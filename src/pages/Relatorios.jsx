@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { enviarRelatorio, gerarRelatorio, listarRelatorios } from "../services/relatorios";
-import { IconCopiar, IconEnviar, IconImprimir } from "../components/IconesUI";
+import { enviarRelatorio, excluirRelatorio, gerarRelatorio, listarRelatorios } from "../services/relatorios";
+import { IconCopiar, IconEnviar, IconImprimir, IconLixeira } from "../components/IconesUI";
 
 function hoje(deslocamentoDias = 0) {
   const d = new Date(Date.now() + deslocamentoDias * 86400000);
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
-// O banco grava CURRENT_TIMESTAMP em UTC, sem indicação de fuso na resposta.
 const dataHora = (iso) =>
   new Date(/(Z|[+-]\d\d:\d\d)$/.test(iso) ? iso : `${iso}Z`).toLocaleString("pt-BR", {
     dateStyle: "short",
@@ -25,6 +24,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
   const [msg, setMsg] = useState("");
   const [gerando, setGerando] = useState(false);
   const [enviandoId, setEnviandoId] = useState(null);
+  const [excluindoId, setExcluindoId] = useState(null);
   const [aberto, setAberto] = useState(null);
 
   const carregar = useCallback(async () => {
@@ -66,7 +66,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
     }
   };
 
-  const enviar = async (id) => {
+  const enviar = async (relatorio) => {
     if (enviandoId) return;
     setErro("");
     setMsg("");
@@ -74,13 +74,13 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
     if (destinoLimpo && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(destinoLimpo)) {
       return setErro("Digite um e-mail de destino válido ou deixe vazio para usar o e-mail da sua conta.");
     }
-    setEnviandoId(id);
+    setEnviandoId(relatorio.id);
     try {
-      const atualizado = await enviarRelatorio(id, {
-        channel: "email",
+      const atualizado = await enviarRelatorio(relatorio.id, {
         recipient: destinoLimpo || null,
+        resend: Boolean(relatorio.sent),
       });
-      setLista((l) => l.map((r) => (r.id === id ? atualizado : r)));
+      setLista((l) => l.map((r) => (r.id === relatorio.id ? atualizado : r)));
       setMsg(
         atualizado.delivery_recipient
           ? `Relatório enviado para ${atualizado.delivery_recipient}.`
@@ -90,6 +90,23 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
       setErro(e.message);
     } finally {
       setEnviandoId(null);
+    }
+  };
+
+  const excluir = async (id) => {
+    if (excluindoId) return;
+    setErro("");
+    setMsg("");
+    setExcluindoId(id);
+    try {
+      await excluirRelatorio(id);
+      setLista((l) => l.filter((r) => r.id !== id));
+      if (aberto === id) setAberto(null);
+      setMsg("Relatório excluído.");
+    } catch (e) {
+      setErro(e.message);
+    } finally {
+      setExcluindoId(null);
     }
   };
 
@@ -194,18 +211,16 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
               </span>
             </div>
             <div className="perfil-acoes no-print">
-              {!r.sent && (
-                <button
-                  type="button"
-                  className="btn peq"
-                  disabled={enviandoId === r.id}
-                  aria-busy={enviandoId === r.id}
-                  onClick={() => enviar(r.id)}
-                >
-                  <IconEnviar size={15} />
-                  {enviandoId === r.id ? "Enviando…" : "Enviar relatório"}
-                </button>
-              )}
+              <button
+                type="button"
+                className="btn peq"
+                disabled={enviandoId === r.id}
+                aria-busy={enviandoId === r.id}
+                onClick={() => enviar(r)}
+              >
+                <IconEnviar size={15} />
+                {enviandoId === r.id ? "Enviando…" : r.sent ? "Reenviar" : "Enviar relatório"}
+              </button>
               <button
                 type="button"
                 className="btn neutro peq"
@@ -213,6 +228,16 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
                 onClick={() => setAberto(aberto === r.id ? null : r.id)}
               >
                 {aberto === r.id ? "Ocultar" : "Ver relatório"}
+              </button>
+              <button
+                type="button"
+                className="btn neutro peq perigo"
+                disabled={excluindoId === r.id}
+                aria-busy={excluindoId === r.id}
+                onClick={() => excluir(r.id)}
+              >
+                <IconLixeira size={15} />
+                {excluindoId === r.id ? "Excluindo…" : "Excluir"}
               </button>
             </div>
             {aberto === r.id && (
