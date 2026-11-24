@@ -11,7 +11,7 @@ import {
 import { emailOk } from "../utils/validacao";
 import { redefinirSenha, solicitarCodigoSenha } from "../services/auth";
 import Fundo from "../components/Fundo";
-import { NuviMascote } from "../components/Nuvi";
+import nuviLoginHero from "../assets/nuvi-login-hero.png";
 import { Alert, Button, Dialog, Input, Label } from "../components/ui";
 import { cn } from "../lib/cn";
 
@@ -157,11 +157,17 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
           transition={{ duration: 0.35 }}
           className="relative z-10 my-8 flex flex-col items-center text-center lg:my-0"
         >
-          <NuviMascote size="lg" className="mb-4" />
           <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-tight text-ink max-w-md leading-tight m-0">
             Aprender no seu ritmo, com cores e acolhimento
           </h1>
-          <p className="mt-3 max-w-md text-base text-ink/85 leading-relaxed">
+          <motion.img
+            src={nuviLoginHero}
+            alt="Mascote Nuvi cercada por formas geométricas coloridas"
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="my-5 w-full max-w-[330px] sm:max-w-[360px] h-auto select-none pointer-events-none drop-shadow-[0_10px_18px_rgba(31,45,77,0.08)]"
+          />
+          <p className="m-0 max-w-md text-sm sm:text-base text-ink/85 leading-relaxed">
             Jogos educativos acessíveis pensados para conforto sensorial (TEA) e painel pedagógico completo para
             famílias e professores.
           </p>
