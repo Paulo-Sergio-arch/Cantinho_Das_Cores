@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { MotionConfig } from "motion/react";
 import {
   cancelarFala,
   definirNomeVoz,
@@ -17,6 +18,7 @@ import * as criancasApi from "./services/criancas";
 import { listarJogos } from "./services/jogos";
 import { montarPayload, registrarPartida } from "./services/partidas";
 import Fundo from "./components/Fundo";
+import { Alert, Button } from "./components/ui";
 import Login from "./pages/Login";
 import Menu from "./pages/Menu";
 import JogoCores from "./games/JogoCores";
@@ -512,9 +514,15 @@ export default function App() {
   }, [tela, abaMenu, nomeJogoAtual]);
 
   const ehAreaInstitucional = tela === "menu" && (abaMenu === "perfis" || abaMenu === "pais");
+  const ehLogin = tela === "login";
+  const ehJogo = Boolean(JogoAtivo);
+  const ehMenuCenario = tela === "menu" && !ehAreaInstitucional;
 
   const classesRaiz = [
     "cc",
+    ehLogin ? "area-login" : "",
+    ehMenuCenario ? "area-menu-cenario" : "",
+    ehJogo ? "area-jogo" : "",
     ehAreaInstitucional ? "area-institucional" : "",
     fonteMaior ? "fonte-maior" : "",
     altoContraste ? "alto-contraste" : "",
@@ -524,90 +532,90 @@ export default function App() {
     .join(" ");
 
   return (
-    <div className={classesRaiz}>
-      {!ehAreaInstitucional && <Fundo />}
+    <MotionConfig reducedMotion={calmo ? "always" : "user"}>
+      <div className={classesRaiz}>
+        {ehMenuCenario && !calmo && !altoContraste && <Fundo variant="suave" />}
 
-      {avisoApi && (
-        <div className="aviso-global-wrap no-print">
-          <div
-            className={`aviso-api ${avisoApi.tipo === "ok" ? "ok" : "erro"}`}
-            role={avisoApi.tipo === "ok" ? "status" : "alert"}
-          >
-            <span>{avisoApi.texto}</span>
-            <button type="button" className="btn neutro peq" onClick={() => setAvisoApi(null)}>
-              Fechar
-            </button>
+        {avisoApi && (
+          <div className="no-print relative z-20 w-full max-w-5xl px-4 pt-3 sm:px-6">
+            <Alert variant={avisoApi.tipo === "ok" ? "success" : "error"}>
+              <span>{avisoApi.texto}</span>
+              <Button variant="outlineInst" size="sm" onClick={() => setAvisoApi(null)}>
+                Fechar
+              </Button>
+            </Alert>
           </div>
-        </div>
-      )}
+        )}
 
-      {tela === "carregando" && (
-        <main className="tela" role="status">
-          Carregando…
-        </main>
-      )}
+        {tela === "carregando" && (
+          <main
+            className="flex min-h-screen w-full items-center justify-center p-6 text-base font-bold text-ink-muted"
+            role="status"
+          >
+            Carregando…
+          </main>
+        )}
 
-      {tela === "login" && (
-        <Login
-          onLogin={fazerLogin}
-          onCadastro={fazerCadastro}
-          onVisitante={entrarVisitante}
-          aviso={avisoLogin}
-        />
-      )}
+        {tela === "login" && (
+          <Login
+            onLogin={fazerLogin}
+            onCadastro={fazerCadastro}
+            onVisitante={entrarVisitante}
+            aviso={avisoLogin}
+          />
+        )}
 
-      {tela === "menu" && (
-        <Menu
-          jogos={jogos}
-          jogosCarregando={catalogo.carregando}
-          jogosErro={catalogo.erro}
-          onRecarregarJogos={carregarJogos}
-          resp={usuario?.name || usuario?.email || ""}
-          visitante={Boolean(usuario?.is_guest)}
-          criancaAtiva={criancaAtiva}
-          perfis={perfis}
-          idadeTravada={Boolean(criancaAtiva)}
-          rodadasTravadas={Boolean(criancaAtiva)}
-          som={som}
-          onToggleSom={() => setSom((s) => !s)}
-          efeitos={efeitos}
-          onToggleEfeitos={() => setEfeitos((e) => !e)}
-          velocidade={velocidade}
-          onToggleVelocidade={() =>
-            setVelocidade((v) => (v === "calma" ? "normal" : "calma"))
-          }
-          fonteMaior={fonteMaior}
-          onToggleFonteMaior={() => setFonteMaior((f) => !f)}
-          altoContraste={altoContraste}
-          onToggleAltoContraste={() => setAltoContraste((a) => !a)}
-          calmo={calmo}
-          onToggleCalmo={() => setCalmo((c) => !c)}
-          totalRodadas={rodadasEfetivas}
-          onAlterarTotal={(n) => setTotalRodadas(n)}
-          idade={idadeEfetiva}
-          onAlterarIdade={(novaIdade) => setIdade(novaIdade)}
-          aba={abaMenu}
-          onAlterarAba={alterarAba}
-          depthFisica={depthFisica}
-          onToggleDepthFisica={() =>
-            setDepthFisica((d) => (d === "3d" ? "2d" : "3d"))
-          }
-          seedFisica={seedFisica}
-          onReiniciarBloquinhos={() => setSeedFisica((s) => s + 1)}
-          onSair={sair}
-          onAlterarSenha={authApi.alterarSenha}
-          onExcluirConta={excluirConta}
-          vozes={vozes}
-          vozSel={vozSel}
-          onTrocarVoz={trocarVoz}
-          feitos={feitosAtuais}
-          onSelecionarJogo={selecionarJogo}
-        />
-      )}
+        {tela === "menu" && (
+          <Menu
+            jogos={jogos}
+            jogosCarregando={catalogo.carregando}
+            jogosErro={catalogo.erro}
+            onRecarregarJogos={carregarJogos}
+            resp={usuario?.name || usuario?.email || ""}
+            visitante={Boolean(usuario?.is_guest)}
+            criancaAtiva={criancaAtiva}
+            perfis={perfis}
+            idadeTravada={Boolean(criancaAtiva)}
+            rodadasTravadas={Boolean(criancaAtiva)}
+            som={som}
+            onToggleSom={() => setSom((s) => !s)}
+            efeitos={efeitos}
+            onToggleEfeitos={() => setEfeitos((e) => !e)}
+            velocidade={velocidade}
+            onToggleVelocidade={() =>
+              setVelocidade((v) => (v === "calma" ? "normal" : "calma"))
+            }
+            fonteMaior={fonteMaior}
+            onToggleFonteMaior={() => setFonteMaior((f) => !f)}
+            altoContraste={altoContraste}
+            onToggleAltoContraste={() => setAltoContraste((a) => !a)}
+            calmo={calmo}
+            onToggleCalmo={() => setCalmo((c) => !c)}
+            totalRodadas={rodadasEfetivas}
+            onAlterarTotal={(n) => setTotalRodadas(n)}
+            idade={idadeEfetiva}
+            onAlterarIdade={(novaIdade) => setIdade(novaIdade)}
+            aba={abaMenu}
+            onAlterarAba={alterarAba}
+            depthFisica={depthFisica}
+            onToggleDepthFisica={() =>
+              setDepthFisica((d) => (d === "3d" ? "2d" : "3d"))
+            }
+            seedFisica={seedFisica}
+            onReiniciarBloquinhos={() => setSeedFisica((s) => s + 1)}
+            onSair={sair}
+            onAlterarSenha={authApi.alterarSenha}
+            onExcluirConta={excluirConta}
+            vozes={vozes}
+            vozSel={vozSel}
+            onTrocarVoz={trocarVoz}
+            feitos={feitosAtuais}
+            onSelecionarJogo={selecionarJogo}
+          />
+        )}
 
-      {JogoAtivo && (
-        <main className="tela">
-          <div className="conteudo-infantil">
+        {JogoAtivo && (
+          <main className="relative z-10 flex w-full max-w-2xl flex-col items-center px-4 py-5 sm:py-8">
             <JogoAtivo
               key={`${chave}-${rodadasEfetivas}-${idadeEfetiva}`}
               total={rodadasEfetivas}
@@ -625,9 +633,9 @@ export default function App() {
               onFim={(resumo, opcoes) => gravarSessao(jogo.id, resumo, true, opcoes)}
               onParcial={(resumo, opcoes) => gravarSessao(jogo.id, resumo, false, opcoes)}
             />
-          </div>
-        </main>
-      )}
-    </div>
+          </main>
+        )}
+      </div>
+    </MotionConfig>
   );
 }

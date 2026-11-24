@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
 import { cancelarFala, falar } from "../utils/voz";
 import { tocarVitoria } from "../utils/sons";
-import Titulo from "./Titulo";
 import Estrelas from "./Estrelas";
 import Nuvi from "./Nuvi";
 import Vitoria from "./Vitoria";
 import Fim from "./Fim";
-import { IconCasa, IconVozOff, IconVozOn } from "./IconesUI";
+import { Alert, Badge, Button } from "./ui";
+import { cn } from "../lib/cn";
 
 export default function Casca({
   titulo,
@@ -128,63 +129,69 @@ export default function Casca({
   };
 
   return (
-    <section className="jogo">
-      <header className="topo">
-        <button
-          type="button"
-          className="redondo"
-          onClick={solicitarSaida}
-          aria-label="Voltar ao menu"
-          aria-expanded={!fim ? confirmandoSaida : undefined}
-          title="Voltar ao menu"
-        >
-          <IconCasa size={22} />
-        </button>
-        <Titulo t={titulo} tag="h1" className="titulo-jogo" />
-        {onToggleSom && (
-          <button
-            type="button"
-            className={`redondo redondo-neutro ${som ? "" : "mudo"}`}
-            onClick={onToggleSom}
-            aria-pressed={som}
-            aria-label={som ? "Silenciar voz durante o jogo" : "Ativar voz durante o jogo"}
-            title={som ? "Silenciar voz" : "Ativar voz"}
-          >
-            {som ? <IconVozOn size={20} /> : <IconVozOff size={20} />}
-          </button>
+    <section className="flex w-full flex-col gap-4">
+      <header
+        className={cn(
+          "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-surface px-3.5 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.05)]",
+          "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
         )}
-        <span className="nivel-badge" aria-label={`Nível ${idade} anos`}>
-          {idade} anos
-        </span>
-        <Estrelas n={estrelas} total={total} />
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={solicitarSaida}
+            aria-label="Voltar ao menu"
+            aria-expanded={!fim ? confirmandoSaida : undefined}
+            title="Voltar ao menu"
+            className="rounded-xl px-3"
+          >
+            <ArrowLeft size={18} />
+            <span className="hidden sm:inline">Voltar</span>
+          </Button>
+
+          <div className="min-w-0">
+            <h1 className="font-display text-lg sm:text-xl font-semibold text-ink truncate m-0 leading-tight">
+              {titulo}
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Estrelas n={estrelas} total={total} />
+          <Badge variant="brand" aria-label={`Nível ${idade} anos`}>
+            {idade} anos
+          </Badge>
+          {onToggleSom && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onToggleSom}
+              aria-pressed={som}
+              aria-label={som ? "Silenciar voz durante o jogo" : "Ativar voz durante o jogo"}
+              title={som ? "Silenciar voz" : "Ativar voz"}
+              className={cn("h-10 w-10 rounded-xl", !som && "opacity-75")}
+            >
+              {som ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </Button>
+          )}
+        </div>
       </header>
 
       {confirmandoSaida && !fim && (
-        <div
-          className="aviso-api confirmar-saida"
-          role="alertdialog"
-          aria-labelledby="confirmar-saida-titulo"
-        >
+        <Alert variant="warning" role="alertdialog" aria-labelledby="confirmar-saida-titulo">
           <span id="confirmar-saida-titulo">
             Quer mesmo sair desta partida? O progresso atual será encerrado.
           </span>
-          <div className="perfil-acoes">
-            <button
-              type="button"
-              className="btn peq"
-              onClick={() => setConfirmandoSaida(false)}
-            >
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="playful" size="sm" onClick={() => setConfirmandoSaida(false)}>
               Continuar jogando
-            </button>
-            <button
-              type="button"
-              className="btn neutro peq"
-              onClick={sairConfirmado}
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={sairConfirmado}>
               Sair para o menu
-            </button>
+            </Button>
           </div>
-        </div>
+        </Alert>
       )}
 
       {vitoria && <Vitoria calmo={calmo} />}
@@ -201,7 +208,7 @@ export default function Casca({
         )
       ) : (
         <>
-          <Nuvi fala={fala} falaVisual={falaVisual} ouvivel />
+          <Nuvi fala={fala} falaVisual={falaVisual} ouvivel className="mb-1" />
           {children}
         </>
       )}

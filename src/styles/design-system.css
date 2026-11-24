@@ -1,0 +1,438 @@
+@import "tailwindcss";
+
+@custom-variant alto-contraste (&:where(.alto-contraste, .alto-contraste *));
+@custom-variant modo-calmo (&:where(.modo-calmo, .modo-calmo *));
+
+@theme {
+  /* Tipografia do Design System */
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --font-display: "Fredoka", "Atkinson Hyperlegible", system-ui, sans-serif;
+
+  /* Superfícies sensoriais calmas (TEA — sem branco estourado) */
+  --color-canvas: #F6F4EE;
+  --color-canvas-jogo: #F5F3EC;
+  --color-surface: #FCFBF8;
+  --color-surface-muted: #EFECE3;
+  --color-surface-border: #E5DFD2;
+  --color-surface-border-strong: #CFC7B6;
+
+  /* Superfícies institucionais (Pais, Professores e Gestão) */
+  --color-inst-bg: #F8FAFC;
+  --color-inst-surface: #FFFFFF;
+  --color-inst-subtle: #F1F5F9;
+  --color-inst-border: #E2E8F0;
+  --color-inst-border-strong: #CBD5E1;
+
+  /* Paleta acessível (tons equilibrados, não fluorescentes) */
+  --color-ink: #1F2D4D;
+  --color-ink-muted: #526280;
+  --color-brand: #2F6FD6;
+  --color-brand-deep: #1E54AD;
+  --color-brand-soft: #EAF2FF;
+  --color-success: #2D8A56;
+  --color-success-deep: #1F683F;
+  --color-success-soft: #E9F6EE;
+  --color-warn: #E8B638;
+  --color-warn-deep: #BA8C1D;
+  --color-warn-soft: #FDF6DF;
+  --color-danger: #C94440;
+  --color-danger-deep: #962B28;
+  --color-danger-soft: #FDECEC;
+}
+
+:root {
+  /* Compatibilidade com variáveis usadas nos componentes de jogos */
+  --tinta: #1F2D4D;
+  --tinta-suave: #526280;
+  --azul: #2F6FD6;
+  --azul-sombra: #1E54AD;
+  --azul-claro: #EAF2FF;
+  --verde: #2D8A56;
+  --verde-sombra: #1F683F;
+  --verde-claro: #E9F6EE;
+  --amarelo: #E8B638;
+  --amarelo-sombra: #BA8C1D;
+  --amarelo-claro: #FDF6DF;
+  --creme: #FCFBF8;
+  --erro: #C94440;
+  --erro-sombra: #962B28;
+  --erro-claro: #FDECEC;
+  --alerta-bg: #FDF6DF;
+  --alerta-borda: #E8B638;
+  --alerta-texto: #6B4700;
+  --borda-azul: #A8C9F2;
+
+  --inst-bg: #F8FAFC;
+  --inst-surface: #FFFFFF;
+  --inst-surface-alt: #F8FAFC;
+  --inst-borda: #E2E8F0;
+  --inst-borda-forte: #CBD5E1;
+
+  --fonte-texto: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --fonte-titulo: "Fredoka", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --alvo-min: 44px;
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    color: var(--tinta);
+    font-family: var(--fonte-texto);
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: #F6F4EE;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  select {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--azul);
+    outline-offset: 2px;
+  }
+}
+
+/* Shell raiz e modos globais de acessibilidade */
+.cc {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  background-color: #F6F4EE;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease;
+}
+
+.cc.area-menu-cenario {
+  background: linear-gradient(180deg, #D9EEFF 0%, #EEF6FC 44%, #F4F6EE 84%, #C5E8C8 100%);
+}
+
+.cc.area-jogo {
+  background-color: #F5F3EC;
+}
+
+.cc.area-institucional {
+  background-color: #F8FAFC;
+}
+
+.cc.area-login {
+  background-color: #FCFBF8;
+}
+
+/* Fonte ampliada (A+) */
+.cc.fonte-maior {
+  font-size: 19px;
+}
+
+.cc.fonte-maior .cc-scale-text {
+  font-size: 1.12em;
+}
+
+/* Modo calmo (remove distrações visuais e animações) */
+.cc.modo-calmo.area-menu-cenario {
+  background: #F6F4EE;
+}
+
+.cc.modo-calmo *,
+.cc.modo-calmo *::before,
+.cc.modo-calmo *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc *,
+  .cc *::before,
+  .cc *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Modo Alto Contraste (WCAG AAA) */
+.cc.alto-contraste {
+  --tinta: #0F172A;
+  --tinta-suave: #1E293B;
+  --azul: #0F4CC0;
+  --azul-sombra: #082B73;
+  --verde: #116B38;
+  --verde-sombra: #074221;
+  --amarelo: #FFD029;
+  --amarelo-sombra: #0F172A;
+  --creme: #FFFFFF;
+  --erro: #991B1B;
+  --erro-sombra: #450A0A;
+  --borda-azul: #0F172A;
+  --inst-bg: #FFFFFF;
+  --inst-surface: #FFFFFF;
+  --inst-borda: #0F172A;
+  --inst-borda-forte: #0F172A;
+  background: #FFFFFF !important;
+  color: #0F172A;
+}
+
+.cc.alto-contraste :focus-visible {
+  outline: 3px solid #0F172A;
+  outline-offset: 3px;
+}
+
+.cc.alto-contraste .cores,
+.cc.alto-contraste .linha,
+.cc.alto-contraste .ligar,
+.cc.alto-contraste .grade2,
+.cc.alto-contraste .fala-card,
+.cc.alto-contraste .frutas-hud,
+.cc.alto-contraste .frutas-tabuleiro,
+.cc.alto-contraste .ficha {
+  background: #FFFFFF !important;
+  border: 2px solid #0F172A !important;
+  box-shadow: none !important;
+}
+
+.cc.alto-contraste .ficha.par {
+  background: #FFFFFF !important;
+  border: 3px solid #0F172A !important;
+}
+
+.cc.alto-contraste .titulo {
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.cc.alto-contraste .titulo span {
+  color: #0F172A !important;
+}
+
+/* Cenário ilustrado reutilizável (Login, Menu suavizado e Vitória) */
+.fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.fundo.fundo-local {
+  position: absolute;
+}
+
+.fundo-ceu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: min(62vh, 520px);
+}
+
+.fundo-grama {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(130px, 19vw, 240px);
+}
+
+/* Estilos utilitários de título lúdico e componentes de jogo preservados */
+.titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0;
+}
+
+/* Fichas interativas usadas nos jogos (Cores, Encaixe, Ligar, Cor e Forma) */
+.ficha {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 84px;
+  min-height: 84px;
+  padding: 12px;
+  border-radius: 24px;
+  border: 2px solid #E5DFD2;
+  background: #FCFBF8;
+  color: var(--tinta);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  box-shadow: 0 4px 0 #DDD6C6;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+  user-select: none;
+}
+
+.ficha:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #B8CEEF;
+  box-shadow: 0 6px 0 #D5CEBE;
+}
+
+.ficha:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #DDD6C6;
+}
+
+.ficha:disabled {
+  cursor: default;
+}
+
+.ficha.sel {
+  border-color: var(--azul);
+  background: #EAF2FF;
+  box-shadow: 0 0 0 3px rgba(47, 111, 214, 0.22), 0 4px 0 #B3CDEF;
+}
+
+.ficha.sobre {
+  border-color: var(--azul);
+  background: #EAF2FF;
+  transform: scale(1.03);
+}
+
+.ficha.certo {
+  border-color: var(--verde);
+  background: #E9F6EE;
+  box-shadow: 0 0 0 3px rgba(45, 138, 86, 0.22), 0 4px 0 #B5DFC6;
+}
+
+.ficha.tente {
+  border-color: var(--erro);
+  background: #FDECEC;
+  animation: balanca 0.42s ease;
+}
+
+.ficha.par {
+  opacity: 0.92;
+  border-color: var(--verde);
+}
+
+/* Animação suave de erro / feedback nos jogos */
+@keyframes balanca {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  45% { transform: translateX(6px); }
+  70% { transform: translateX(-4px); }
+  85% { transform: translateX(3px); }
+}
+
+@keyframes confete-cai {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(105vh) rotate(420deg);
+    opacity: 0;
+  }
+}
+
+.confete-particula {
+  position: fixed;
+  top: -16px;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  pointer-events: none;
+  animation: confete-cai linear forwards;
+}
+
+/* Botões utilitários compatíveis com jogos legados (ex: JogoFalar, JogoFrutas) */
+.btn {
+  --btn-sombra: var(--azul-sombra);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: 0;
+  border-radius: 18px;
+  padding: 11px 22px;
+  min-height: 48px;
+  background: var(--azul);
+  color: #FFFFFF;
+  box-shadow: 0 4px 0 var(--btn-sombra);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--btn-sombra);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn.sec {
+  --btn-sombra: var(--amarelo-sombra);
+  background: var(--amarelo);
+  color: #1F2D4D;
+}
+
+.btn.ok {
+  --btn-sombra: var(--verde-sombra);
+  background: var(--verde);
+  color: #FFFFFF;
+}
+
+.btn.neutro {
+  --btn-sombra: #D8D1C2;
+  background: #FCFBF8;
+  color: var(--tinta);
+  border: 1.5px solid #D8D1C2;
+}
+
+.btn.neutro:hover:not(:disabled) {
+  background: #F3EFE6;
+  filter: none;
+}
+
+.btn.peq,
+.btn.peq-acao {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--btn-sombra);
+}
+
+/* Estilos de impressão para relatórios pedagógicos */
+@media print {
+  body,
+  .cc {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .rel-documento {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
