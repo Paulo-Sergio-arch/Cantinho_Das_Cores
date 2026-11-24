@@ -101,6 +101,23 @@
   margin-top: 14px;
 }
 
+.encaixe-pecas .ficha {
+  cursor: grab;
+}
+
+.buraco {
+  background: rgba(255, 255, 255, 0.52);
+  border: 4px dashed #5BA8E0;
+  box-shadow: inset 0 4px 10px rgba(43, 58, 103, 0.12);
+}
+
+.buraco.certo {
+  background: #E6F8EC;
+  border-style: solid;
+  border-color: var(--verde);
+  box-shadow: 0 5px 0 rgba(43, 58, 103, 0.15);
+}
+
 /* Destaque suave de alvos quando há peça selecionada */
 .alvos-ativos .ficha:not(:disabled) {
   border-color: var(--azul);

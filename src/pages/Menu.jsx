@@ -56,15 +56,26 @@ export default function Menu({
   const shapeRef = useRef(null);
   const faixaAtual = obterFaixaEtaria(idade);
 
-  const classesTela = [
-    "tela",
-    aba === "pais" ? "tela-pais" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const ABAS = [
+    { id: "jogos", rotulo: "🎮 Jogos" },
+    { id: "bloquinhos", rotulo: "🧩 Bloquinhos" },
+    { id: "perfis", rotulo: "👧 Crianças" },
+    { id: "pais", rotulo: "📊 Pais e Professores" },
+  ];
+
+  const aoTeclarAba = (ev, idx) => {
+    if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft" && ev.key !== "Home" && ev.key !== "End") return;
+    ev.preventDefault();
+    let proximo = idx;
+    if (ev.key === "ArrowRight") proximo = (idx + 1) % ABAS.length;
+    if (ev.key === "ArrowLeft") proximo = (idx - 1 + ABAS.length) % ABAS.length;
+    if (ev.key === "Home") proximo = 0;
+    if (ev.key === "End") proximo = ABAS.length - 1;
+    onAlterarAba(ABAS[proximo].id);
+  };
 
   return (
-    <main className={classesTela}>
+    <main className="tela">
       <div className="barra">
         <div className="barra-topo">
           <span className="resp" title={resp}>
@@ -167,49 +178,34 @@ export default function Menu({
         )}
       </div>
 
-      <nav className="tabs-menu" aria-label="Navegação principal">
-        <button
-          type="button"
-          className={`tab-btn ${aba === "jogos" ? "ativa" : ""}`}
-          onClick={() => onAlterarAba("jogos")}
-          aria-pressed={aba === "jogos"}
-        >
-          🎮 Jogos
-        </button>
-        <button
-          type="button"
-          className={`tab-btn ${aba === "bloquinhos" ? "ativa" : ""}`}
-          onClick={() => onAlterarAba("bloquinhos")}
-          aria-pressed={aba === "bloquinhos"}
-        >
-          🧩 Bloquinhos
-        </button>
-        <button
-          type="button"
-          className={`tab-btn ${aba === "perfis" ? "ativa" : ""}`}
-          onClick={() => onAlterarAba("perfis")}
-          aria-pressed={aba === "perfis"}
-        >
-          👧 Crianças
-        </button>
-        <button
-          type="button"
-          className={`tab-btn ${aba === "pais" ? "ativa" : ""}`}
-          onClick={() => onAlterarAba("pais")}
-          aria-pressed={aba === "pais"}
-        >
-          📊 Pais e Professores
-        </button>
+      <nav className="tabs-menu" aria-label="Navegação principal" role="tablist">
+        {ABAS.map((item, idx) => (
+          <button
+            key={item.id}
+            id={`tab-${item.id}`}
+            type="button"
+            role="tab"
+            aria-selected={aba === item.id}
+            aria-controls={`painel-${item.id}`}
+            className={`tab-btn ${aba === item.id ? "ativa" : ""}`}
+            onClick={() => onAlterarAba(item.id)}
+            onKeyDown={(ev) => aoTeclarAba(ev, idx)}
+          >
+            {item.rotulo}
+          </button>
+        ))}
       </nav>
 
       {aba === "jogos" && (
-        <>
+        <div id="painel-jogos" role="tabpanel" aria-labelledby="tab-jogos" className="conteudo-infantil">
           <Titulo t="Cantinho das Cores" />
           <Nuvi fala="Oi! Escolha sua idade e um jogo para brincar." ouvivel />
 
           <div className="crianca-atual">
             {visitante ? (
-              <span className="aviso-api">Visitante: as partidas não ficam salvas.</span>
+              <div className="aviso-api">
+                <span>Visitante: as partidas não ficam salvas.</span>
+              </div>
             ) : criancaAtiva ? (
               <>
                 <strong>Jogando como {criancaAtiva.name}</strong>
@@ -218,12 +214,12 @@ export default function Menu({
                 </button>
               </>
             ) : (
-              <span className="aviso-api">
-                Escolha ou cadastre um perfil de criança para salvar as partidas.{" "}
+              <div className="aviso-api">
+                <span>Escolha ou cadastre um perfil de criança para salvar as partidas.</span>
                 <button type="button" className="btn sec peq" onClick={() => onAlterarAba("perfis")}>
                   Abrir perfis
                 </button>
-              </span>
+              </div>
             )}
           </div>
 
@@ -239,7 +235,7 @@ export default function Menu({
                   type="button"
                   className={`nivel-chip ${String(idade) === f.id ? "ativo" : ""}`}
                   disabled={idadeTravada}
-                  title={idadeTravada ? "A idade vem do perfil da criança" : undefined}
+                  title={idadeTravada ? `Idade definida pelo perfil de ${criancaAtiva?.name}` : undefined}
                   onClick={() => onAlterarIdade(f.id)}
                   aria-pressed={String(idade) === f.id}
                 >
@@ -248,16 +244,30 @@ export default function Menu({
                 </button>
               ))}
             </div>
+            {idadeTravada && criancaAtiva && (
+              <p className="niveis-travada-nota">
+                <span>
+                  Idade definida pelo perfil de <strong>{criancaAtiva.name}</strong> ({criancaAtiva.age} anos).
+                </span>
+                <button
+                  type="button"
+                  className="btn neutro peq"
+                  onClick={() => onAlterarAba("perfis")}
+                >
+                  Alterar em Crianças
+                </button>
+              </p>
+            )}
           </section>
 
           {jogosCarregando && <p role="status">Carregando jogos…</p>}
           {jogosErro && (
-            <p className="aviso-api" role="alert">
-              {jogosErro}{" "}
-              <button type="button" className="btn sec peq" onClick={onRecarregarJogos}>
+            <div className="aviso-api erro" role="alert">
+              <span>{jogosErro}</span>
+              <button type="button" className="btn neutro peq" onClick={onRecarregarJogos}>
                 Tentar de novo
               </button>
-            </p>
+            </div>
           )}
 
           <div className="menu">
@@ -285,11 +295,17 @@ export default function Menu({
               </button>
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {aba === "bloquinhos" && (
-        <section className="bloquinhos-secao" aria-label="Bloquinhos interativos">
+        <section
+          id="painel-bloquinhos"
+          role="tabpanel"
+          aria-labelledby="tab-bloquinhos"
+          className="conteudo-infantil bloquinhos-secao"
+          aria-label="Bloquinhos interativos"
+        >
           <div className="bloquinhos-controles">
             <p className="bloquinhos-aviso">
               Brinque com os bloquinhos nas cores do autismo: arraste, jogue ou toque no espaço vazio!
@@ -349,16 +365,22 @@ export default function Menu({
         </section>
       )}
 
-      {aba === "perfis" && <PerfisCriancas visitante={visitante} {...perfis} />}
+      {aba === "perfis" && (
+        <div id="painel-perfis" role="tabpanel" aria-labelledby="tab-perfis" style={{ width: "100%" }}>
+          <PerfisCriancas visitante={visitante} {...perfis} />
+        </div>
+      )}
 
       {aba === "pais" && (
-        <PainelPais
-          visitante={visitante}
-          criancas={perfis.criancas}
-          criancaId={perfis.ativaId}
-          onSelecionarCrianca={perfis.onSelecionar}
-          onIrPerfis={() => onAlterarAba("perfis")}
-        />
+        <div id="painel-pais" role="tabpanel" aria-labelledby="tab-pais" style={{ width: "100%" }}>
+          <PainelPais
+            visitante={visitante}
+            criancas={perfis.criancas}
+            criancaId={perfis.ativaId}
+            onSelecionarCrianca={perfis.onSelecionar}
+            onIrPerfis={() => onAlterarAba("perfis")}
+          />
+        </div>
       )}
     </main>
   );

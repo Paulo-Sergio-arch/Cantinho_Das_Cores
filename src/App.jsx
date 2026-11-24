@@ -427,15 +427,17 @@ export default function App() {
       <Fundo />
 
       {avisoApi && (
-        <p
-          className={`aviso-api ${avisoApi.tipo === "ok" ? "ok" : ""}`}
-          role={avisoApi.tipo === "ok" ? "status" : "alert"}
-        >
-          {avisoApi.texto}{" "}
-          <button type="button" className="btn sec peq" onClick={() => setAvisoApi(null)}>
-            Fechar
-          </button>
-        </p>
+        <div className="aviso-global-wrap">
+          <div
+            className={`aviso-api ${avisoApi.tipo === "ok" ? "ok" : "erro"}`}
+            role={avisoApi.tipo === "ok" ? "status" : "alert"}
+          >
+            <span>{avisoApi.texto}</span>
+            <button type="button" className="btn neutro peq" onClick={() => setAvisoApi(null)}>
+              Fechar
+            </button>
+          </div>
+        </div>
       )}
 
       {tela === "carregando" && (
@@ -505,22 +507,24 @@ export default function App() {
 
       {JogoAtivo && (
         <main className="tela">
-          <JogoAtivo
-            key={`${chave}-${rodadasEfetivas}-${idadeEfetiva}`}
-            total={rodadasEfetivas}
-            idade={idadeEfetiva}
-            calmo={calmo}
-            onSair={() => {
-              cancelarFala();
-              setTela("menu");
-            }}
-            onNovo={() => {
-              cancelarFala();
-              setChave((c) => c + 1);
-            }}
-            onFim={(resumo, opcoes) => gravarSessao(jogo.id, resumo, true, opcoes)}
-            onParcial={(resumo, opcoes) => gravarSessao(jogo.id, resumo, false, opcoes)}
-          />
+          <div className="conteudo-infantil">
+            <JogoAtivo
+              key={`${chave}-${rodadasEfetivas}-${idadeEfetiva}`}
+              total={rodadasEfetivas}
+              idade={idadeEfetiva}
+              calmo={calmo}
+              onSair={() => {
+                cancelarFala();
+                setTela("menu");
+              }}
+              onNovo={() => {
+                cancelarFala();
+                setChave((c) => c + 1);
+              }}
+              onFim={(resumo, opcoes) => gravarSessao(jogo.id, resumo, true, opcoes)}
+              onParcial={(resumo, opcoes) => gravarSessao(jogo.id, resumo, false, opcoes)}
+            />
+          </div>
         </main>
       )}
     </div>

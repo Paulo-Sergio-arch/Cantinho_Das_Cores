@@ -108,26 +108,47 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
         <span className="pais-legenda">{lista.length} gerado(s)</span>
       </div>
 
-      <form className="pais-filtros" onSubmit={gerar} noValidate>
-        <label className="pais-filtro-campo" htmlFor="rel-inicio">
-          <span>De</span>
-          <input id="rel-inicio" type="date" value={inicio} max={fim} onChange={(e) => setInicio(e.target.value)} />
-        </label>
-        <label className="pais-filtro-campo" htmlFor="rel-fim">
-          <span>Até</span>
-          <input id="rel-fim" type="date" value={fim} min={inicio} onChange={(e) => setFim(e.target.value)} />
-        </label>
-        <label className="pais-filtro-campo" htmlFor="rel-dest">
-          <span>E-mail para envio (opcional)</span>
+      <form className="rel-form" onSubmit={gerar} noValidate>
+        <div className="campo-grupo">
+          <label className="campo-rotulo" htmlFor="rel-inicio">
+            De
+          </label>
+          <input
+            id="rel-inicio"
+            className="campo-input"
+            type="date"
+            value={inicio}
+            max={fim}
+            onChange={(e) => setInicio(e.target.value)}
+          />
+        </div>
+        <div className="campo-grupo">
+          <label className="campo-rotulo" htmlFor="rel-fim">
+            Até
+          </label>
+          <input
+            id="rel-fim"
+            className="campo-input"
+            type="date"
+            value={fim}
+            min={inicio}
+            onChange={(e) => setFim(e.target.value)}
+          />
+        </div>
+        <div className="campo-grupo rel-campo-email">
+          <label className="campo-rotulo" htmlFor="rel-dest">
+            E-mail para envio (opcional)
+          </label>
           <input
             id="rel-dest"
+            className="campo-input"
             type="email"
-            placeholder="padrão: seu e-mail"
+            placeholder="padrão: e-mail da sua conta"
             value={destinatario}
             onChange={(e) => setDestinatario(e.target.value)}
           />
-        </label>
-        <button type="submit" className="btn peq" disabled={gerando}>
+        </div>
+        <button type="submit" className="btn peq rel-btn-gerar" disabled={gerando} aria-busy={gerando}>
           {gerando ? "Gerando…" : "Gerar relatório"}
         </button>
       </form>
@@ -138,12 +159,14 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
         </p>
       )}
       {msg && (
-        <p className="aviso-api ok" role="status">
-          {msg}
-        </p>
+        <div className="aviso-api ok" role="status">
+          <span>{msg}</span>
+        </div>
       )}
       {carregando && <p role="status">Carregando relatórios…</p>}
-      {!carregando && !erro && lista.length === 0 && <p>Nenhum relatório gerado ainda. Escolha o período e gere o primeiro.</p>}
+      {!carregando && !erro && lista.length === 0 && (
+        <p className="pais-subtitulo">Nenhum relatório gerado ainda. Escolha o período e gere o primeiro.</p>
+      )}
 
       <ul className="perfis-lista">
         {lista.map((r) => (
@@ -156,30 +179,35 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
               Gerado em {dataHora(r.generated_at)} ·{" "}
               {r.sent ? `Enviado em ${dataHora(r.sent_at)}` : "Ainda não enviado"}
             </span>
-            {!r.sent && (
+            <div className="perfil-acoes">
+              {!r.sent && (
+                <button
+                  type="button"
+                  className="btn peq"
+                  disabled={enviandoId === r.id}
+                  aria-busy={enviandoId === r.id}
+                  onClick={() => enviar(r.id)}
+                >
+                  {enviandoId === r.id ? "Enviando…" : "Enviar relatório"}
+                </button>
+              )}
               <button
                 type="button"
-                className="btn peq"
-                disabled={enviandoId === r.id}
-                onClick={() => enviar(r.id)}
+                className="btn neutro peq"
+                aria-expanded={aberto === r.id}
+                onClick={() => setAberto(aberto === r.id ? null : r.id)}
               >
-                {enviandoId === r.id ? "Enviando…" : "Enviar relatório"}
+                {aberto === r.id ? "Ocultar" : "Ver relatório"}
               </button>
-            )}
-            <button
-              type="button"
-              className="btn sec peq"
-              aria-expanded={aberto === r.id}
-              onClick={() => setAberto(aberto === r.id ? null : r.id)}
-            >
-              {aberto === r.id ? "Ocultar" : "Ver relatório"}
-            </button>
+            </div>
             {aberto === r.id && (
-              <div style={{ flexBasis: "100%" }}>
+              <div style={{ flexBasis: "100%", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <pre className="rel-texto">{r.text}</pre>
-                <button type="button" className="btn sec peq" onClick={() => copiar(r.text)}>
-                  Copiar texto
-                </button>
+                <div className="perfil-acoes">
+                  <button type="button" className="btn neutro peq" onClick={() => copiar(r.text)}>
+                    Copiar texto
+                  </button>
+                </div>
               </div>
             )}
           </li>

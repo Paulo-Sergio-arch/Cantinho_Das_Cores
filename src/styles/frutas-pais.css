@@ -212,12 +212,12 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 3px solid #fff;
-  border-radius: 22px;
-  padding: 12px 14px;
-  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.1);
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--inst-borda);
+  border-radius: 20px;
+  padding: 14px 16px;
+  box-shadow: var(--inst-sombra-sm);
 }
 
 .pais-filtro-campo {
@@ -229,9 +229,10 @@
 }
 
 .pais-filtro-campo select {
-  padding: 7px 12px;
-  border-radius: 14px;
-  border: 2px solid var(--borda-azul);
+  min-height: var(--alvo-min);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--inst-borda-forte);
   background: #fff;
 }
 
@@ -239,6 +240,35 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.rel-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr)) minmax(200px, 1.5fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  margin-bottom: 14px;
+  background: var(--inst-surface-alt);
+  border: 1px solid var(--inst-borda);
+  border-radius: 16px;
+}
+
+@media (max-width: 760px) {
+  .rel-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rel-form .rel-campo-email,
+  .rel-form .rel-btn-gerar {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .rel-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pais-kpis {
