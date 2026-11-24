@@ -10,7 +10,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET com pelo menos 32 caracteres}
       ADMIN_API_KEY: ${ADMIN_API_KEY:?Defina ADMIN_API_KEY para proteger backups administrativos}
       JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://ca10v1ana.github.io,https://cantinhodascores.com.br}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://cantinho-das-cores.vercel.app,https://ca10v1ana.github.io,https://cantinhodascores.com.br}
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-172.16.0.0/12,192.168.0.0/16,10.0.0.0/8,127.0.0.1}
       DATABASE_PATH: /srv/backend/data/cantinho_das_cores.sqlite3
       BACKUP_DIR: /srv/backend/data/backups
       BACKUP_KEEP_COUNT: ${BACKUP_KEEP_COUNT:-10}
@@ -23,8 +24,8 @@ services:
       REPORT_WEBHOOK_URL: ${REPORT_WEBHOOK_URL:-}
     volumes:
       - cantinho_sqlite_data:/srv/backend/data
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 
   caddy:
     image: caddy:2-alpine

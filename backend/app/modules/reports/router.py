@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from app.core.config import settings
 from app.modules.auth.dependencies import get_current_claims
 from app.modules.auth.repository import repository as users_repository
+from app.modules.auth.security import consume_rate_limit
 from app.modules.children.repository import repository as children_repository
 from app.modules.reports import repository as repo
 from app.modules.reports.delivery import deliver_report
@@ -60,6 +62,18 @@ def _execute_send(report_id: str, owner_id: str, payload: ReportSendRequest | No
     report = owned_or_404(report_id, owner_id)
     if report["sent"]:
         raise HTTPException(status_code=409, detail="Relatório já marcado como enviado")
+
+    blocked, retry_after = consume_rate_limit(
+        f"report_send:{owner_id}",
+        max_attempts=settings.report_send_rate_limit_max_attempts,
+        window_seconds=settings.report_send_rate_limit_window_seconds,
+    )
+    if blocked:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Limite de envios de relatório atingido. Aguarde {retry_after}s antes de enviar outro.",
+            headers={"Retry-After": str(retry_after)},
+        )
 
     owner = users_repository.get_by_id(owner_id)
     owner_email = owner.email if owner else ""
