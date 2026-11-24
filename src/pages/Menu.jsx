@@ -45,6 +45,16 @@ import PerfisCriancas from "./PerfisCriancas";
 
 const PainelPais = lazy(() => import("./PainelPais"));
 
+const CORES_AVATAR = ["#2F6FD6", "#2D8A56", "#8C72D1", "#D67A59", "#CC6B7D", "#2A8F85"];
+
+function corAvatar(nome = "") {
+  const limpo = nome.trim();
+  if (!limpo) return "#5B82BA";
+  let soma = 0;
+  for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
+  return CORES_AVATAR[soma % CORES_AVATAR.length];
+}
+
 function MarcaCompacta() {
   return (
     <span className="inline-flex items-center gap-2 shrink-0" aria-label="Cantinho das Cores">
@@ -117,42 +127,29 @@ const ESTILO_CARD_JOGO = {
   },
 };
 
-function ToggleCard({ active, onClick, icon: Icon, title, description }) {
+function SettingRowSwitch({ active, onClick, icon: Icon, iconBg, title, description }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={active}
       onClick={onClick}
-      className={cn(
-        "flex w-full items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-all",
-        active
-          ? "border-brand/45 bg-brand-soft/60 alto-contraste:bg-slate-950 alto-contraste:text-white alto-contraste:border-slate-950"
-          : "border-inst-border bg-white hover:bg-inst-subtle/60 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-      )}
+      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-inst-subtle/50 first:rounded-t-2xl last:rounded-b-2xl"
     >
       <div className="flex items-center gap-3 min-w-0">
         <span
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-            active
-              ? "bg-brand text-white alto-contraste:bg-white alto-contraste:text-slate-950"
-              : "bg-inst-subtle text-ink-muted alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+            iconBg,
+            "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950 alto-contraste:text-slate-950"
           )}
           aria-hidden="true"
         >
           <Icon size={17} />
         </span>
         <div className="min-w-0">
-          <span className="block text-sm font-bold leading-tight">{title}</span>
-          <span
-            className={cn(
-              "mt-0.5 block text-xs leading-snug",
-              active ? "text-ink/80 alto-contraste:text-white/85" : "text-ink-muted"
-            )}
-          >
-            {description}
-          </span>
+          <span className="block text-sm font-bold text-ink leading-tight">{title}</span>
+          <span className="mt-0.5 block text-xs text-ink-muted leading-snug">{description}</span>
         </div>
       </div>
 
@@ -160,7 +157,7 @@ function ToggleCard({ active, onClick, icon: Icon, title, description }) {
         aria-hidden="true"
         className={cn(
           "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors",
-          active ? "bg-brand" : "bg-slate-300"
+          active ? "bg-brand alto-contraste:bg-slate-950" : "bg-slate-300"
         )}
       >
         <span
@@ -235,9 +232,11 @@ export default function Menu({
   const bloqueadoPorPin = ehAreaPais && !visitante && !areaPaisLiberada;
   const abasAtuais = ehAreaPais ? ABAS_PAIS : ABAS_INFANTIS;
   const temModoAtivo = calmo || altoContraste || fonteMaior || !som;
+  const inicialCrianca = (criancaAtiva?.name || "?").trim().charAt(0).toUpperCase();
 
   const solicitarAcessoPais = (destino = "pais") => {
     setAvisoPin("");
+    setAbrirPrefs(false);
     if (visitante || areaPaisLiberada) {
       onAlterarAba(destino);
       return;
@@ -326,36 +325,38 @@ export default function Menu({
   };
 
   return (
-    <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-6 px-3.5 pt-3.5 pb-14 sm:gap-8 sm:px-6 sm:pt-4">
-      {/* NAVBAR SEPARADA POR CONTEXTO: Espaço Infantil (2 abas) vs. Área dos Pais (2 abas + Voltar) */}
+    <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-6 px-3.5 pt-3.5 pb-12 sm:gap-8 sm:px-6 sm:pt-4">
+      {/* NAVBAR SIMÉTRICA EM 3 COLUNAS NO DESKTOP ([1fr_auto_1fr]) — centro cravado! */}
       <header className="no-print w-full">
         <div
           className={cn(
-            "flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border px-3.5 py-2.5 sm:px-4",
+            "grid grid-cols-[1fr_auto] items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 sm:px-4 md:grid-cols-[1fr_auto_1fr]",
             ehAreaPais
               ? "border-inst-border bg-inst-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
               : "border-[#DDD6C7] bg-[#FCFBF8] shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
             "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
           )}
         >
-          {/* Esquerda: Marca no Espaço Infantil | Botão Voltar aos Jogos na Área dos Pais */}
-          {ehAreaPais ? (
-            <button
-              type="button"
-              onClick={voltarParaJogos}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-inst-border bg-inst-subtle px-3.5 py-1.5 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-slate-200/75 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
-              <span>Voltar aos Jogos</span>
-            </button>
-          ) : (
-            <MarcaCompacta />
-          )}
+          {/* Coluna 1 (Esquerda): Marca ou Voltar aos Jogos */}
+          <div className="justify-self-start">
+            {ehAreaPais ? (
+              <button
+                type="button"
+                onClick={voltarParaJogos}
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-inst-border bg-inst-subtle px-3.5 py-1.5 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-slate-200/75 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+              >
+                <ArrowLeft size={16} aria-hidden="true" />
+                <span>Voltar aos Jogos</span>
+              </button>
+            ) : (
+              <MarcaCompacta />
+            )}
+          </div>
 
-          {/* Centro (desktop) / Linha 2 (mobile): apenas 2 abas super limpas */}
+          {/* Coluna 2 (Centro exato no desktop / Linha 2 limpa no celular): 2 abas */}
           <nav
             className={cn(
-              "order-3 grid w-full grid-cols-2 gap-1 rounded-full p-1 md:order-2 md:flex md:w-auto md:items-center",
+              "col-span-2 order-3 grid w-full grid-cols-2 gap-1 rounded-full p-1 md:col-span-1 md:order-2 md:flex md:w-auto md:justify-self-center",
               ehAreaPais ? "bg-inst-subtle" : "bg-[#EFECE3]",
               "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950"
             )}
@@ -373,7 +374,7 @@ export default function Menu({
                   aria-selected={ativa}
                   aria-controls={`painel-${item.id}`}
                   className={cn(
-                    "min-h-9 rounded-full px-4 py-1.5 text-center text-sm font-semibold whitespace-nowrap transition-all",
+                    "min-h-9 rounded-full px-5 py-1.5 text-center text-sm font-semibold whitespace-nowrap transition-all",
                     ativa
                       ? ehAreaPais
                         ? "bg-brand text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
@@ -389,8 +390,8 @@ export default function Menu({
             })}
           </nav>
 
-          {/* Direita: Controles enxutos conforme o espaço */}
-          <div className="order-2 flex items-center gap-2 md:order-3">
+          {/* Coluna 3 (Direita): Perfil da criança ativa + Botão de Ajustes */}
+          <div className="order-2 flex items-center gap-2 justify-self-end md:order-3">
             {!ehAreaPais && (
               <>
                 {visitante ? (
@@ -398,7 +399,7 @@ export default function Menu({
                     type="button"
                     onClick={onSair}
                     title="Modo visitante — toque para entrar ou criar conta"
-                    className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                    className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
                   >
                     <span>Visitante</span>
                     <span className="hidden sm:inline text-xs font-bold text-[#4F75AE]">· Entrar</span>
@@ -407,24 +408,32 @@ export default function Menu({
                   <button
                     type="button"
                     onClick={() => solicitarAcessoPais("perfis")}
-                    title={`Trocar criança (requer PIN) · Responsável: ${resp}`}
-                    className="inline-flex min-h-9 max-w-[120px] sm:max-w-none items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                    title={`Perfil ativo: ${criancaAtiva.name} (${criancaAtiva.age} anos) · Toque para trocar na Área dos Pais`}
+                    className="inline-flex min-h-9 max-w-[165px] sm:max-w-none items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] py-1 pl-1.5 pr-3 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
                   >
-                    <span className="truncate">{criancaAtiva.name}</span>
-                    <span className="hidden sm:inline text-ink-muted">· {criancaAtiva.age} anos</span>
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
+                      style={{ backgroundColor: corAvatar(criancaAtiva.name) }}
+                      aria-hidden="true"
+                    >
+                      {inicialCrianca}
+                    </span>
+                    <span className="truncate">
+                      <strong>{criancaAtiva.name}</strong>
+                      <span className="text-ink-muted"> · {criancaAtiva.age} anos</span>
+                    </span>
                   </button>
-                ) : null}
-
-                <button
-                  type="button"
-                  onClick={() => solicitarAcessoPais("pais")}
-                  title="Entrar na Área dos Pais e Professores (protegida por PIN)"
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-[#DDD6C7] bg-[#F6F4EE] px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-                >
-                  <Lock size={14} className="shrink-0 text-ink-muted" aria-hidden="true" />
-                  <span className="hidden sm:inline">Área dos Pais</span>
-                  <span className="sm:hidden">Pais</span>
-                </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => solicitarAcessoPais("perfis")}
+                    title={`Cadastrar perfil de criança · Responsável: ${resp}`}
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5]"
+                  >
+                    <Plus size={14} aria-hidden="true" />
+                    <span>Criança</span>
+                  </button>
+                )}
               </>
             )}
 
@@ -434,7 +443,7 @@ export default function Menu({
               aria-haspopup="dialog"
               aria-expanded={abrirPrefs}
               aria-label="Abrir ajustes"
-              title={ehAreaPais ? "Ajustes, PIN e conta" : "Ajustes sensoriais e áudio"}
+              title="Ajustes e Área dos Pais"
               className={cn(
                 "relative inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
                 ehAreaPais
@@ -466,17 +475,18 @@ export default function Menu({
         </div>
       )}
 
-      {/* MODAL DE AJUSTES (sensorial para todos; PIN, LGPD e Sair apenas na Área dos Pais) */}
+      {/* MODAL DE AJUSTES REDESENHADO — listas agrupadas limpas estilo iOS/Linear */}
       <Dialog
         open={abrirPrefs}
         onClose={() => setAbrirPrefs(false)}
-        title="Ajustes e Acessibilidade"
+        title="Ajustes"
         subtitle={
           ehAreaPais || visitante
-            ? "Personalize conforto sensorial, áudio e preferências da conta."
-            : "Personalize conforto sensorial e áudio para a brincadeira."
+            ? "Áudio, conforto sensorial e gerenciamento da conta."
+            : "Conforto sensorial, áudio e acesso para responsáveis."
         }
         titleId="modal-ajustes-titulo"
+        className="max-w-md"
         footerClassName={ehAreaPais || visitante ? "justify-between" : "justify-end"}
         footer={
           <>
@@ -494,81 +504,174 @@ export default function Menu({
               </Button>
             )}
             <Button variant="institutional" size="sm" onClick={() => setAbrirPrefs(false)}>
-              Concluir
+              Pronto
             </Button>
           </>
         }
       >
-        {/* Seção 1: Conforto Sensorial e Áudio */}
-        <div className="space-y-2.5">
-          <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
-            Conforto sensorial e áudio
+        {/* Atalho destacado para a Área dos Pais (quando está no Espaço Infantil) */}
+        {!ehAreaPais && (
+          <button
+            type="button"
+            onClick={() => solicitarAcessoPais("pais")}
+            className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#DDD6C7] bg-[#F6F4EE] px-4 py-3.5 text-left transition-colors hover:bg-[#EFECE3] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5B82BA] text-white alto-contraste:bg-slate-950"
+                aria-hidden="true"
+              >
+                <Lock size={18} />
+              </span>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-ink leading-tight">
+                  Área dos Pais e Professores
+                </span>
+                <span className="mt-0.5 block text-xs text-ink-muted">
+                  Desempenho, trocar criança, relatórios e conta
+                </span>
+              </div>
+            </div>
+            <ChevronRight size={18} className="shrink-0 text-ink-muted" aria-hidden="true" />
+          </button>
+        )}
+
+        {/* Grupo 1: Conforto Sensorial (TEA) */}
+        <div className="space-y-2">
+          <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+            Conforto sensorial (TEA)
           </h3>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <ToggleCard
-              active={som}
-              onClick={onToggleSom}
-              icon={som ? Volume2 : VolumeX}
-              title="Narração de voz"
-              description={som ? "Nuvi lê as instruções" : "Áudio silenciado"}
-            />
-            <ToggleCard
+          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+            <SettingRowSwitch
               active={calmo}
               onClick={onToggleCalmo}
               icon={Cloud}
+              iconBg="bg-[#E6EFFC] text-[#3E6BB3]"
               title="Modo calmo"
-              description="Reduz animações e estímulos"
+              description="Reduz animações e movimentos"
             />
-            <ToggleCard
+            <SettingRowSwitch
               active={altoContraste}
               onClick={onToggleAltoContraste}
               icon={Contrast}
+              iconBg="bg-slate-100 text-slate-800"
               title="Alto contraste"
-              description="Leitura reforçada (WCAG AAA)"
+              description="Bordas e contraste reforçados (WCAG AAA)"
             />
-            <ToggleCard
+            <SettingRowSwitch
               active={fonteMaior}
               onClick={onToggleFonteMaior}
               icon={Type}
+              iconBg="bg-[#EEEAF9] text-[#6952A8]"
               title="Fonte ampliada (A+)"
-              description="Aumenta tamanho dos textos"
-            />
-            <ToggleCard
-              active={efeitos}
-              onClick={onToggleEfeitos}
-              icon={efeitos ? Bell : BellOff}
-              title="Efeitos sonoros"
-              description={efeitos ? "Sons suaves de acerto" : "Efeitos desligados"}
-            />
-            <ToggleCard
-              active={velocidade === "calma"}
-              onClick={onToggleVelocidade}
-              icon={Gauge}
-              title="Fala calma"
-              description={velocidade === "calma" ? "Ritmo pausado" : "Ritmo normal"}
+              description="Aumenta a legibilidade dos textos"
             />
           </div>
         </div>
 
-        {/* Seção 2: Preferências dos Jogos */}
-        <div className="space-y-3 border-t border-inst-border pt-4">
-          <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
-            Preferências dos jogos
+        {/* Grupo 2: Áudio e Narração */}
+        <div className="space-y-2">
+          <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+            Áudio e narração
           </h3>
+          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+            <SettingRowSwitch
+              active={som}
+              onClick={onToggleSom}
+              icon={som ? Volume2 : VolumeX}
+              iconBg="bg-[#E6F4EC] text-[#2D8A56]"
+              title="Voz da Nuvi"
+              description={som ? "Leitura das instruções ativa" : "Narração silenciada"}
+            />
+            <SettingRowSwitch
+              active={efeitos}
+              onClick={onToggleEfeitos}
+              icon={efeitos ? Bell : BellOff}
+              iconBg="bg-[#FBF2DC] text-[#A87918]"
+              title="Efeitos sonoros"
+              description={efeitos ? "Sons suaves de acerto" : "Efeitos desligados"}
+            />
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3">
-            <div>
-              <span className="flex items-center gap-1.5 text-sm font-bold text-ink">
-                <Star size={15} className="text-warn" aria-hidden="true" />
-                Rodadas por partida
-              </span>
-              <span className="block text-xs text-ink-muted">
-                {rodadasTravadas
-                  ? "Com perfil cadastrado, cada partida tem sempre 5 rodadas."
-                  : "Escolha entre partidas curtas (3) ou padrão (5)."}
-              </span>
+            {/* Ritmo da fala inline */}
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-inst-subtle text-ink-muted"
+                  aria-hidden="true"
+                >
+                  <Gauge size={17} />
+                </span>
+                <span className="text-sm font-bold text-ink">Ritmo da fala</span>
+              </div>
+              <div className="inline-flex rounded-xl bg-inst-subtle p-1">
+                {[
+                  { id: "calma", rotulo: "Calma" },
+                  { id: "normal", rotulo: "Normal" },
+                ].map((op) => {
+                  const ativo = velocidade === op.id;
+                  return (
+                    <button
+                      key={op.id}
+                      type="button"
+                      aria-pressed={ativo}
+                      onClick={() => {
+                        if (!ativo) onToggleVelocidade();
+                      }}
+                      className={cn(
+                        "min-h-7 rounded-lg px-2.5 py-1 text-xs font-bold transition-colors",
+                        ativo ? "bg-white text-ink shadow-2xs" : "text-ink-muted hover:text-ink"
+                      )}
+                    >
+                      {op.rotulo}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="inline-flex rounded-xl border border-inst-border bg-white p-1">
+
+            {vozes.length > 1 && (
+              <div className="px-4 py-3 space-y-1.5">
+                <label className="block text-xs font-bold text-ink-muted" htmlFor="sel-voz">
+                  Voz do dispositivo
+                </label>
+                <Select
+                  id="sel-voz"
+                  value={vozSel}
+                  onChange={(e) => onTrocarVoz(e.target.value)}
+                  className="min-h-9 py-1.5 text-sm"
+                >
+                  {vozes.map((v) => (
+                    <option key={v.name} value={v.name}>
+                      {v.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Grupo 3: Partidas */}
+        <div className="space-y-2">
+          <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+            Partidas
+          </h3>
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-inst-border bg-white px-4 py-3 alto-contraste:border-2 alto-contraste:border-slate-950">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FDF6DF] text-[#BA8C1D]"
+                aria-hidden="true"
+              >
+                <Star size={17} />
+              </span>
+              <div className="min-w-0">
+                <span className="block text-sm font-bold text-ink leading-tight">Rodadas</span>
+                <span className="block text-xs text-ink-muted">
+                  {rodadasTravadas ? "Fixo em 5 com perfil ativo" : "Duração da atividade"}
+                </span>
+              </div>
+            </div>
+            <div className="inline-flex rounded-xl bg-inst-subtle p-1">
               {[3, 5].map((qtd) => (
                 <button
                   key={qtd}
@@ -577,143 +680,135 @@ export default function Menu({
                   onClick={() => onAlterarTotal(qtd)}
                   aria-pressed={totalRodadas === qtd}
                   className={cn(
-                    "min-h-8 rounded-lg px-3 py-1 text-xs font-bold transition-colors",
+                    "min-h-7 rounded-lg px-2.5 py-1 text-xs font-bold transition-colors",
                     totalRodadas === qtd
-                      ? "bg-brand text-white"
+                      ? "bg-white text-ink shadow-2xs"
                       : "text-ink-muted hover:text-ink",
                     rodadasTravadas && "opacity-55 cursor-not-allowed"
                   )}
                 >
-                  {qtd} rodadas
+                  {qtd}
                 </button>
               ))}
             </div>
           </div>
-
-          {vozes.length > 1 && (
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-ink" htmlFor="sel-voz">
-                Voz do dispositivo
-              </label>
-              <Select
-                id="sel-voz"
-                value={vozSel}
-                onChange={(e) => onTrocarVoz(e.target.value)}
-                className="min-h-10 text-sm"
-              >
-                {vozes.map((v) => (
-                  <option key={v.name} value={v.name}>
-                    {v.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          )}
         </div>
 
-        {/* Seção 3: Segurança do PIN e Conta LGPD (apenas na Área dos Pais desbloqueada) */}
+        {/* Grupo 4: Segurança e Conta (apenas na Área dos Pais desbloqueada) */}
         {!visitante && ehAreaPais && areaPaisLiberada && (
-          <div className="space-y-2.5 border-t border-inst-border pt-4">
-            <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
-              Segurança e conta do responsável
+          <div className="space-y-2">
+            <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+              Segurança e conta
             </h3>
-
-            <button
-              type="button"
-              onClick={abrirAlterarPin}
-              className="flex w-full items-center justify-between rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3 text-left transition-colors hover:bg-inst-subtle"
-            >
-              <span className="flex items-center gap-2.5 text-sm font-bold text-ink">
-                <KeyRound size={17} className="text-brand" aria-hidden="true" />
-                Alterar PIN de 4 dígitos da Área dos Pais
-              </span>
-              <ChevronRight size={17} className="text-ink-muted" aria-hidden="true" />
-            </button>
-
-            {(onAlterarSenha || onExcluirConta) && (
-              <>
-                <button
-                  type="button"
-                  aria-expanded={abrirConta}
-                  onClick={() => {
-                    setAbrirConta((v) => !v);
-                    setErroConta("");
-                    setMsgConta("");
-                  }}
-                  className="flex w-full items-center justify-between rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3 text-left transition-colors hover:bg-inst-subtle"
-                >
-                  <span className="flex items-center gap-2.5 text-sm font-bold text-ink">
-                    <ShieldCheck size={17} className="text-brand" aria-hidden="true" />
-                    Minha conta e privacidade (LGPD)
-                  </span>
-                  <ChevronRight
-                    size={17}
-                    className={cn("text-ink-muted transition-transform", abrirConta && "rotate-90")}
+            <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+              <button
+                type="button"
+                onClick={abrirAlterarPin}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-inst-subtle/50 first:rounded-t-2xl last:rounded-b-2xl"
+              >
+                <span className="flex items-center gap-3 text-sm font-bold text-ink">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand"
                     aria-hidden="true"
-                  />
-                </button>
+                  >
+                    <KeyRound size={17} />
+                  </span>
+                  Alterar PIN de 4 dígitos
+                </span>
+                <ChevronRight size={17} className="text-ink-muted" aria-hidden="true" />
+              </button>
 
-                {abrirConta && (
-                  <div className="space-y-3 pt-1">
-                    <form
-                      onSubmit={salvarNovaSenha}
-                      className="space-y-2.5 rounded-2xl border border-inst-border bg-white p-4"
-                    >
-                      <strong className="block text-sm text-ink">Alterar senha</strong>
-                      <Input
-                        type="password"
-                        placeholder="Senha atual"
-                        value={senhaAtual}
-                        onChange={(e) => setSenhaAtual(e.target.value)}
-                      />
-                      <Input
-                        type="password"
-                        placeholder="Nova senha (mín. 8 caracteres)"
-                        value={novaSenha}
-                        onChange={(e) => setNovaSenha(e.target.value)}
-                      />
-                      <Button
-                        type="submit"
-                        variant="institutional"
-                        size="sm"
-                        disabled={ocupadoConta}
-                        aria-busy={ocupadoConta}
+              {(onAlterarSenha || onExcluirConta) && (
+                <div>
+                  <button
+                    type="button"
+                    aria-expanded={abrirConta}
+                    onClick={() => {
+                      setAbrirConta((v) => !v);
+                      setErroConta("");
+                      setMsgConta("");
+                    }}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-inst-subtle/50 rounded-b-2xl"
+                  >
+                    <span className="flex items-center gap-3 text-sm font-bold text-ink">
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand"
+                        aria-hidden="true"
                       >
-                        Salvar nova senha
-                      </Button>
-                    </form>
+                        <ShieldCheck size={17} />
+                      </span>
+                      Conta e privacidade (LGPD)
+                    </span>
+                    <ChevronRight
+                      size={17}
+                      className={cn("text-ink-muted transition-transform", abrirConta && "rotate-90")}
+                      aria-hidden="true"
+                    />
+                  </button>
 
-                    <form
-                      onSubmit={confirmarExclusaoConta}
-                      className="space-y-2.5 rounded-2xl border border-red-200 bg-danger-soft/40 p-4"
-                    >
-                      <strong className="block text-sm text-danger">Excluir minha conta (LGPD)</strong>
-                      <p className="m-0 text-xs text-ink-muted">
-                        Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.
-                      </p>
-                      <Input
-                        type="password"
-                        placeholder="Confirme sua senha para excluir"
-                        value={senhaExclusao}
-                        onChange={(e) => setSenhaExclusao(e.target.value)}
-                      />
-                      <Button
-                        type="submit"
-                        variant="danger"
-                        size="sm"
-                        disabled={ocupadoConta}
-                        aria-busy={ocupadoConta}
+                  {abrirConta && (
+                    <div className="space-y-3 border-t border-inst-border bg-inst-subtle/35 p-4">
+                      <form onSubmit={salvarNovaSenha} className="space-y-2.5">
+                        <strong className="block text-xs font-bold uppercase tracking-wide text-ink-muted">
+                          Alterar senha
+                        </strong>
+                        <Input
+                          type="password"
+                          placeholder="Senha atual"
+                          value={senhaAtual}
+                          onChange={(e) => setSenhaAtual(e.target.value)}
+                        />
+                        <Input
+                          type="password"
+                          placeholder="Nova senha (mín. 8 caracteres)"
+                          value={novaSenha}
+                          onChange={(e) => setNovaSenha(e.target.value)}
+                        />
+                        <Button
+                          type="submit"
+                          variant="institutional"
+                          size="sm"
+                          disabled={ocupadoConta}
+                          aria-busy={ocupadoConta}
+                        >
+                          Salvar nova senha
+                        </Button>
+                      </form>
+
+                      <form
+                        onSubmit={confirmarExclusaoConta}
+                        className="space-y-2.5 border-t border-inst-border pt-3"
                       >
-                        Excluir conta e todos os dados
-                      </Button>
-                    </form>
+                        <strong className="block text-xs font-bold uppercase tracking-wide text-danger">
+                          Excluir minha conta (LGPD)
+                        </strong>
+                        <p className="m-0 text-xs text-ink-muted">
+                          Remove permanentemente conta, perfis das crianças, partidas e relatórios.
+                        </p>
+                        <Input
+                          type="password"
+                          placeholder="Confirme sua senha para excluir"
+                          value={senhaExclusao}
+                          onChange={(e) => setSenhaExclusao(e.target.value)}
+                        />
+                        <Button
+                          type="submit"
+                          variant="danger"
+                          size="sm"
+                          disabled={ocupadoConta}
+                          aria-busy={ocupadoConta}
+                        >
+                          Excluir conta e dados
+                        </Button>
+                      </form>
 
-                    {erroConta && <Alert variant="error">{erroConta}</Alert>}
-                    {msgConta && <Alert variant="success">{msgConta}</Alert>}
-                  </div>
-                )}
-              </>
-            )}
+                      {erroConta && <Alert variant="error">{erroConta}</Alert>}
+                      {msgConta && <Alert variant="success">{msgConta}</Alert>}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </Dialog>
@@ -983,6 +1078,20 @@ export default function Menu({
             </div>
           </Card>
         </section>
+      )}
+
+      {/* ACESSO DISCRETO À ÁREA DOS PAIS NO RODAPÉ DO ESPAÇO INFANTIL */}
+      {!ehAreaPais && (
+        <footer className="no-print pt-2">
+          <button
+            type="button"
+            onClick={() => solicitarAcessoPais("pais")}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#FCFBF8]/80 px-4 py-1.5 text-xs font-bold text-ink-muted transition-colors hover:bg-[#FCFBF8] hover:text-ink alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+          >
+            <Lock size={13} aria-hidden="true" />
+            <span>Área dos Pais e Professores</span>
+          </button>
+        </footer>
       )}
 
       {/* PROTEÇÃO DE ACESSO DIRETO (F5 / URL) NA ÁREA DOS PAIS */}
