@@ -43,11 +43,11 @@ import PerfisCriancas from "./PerfisCriancas";
 
 const PainelPais = lazy(() => import("./PainelPais"));
 
-const CORES_AVATAR = ["#1F6E63", "#D67456", "#7E64C4", "#3E6FB0", "#C88E26", "#B86077"];
+const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
 
 function corAvatar(nome = "") {
   const limpo = nome.trim();
-  if (!limpo) return "#1F6E63";
+  if (!limpo) return "#5B82BA";
   let soma = 0;
   for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
   return CORES_AVATAR[soma % CORES_AVATAR.length];
