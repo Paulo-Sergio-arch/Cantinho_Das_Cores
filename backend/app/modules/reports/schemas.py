@@ -6,6 +6,7 @@ class ReportCreate(BaseModel):
     child_id: str
     period_start: date
     period_end: date
+    tz_offset_minutes: int = Field(default=0, ge=-840, le=840)
 
     @model_validator(mode="after")
     def check_period(self):
@@ -17,8 +18,9 @@ class ReportCreate(BaseModel):
 
 
 class ReportSendRequest(BaseModel):
-    channel: str = Field(default="email", pattern="^(email|smtp|webhook|console)$")
+    channel: str | None = Field(default=None, pattern="^(email|smtp|resend|brevo|webhook|console)$")
     recipient: str | None = Field(default=None, max_length=255)
+    resend: bool = False
 
 
 class ReportPublic(BaseModel):

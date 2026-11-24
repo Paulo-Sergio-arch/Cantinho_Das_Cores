@@ -21,7 +21,7 @@ Baseado em [`backend/.env.example`](backend/.env.example):
 APP_ENV=development
 JWT_SECRET=change-this-to-a-long-random-secret-before-deploying
 JWT_EXPIRE_MINUTES=60
-CORS_ORIGINS=http://localhost:5185,http://localhost:5173,https://ca10v1ana.github.io
+CORS_ORIGINS=http://localhost:5185,http://localhost:5173,https://cantinho-das-cores.vercel.app
 DATABASE_PATH=data/cantinho_das_cores.sqlite3
 BACKUP_DIR=data/backups
 BACKUP_KEEP_COUNT=10

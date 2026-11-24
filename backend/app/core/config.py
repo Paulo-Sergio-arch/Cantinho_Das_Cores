@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
     cors_origins: str = (
         "http://localhost:5185,http://localhost:5173,"
-        "https://cantinho-das-cores.vercel.app,https://ca10v1ana.github.io"
+        "https://cantinho-das-cores.vercel.app"
     )
     database_path: str | None = None  # None = backend/data/cantinho_das_cores.sqlite3
     backup_dir: str | None = None     # None = backend/data/backups
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     enable_docs_in_production: bool = False
     admin_api_key: str = ""
 
-    # Canal real de envio dos relatórios (console | smtp | webhook)
+    # Canal real de envio dos relatórios (console | email | smtp | resend | brevo | webhook)
     report_delivery_mode: str = "console"
     smtp_host: str = ""
     smtp_port: int = 587
@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_from: str = "no-reply@cantinhodascores.com.br"
     smtp_use_tls: bool = True
+    resend_api_key: str = ""
+    resend_from: str = ""
+    brevo_api_key: str = ""
+    brevo_from_name: str = "Cantinho das Cores"
     report_webhook_url: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True)

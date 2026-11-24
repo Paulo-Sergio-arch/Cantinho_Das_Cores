@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+import threading
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response, status
 from app.core.config import settings
 from app.modules.auth.dependencies import get_current_claims
 from app.modules.auth.repository import repository as users_repository
@@ -10,6 +11,9 @@ from app.modules.reports.generator import build_text
 from app.modules.reports.schemas import ReportCreate, ReportPublic, ReportSendRequest, ReportStatus
 
 router = APIRouter(prefix="/api/reports", tags=["Relatórios pedagógicos"])
+
+_in_flight_lock = threading.Lock()
+_in_flight_reports: set[str] = set()
 
 
 def responsible_id(claims: dict = Depends(get_current_claims)) -> str:
@@ -32,7 +36,13 @@ def create_report(payload: ReportCreate, owner_id: str = Depends(responsible_id)
     child = children_repository.get_owned(payload.child_id, owner_id)
     if child is None:
         raise HTTPException(status_code=404, detail="Perfil da criança não encontrado")
-    summary, games = repo.stats(owner_id, child.id, payload.period_start, payload.period_end)
+    summary, games = repo.stats(
+        owner_id,
+        child.id,
+        payload.period_start,
+        payload.period_end,
+        tz_offset_minutes=payload.tz_offset_minutes,
+    )
     text = build_text(child.name, child.age, payload.period_start, payload.period_end, summary, games)
     return repo.create(child.id, payload.period_start, payload.period_end, text)
 
@@ -58,9 +68,17 @@ def report_status(report_id: str, owner_id: str = Depends(responsible_id)):
     return owned_or_404(report_id, owner_id)
 
 
+@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_report(report_id: str, owner_id: str = Depends(responsible_id)):
+    if not repo.delete_owned(report_id, owner_id):
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 def _execute_send(report_id: str, owner_id: str, payload: ReportSendRequest | None) -> dict:
     report = owned_or_404(report_id, owner_id)
-    if report["sent"]:
+    allow_resend = bool(payload and payload.resend)
+    if report["sent"] and not allow_resend:
         raise HTTPException(status_code=409, detail="Relatório já marcado como enviado")
 
     blocked, retry_after = consume_rate_limit(
@@ -75,25 +93,39 @@ def _execute_send(report_id: str, owner_id: str, payload: ReportSendRequest | No
             headers={"Retry-After": str(retry_after)},
         )
 
-    owner = users_repository.get_by_id(owner_id)
-    owner_email = owner.email if owner else ""
-    channel = payload.channel if payload else None
-    recipient = payload.recipient if payload else None
+    # Impede envios concorrentes duplicados (TOCTOU) para o mesmo relatório
+    with _in_flight_lock:
+        if report["id"] in _in_flight_reports:
+            raise HTTPException(status_code=409, detail="Este relatório já está sendo enviado no momento.")
+        _in_flight_reports.add(report["id"])
 
     try:
-        envelope = deliver_report(report, owner_email=owner_email, channel=channel, recipient=recipient)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail="Falha ao enviar o relatório pelo canal configurado.") from exc
+        owner = users_repository.get_by_id(owner_id)
+        owner_email = owner.email if owner else ""
+        channel = payload.channel if payload else None
+        recipient = payload.recipient if payload else None
 
-    if not repo.mark_sent(report["id"]):
-        raise HTTPException(status_code=409, detail="Relatório já marcado como enviado")
+        try:
+            envelope = deliver_report(report, owner_email=owner_email, channel=channel, recipient=recipient)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail="Falha ao enviar o relatório pelo canal configurado.") from exc
 
-    updated = owned_or_404(report_id, owner_id)
-    updated["delivery_channel"] = envelope["channel"]
-    updated["delivery_recipient"] = envelope["recipient"]
-    return updated
+        try:
+            marked = repo.mark_sent(report["id"], allow_resend=allow_resend)
+        except TypeError:
+            marked = repo.mark_sent(report["id"])
+        if not marked:
+            raise HTTPException(status_code=409, detail="Relatório já marcado como enviado")
+
+        updated = owned_or_404(report_id, owner_id)
+        updated["delivery_channel"] = envelope["channel"]
+        updated["delivery_recipient"] = envelope["recipient"]
+        return updated
+    finally:
+        with _in_flight_lock:
+            _in_flight_reports.discard(report["id"])
 
 
 @router.post("/{report_id}/sent", response_model=ReportPublic)
@@ -102,7 +134,7 @@ def mark_report_sent(
     payload: ReportSendRequest | None = Body(default=None),
     owner_id: str = Depends(responsible_id),
 ):
-    """Envia o relatório pelo canal configurado (e-mail/SMTP, webhook ou caixa de saída) e preenche enviado_em."""
+    """Envia o relatório pelo canal configurado (e-mail/SMTP, Resend, Brevo, webhook ou caixa de saída) e preenche enviado_em."""
     return _execute_send(report_id, owner_id, payload)
 
 
@@ -112,5 +144,5 @@ def send_report_now(
     payload: ReportSendRequest | None = Body(default=None),
     owner_id: str = Depends(responsible_id),
 ):
-    """Rota explícita para envio real do relatório pedagógico."""
+    """Rota explícita para envio ou reenvio real do relatório pedagógico."""
     return _execute_send(report_id, owner_id, payload)
