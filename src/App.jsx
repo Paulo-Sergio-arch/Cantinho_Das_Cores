@@ -413,8 +413,11 @@ export default function App() {
   const jogo = jogos.find((j) => j.id === tela);
   const JogoAtivo = jogo?.C;
 
+  const ehAreaInstitucional = tela === "menu" && (abaMenu === "perfis" || abaMenu === "pais");
+
   const classesRaiz = [
     "cc",
+    ehAreaInstitucional ? "area-institucional" : "",
     fonteMaior ? "fonte-maior" : "",
     altoContraste ? "alto-contraste" : "",
     calmo ? "modo-calmo" : "",
@@ -424,7 +427,7 @@ export default function App() {
 
   return (
     <div className={classesRaiz}>
-      <Fundo />
+      {!ehAreaInstitucional && <Fundo />}
 
       {avisoApi && (
         <div className="aviso-global-wrap">

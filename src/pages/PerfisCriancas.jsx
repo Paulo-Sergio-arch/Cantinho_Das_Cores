@@ -1,7 +1,21 @@
 import { useState } from "react";
 import { FAIXAS_ETARIAS } from "../data/jogosData";
+import {
+  IconCheck,
+  IconEditar,
+  IconLixeira,
+  IconMais,
+  IconUsuario,
+} from "../components/IconesUI";
 
 const VAZIO = { id: null, nome: "", idade: "8" };
+const CORES_AVATAR = ["#2D7FF9", "#24A159", "#8E6CEF", "#E66A2B", "#D6428A", "#179A8D"];
+
+function corAvatar(nome = "") {
+  let soma = 0;
+  for (let i = 0; i < nome.length; i++) soma += nome.charCodeAt(i);
+  return CORES_AVATAR[soma % CORES_AVATAR.length];
+}
 
 export default function PerfisCriancas({
   visitante,
@@ -13,6 +27,7 @@ export default function PerfisCriancas({
   onSalvar,
   onExcluir,
   onRecarregar,
+  onEntrarConta,
 }) {
   const [form, setForm] = useState(VAZIO);
   const [erro, setErro] = useState("");
@@ -27,15 +42,23 @@ export default function PerfisCriancas({
           <div>
             <h1 className="pais-titulo">Perfis das crianças</h1>
             <p className="pais-subtitulo">
-              Cadastre cada criança para personalizar a idade e acompanhar o progresso individual.
+              Cadastre cada criança para personalizar a faixa etária e acompanhar o progresso individual.
             </p>
           </div>
         </div>
-        <div className="aviso-api">
-          <span>
-            O visitante pode jogar, mas as partidas não ficam salvas. Entre com uma conta de responsável para cadastrar
-            perfis e acompanhar o desempenho.
-          </span>
+        <div className="pais-bloco">
+          <div className="aviso-api info">
+            <span>
+              No modo visitante você pode testar todos os jogos, mas as partidas não ficam salvas. Entre com uma conta
+              de responsável para cadastrar perfis e acompanhar relatórios.
+            </span>
+            {onEntrarConta && (
+              <button type="button" className="btn peq" onClick={onEntrarConta}>
+                <IconUsuario size={16} />
+                Fazer login ou criar conta
+              </button>
+            )}
+          </div>
         </div>
       </section>
     );
@@ -120,11 +143,25 @@ export default function PerfisCriancas({
             {criancas.map((c) => {
               const ativo = String(ativaId) === String(c.id);
               const confirmando = confirmarId === c.id;
+              const inicial = (c.name || "?").trim().charAt(0).toUpperCase();
               return (
                 <li key={c.id} className={`perfil-item ${ativo ? "ativo" : ""}`}>
-                  <span className="perfil-nome">
-                    <strong>{c.name}</strong> · {c.age} anos
-                  </span>
+                  <div className="perfil-identidade">
+                    <span
+                      className="perfil-avatar"
+                      style={{ background: corAvatar(c.name) }}
+                      aria-hidden="true"
+                    >
+                      {inicial}
+                    </span>
+                    <div className="perfil-nome">
+                      <strong>{c.name}</strong>
+                      <span className="perfil-meta">
+                        {c.age} anos · {ativo ? "Perfil ativo nos jogos" : "Disponível para selecionar"}
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="perfil-acoes">
                     <button
                       type="button"
@@ -132,6 +169,7 @@ export default function PerfisCriancas({
                       aria-pressed={ativo}
                       onClick={() => onSelecionar(c.id)}
                     >
+                      {ativo && <IconCheck size={16} />}
                       {ativo ? "Jogando" : "Escolher"}
                     </button>
                     <button
@@ -144,6 +182,7 @@ export default function PerfisCriancas({
                         setMsg("");
                       }}
                     >
+                      <IconEditar size={15} />
                       Editar
                     </button>
                     <button
@@ -153,6 +192,7 @@ export default function PerfisCriancas({
                       aria-busy={ocupado && confirmando}
                       onClick={() => excluir(c.id)}
                     >
+                      <IconLixeira size={15} />
                       {confirmando ? "Confirmar exclusão?" : "Excluir"}
                     </button>
                     {confirmando && (
@@ -230,6 +270,7 @@ export default function PerfisCriancas({
 
           <div className="perfil-form-acoes">
             <button type="submit" className="btn peq" disabled={ocupado} aria-busy={ocupado}>
+              {!editando && <IconMais size={16} />}
               {ocupado ? "Salvando…" : editando ? "Salvar alterações" : "Cadastrar criança"}
             </button>
             {editando && (

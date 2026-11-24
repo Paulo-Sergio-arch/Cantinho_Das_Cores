@@ -143,18 +143,33 @@
 }
 
 .col .ficha {
-  min-height: 68px;
+  min-height: 70px;
   width: 100%;
   padding: 6px 10px;
 }
 
-.emo {
-  font-size: 2.3rem;
-  line-height: 1;
+.pictograma-svg {
+  display: block;
+}
+
+.par-selo {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--verde);
+  color: #FFFFFF;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .pal {
-  font-size: clamp(1.25rem, 4.5vw, 1.6rem);
+  font-size: clamp(1.25rem, 4.5vw, 1.55rem);
 }
 
 /* Jogo 4: Cor e forma */
@@ -209,15 +224,23 @@
   box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
 }
 
-.emo.grande {
-  font-size: 5rem;
+.fala-ilustracao {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 3px solid #FFFFFF;
+  margin-bottom: 6px;
+  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.1);
 }
 
 .palavra {
-  font-size: clamp(2.2rem, 10vw, 3.4rem);
+  font-size: clamp(2.1rem, 9.5vw, 3.2rem);
   line-height: 1.1;
   margin-top: 4px;
-  -webkit-text-stroke: 6px #fff;
+  -webkit-text-stroke: 5px #fff;
   paint-order: stroke fill;
   text-shadow: 0 4px 0 rgba(43, 58, 103, 0.15);
   text-align: center;
@@ -229,33 +252,47 @@
   justify-content: center;
   gap: 10px;
   margin-top: 12px;
-  font-size: 1.8rem;
+  font-size: 1.7rem;
 }
 
-.silabas span,
+.silabas span.silaba-texto,
 .silaba-btn {
-  border: 0;
-  padding: 4px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  border: 2px solid rgba(43, 58, 103, 0.12);
+  padding: 5px 14px;
   border-radius: 18px;
   background: var(--creme);
-  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.15);
+  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.14);
   transition: background 0.2s, transform 0.2s;
+}
+
+.silaba-ico {
+  opacity: 0.55;
+  flex-shrink: 0;
 }
 
 .silaba-btn:hover {
   transform: translateY(-2px);
 }
 
+.silaba-btn:hover .silaba-ico,
+.silabas .ativa .silaba-ico {
+  opacity: 1;
+}
+
 .silabas .ativa {
   background: #FFD35A;
-  transform: scale(1.12);
+  transform: scale(1.1);
 }
 
 .frase {
   margin: 14px 0 0;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.82);
   border-radius: 18px;
   padding: 8px 18px;
   text-align: center;
@@ -270,7 +307,7 @@
   font-size: 0.94rem;
   font-weight: 700;
   text-align: center;
-  opacity: 0.85;
+  color: var(--tinta);
 }
 
 @keyframes pulso-alvo {

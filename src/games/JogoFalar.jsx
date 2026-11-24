@@ -4,6 +4,8 @@ import { pick } from "../utils/aleatorio";
 import { falar } from "../utils/voz";
 import { tocarAcerto } from "../utils/sons";
 import Casca from "../components/Casca";
+import Pictograma from "../components/Pictograma";
+import { IconFala, IconReiniciar, IconVozOn } from "../components/IconesUI";
 
 function gerarListaFala(total, idade) {
   const nivel = String(idade);
@@ -97,8 +99,8 @@ export default function JogoFalar(p) {
       }
     >
       <div className="fala-card">
-        <div className="emo grande" aria-hidden="true">
-          {w.e}
+        <div className="fala-ilustracao" aria-hidden="true">
+          <Pictograma id={w.w} tam={86} />
         </div>
         <div className="palavra">{w.w}</div>
         <div className="silabas">
@@ -110,7 +112,8 @@ export default function JogoFalar(p) {
               className={`silaba-btn ${i === ativa ? "ativa" : ""}`}
               aria-label={`Ouvir sílaba ${s}`}
             >
-              {s}
+              <span>{s}</span>
+              <IconVozOn size={15} className="silaba-ico" />
             </button>
           ))}
         </div>
@@ -121,8 +124,10 @@ export default function JogoFalar(p) {
             className={`btn ${!ouviu && !tocando ? "guia-pulsar" : ""}`}
             onClick={ouvir}
             disabled={bloq}
+            aria-busy={tocando}
           >
-            {tocando ? "🔊 Ouvindo..." : "🔊 Ouvir"}
+            <IconVozOn size={20} />
+            {tocando ? "Ouvindo..." : "Ouvir"}
           </button>
           <button
             type="button"
@@ -130,7 +135,8 @@ export default function JogoFalar(p) {
             onClick={falei}
             disabled={!ouviu || bloq}
           >
-            🗣️ Eu falei!
+            <IconFala size={20} />
+            Eu falei!
           </button>
           {ouviu && !bloq && (
             <button
@@ -138,7 +144,8 @@ export default function JogoFalar(p) {
               className="btn sec"
               onClick={praticarMais}
             >
-              🔁 Repetir devagar
+              <IconReiniciar size={19} />
+              Repetir devagar
             </button>
           )}
         </div>
