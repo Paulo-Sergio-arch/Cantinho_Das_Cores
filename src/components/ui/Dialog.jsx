@@ -36,7 +36,7 @@ export function Dialog({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.16 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -45,11 +45,11 @@ export function Dialog({
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+        initial={{ opacity: 0, y: 12, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 420, damping: 32 }}
         className={cn(
-          "flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-inst-border bg-inst-surface shadow-2xl sm:max-h-[85vh] sm:rounded-3xl",
+          "flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-inst-border bg-inst-surface shadow-2xl",
           className
         )}
       >
