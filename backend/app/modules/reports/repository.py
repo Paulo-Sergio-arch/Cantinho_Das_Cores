@@ -1,25 +1,17 @@
-from datetime import date, datetime, timezone
-from app.core.database import connect, to_id
-
-
-def _utc_dt(value: str | None) -> datetime | None:
-    if not value:
-        return None
-    dt = datetime.fromisoformat(value)
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+from app.core.database import as_date, as_datetime, as_float, connect, sql_date, to_id
 
 
 def _rec(r):
-    sent = r["enviado_em"]
+    sent = as_datetime(r["enviado_em"])
     return {
         "id": str(r["id_relatorio"]),
         "child_id": str(r["id_crianca"]),
         "child_name": r["apelido"],
-        "period_start": date.fromisoformat(r["periodo_inicio"]),
-        "period_end": date.fromisoformat(r["periodo_fim"]),
+        "period_start": as_date(r["periodo_inicio"]),
+        "period_end": as_date(r["periodo_fim"]),
         "text": r["texto"],
-        "generated_at": _utc_dt(r["gerado_em"]),
-        "sent_at": _utc_dt(sent),
+        "generated_at": as_datetime(r["gerado_em"]),
+        "sent_at": sent,
         "sent": sent is not None,
     }
 
@@ -27,16 +19,10 @@ def _rec(r):
 BASE = "SELECT r.*, c.apelido FROM relatorios r JOIN criancas c ON c.id_crianca=r.id_crianca"
 
 
-def _date_expr(col: str, tz_offset_minutes: int) -> tuple[str, list]:
-    if tz_offset_minutes:
-        return f"date({col}, ?)", [f"{int(tz_offset_minutes):+d} minutes"]
-    return f"date({col})", []
-
-
 def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
     """Resumo e desempenho por jogo restritos ao intervalo [start, end] considerando o fuso informado."""
-    d_partidas, tz_args = _date_expr("jogado_em", tz_offset_minutes)
-    d_join, tz_join_args = _date_expr("p.jogado_em", tz_offset_minutes)
+    d_partidas, tz_args = sql_date("jogado_em", tz_offset_minutes)
+    d_join, tz_join_args = sql_date("p.jogado_em", tz_offset_minutes)
     args_summary = [int(child_id), *tz_args, start.isoformat(), end.isoformat()]
     args_games = [int(child_id), *tz_join_args, start.isoformat(), end.isoformat()]
     with connect() as db:
@@ -52,29 +38,30 @@ def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
             f"""SELECT j.id_jogo, j.nome, j.habilidade, COUNT(p.id_partida) total, COALESCE(SUM(p.concluida),0) done,
             AVG(CASE WHEN p.concluida=1 THEN pontuacao END) score, AVG(CASE WHEN p.concluida=1 THEN duracao_seg END) dur FROM jogos j
             LEFT JOIN partidas p ON p.id_jogo=j.id_jogo AND p.id_crianca=? AND {d_join} BETWEEN ? AND ?
-            GROUP BY j.id_jogo ORDER BY j.id_jogo""",
+            GROUP BY j.id_jogo, j.nome, j.habilidade ORDER BY j.id_jogo""",
             args_games,
         ).fetchall()
-    total = r["total"]
+    total = int(r["total"])
+    done = int(r["done"])
     summary = {
         "total_matches": total,
-        "completed_matches": r["done"],
-        "abandoned_matches": total - r["done"],
-        "completion_rate": round(r["done"] / total * 100) if total else 0,
-        "average_score": r["score"],
-        "average_duration_seconds": r["dur"],
-        "total_correct": r["ok"],
-        "total_errors": r["err"],
+        "completed_matches": done,
+        "abandoned_matches": total - done,
+        "completion_rate": round(done / total * 100) if total else 0,
+        "average_score": as_float(r["score"]),
+        "average_duration_seconds": as_float(r["dur"]),
+        "total_correct": int(r["ok"]),
+        "total_errors": int(r["err"]),
     }
     games = [
         {
             "game_id": g["id_jogo"],
             "name": g["nome"],
             "skill": g["habilidade"],
-            "total_matches": g["total"],
-            "completed_matches": g["done"],
-            "average_score": g["score"],
-            "average_duration_seconds": g["dur"],
+            "total_matches": int(g["total"]),
+            "completed_matches": int(g["done"]),
+            "average_score": as_float(g["score"]),
+            "average_duration_seconds": as_float(g["dur"]),
         }
         for g in rows
     ]
@@ -83,11 +70,11 @@ def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
 
 def create(child_id, start, end, text):
     with connect() as db:
-        cur = db.execute(
-            "INSERT INTO relatorios(id_crianca, periodo_inicio, periodo_fim, texto) VALUES (?,?,?,?)",
+        inserted = db.execute(
+            "INSERT INTO relatorios(id_crianca, periodo_inicio, periodo_fim, texto) VALUES (?,?,?,?) RETURNING id_relatorio",
             (int(child_id), start.isoformat(), end.isoformat(), text),
-        )
-        return _rec(db.execute(BASE + " WHERE r.id_relatorio=?", (cur.lastrowid,)).fetchone())
+        ).fetchone()
+        return _rec(db.execute(BASE + " WHERE r.id_relatorio=?", (inserted["id_relatorio"],)).fetchone())
 
 
 def list_by_owner(owner_id, child_id=None, sent=None):

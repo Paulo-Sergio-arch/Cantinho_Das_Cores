@@ -230,3 +230,44 @@ def test_token_de_responsavel_excluido_e_rejeitado_com_401():
     assert client.get("/api/children", headers=h).status_code == 401
     assert client.get("/api/dashboard/summary", headers=h).status_code == 401
     assert client.get("/api/reports", headers=h).status_code == 401
+
+
+# ---------- 6. Compatibilidade PostgreSQL / Supabase ----------
+def test_schema_supabase_valido_sem_sintaxe_exclusiva_de_sqlite():
+    sql = database.SUPABASE_SCHEMA_PATH.read_text(encoding="utf-8")
+    for tabela in (
+        "responsaveis",
+        "criancas",
+        "jogos",
+        "partidas",
+        "relatorios",
+        "tokens_revogados",
+        "tokens_recuperacao_senha",
+        "tentativas_login",
+    ):
+        assert f"CREATE TABLE IF NOT EXISTS {tabela}" in sql
+        assert f"ALTER TABLE {tabela}" in sql and "ENABLE ROW LEVEL SECURITY" in sql
+    assert "CREATE OR REPLACE VIEW v_desempenho" in sql
+    for jogo in ("'cores'", "'encaixe'", "'ligar'", "'corforma'", "'falar'", "'frutas'"):
+        assert jogo in sql
+    # Não pode conter construções exclusivas do SQLite
+    sql_sem_comentarios = "\n".join(l for l in sql.splitlines() if not l.strip().startswith("--"))
+    for proibido in ("PRAGMA", "AUTOINCREMENT", "INSERT OR IGNORE", "COLLATE NOCASE", "DATETIME"):
+        assert proibido not in sql_sem_comentarios
+
+
+def test_adaptador_postgresql_traduz_placeholders_e_tipos():
+    from decimal import Decimal
+    from datetime import date
+
+    assert (
+        database.translate_qmarks_to_pg("SELECT * FROM t WHERE a = ? AND b = '?' AND c = ?")
+        == "SELECT * FROM t WHERE a = %s AND b = '?' AND c = %s"
+    )
+    row = database.PgRow(("id", "media"), (7, Decimal("87.5")))
+    assert row["id"] == 7 and row[0] == 7
+    assert database.as_float(row["media"]) == 87.5
+    assert database.as_date(date(2026, 11, 23)) == date(2026, 11, 23)
+    dt = database.as_datetime(datetime(2026, 11, 23, 12, 0, tzinfo=timezone.utc))
+    assert dt == datetime(2026, 11, 23, 12, 0, tzinfo=timezone.utc)
+

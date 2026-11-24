@@ -24,7 +24,7 @@ def _hash_reset_code(email: str, code: str) -> str:
 class SQLiteUserRepository:
     def get_by_email(self, email):
         with connect() as db:
-            row = db.execute("SELECT * FROM responsaveis WHERE email = ? COLLATE NOCASE", (email.strip(),)).fetchone()
+            row = db.execute("SELECT * FROM responsaveis WHERE lower(email) = lower(?)", (email.strip(),)).fetchone()
         return self._record(row) if row else None
 
     def get_by_id(self, user_id):
@@ -41,11 +41,11 @@ class SQLiteUserRepository:
             raise ValueError("terms_not_accepted")
         clean_name = (user.name or "").strip() or user.email.split("@")[0]
         with connect() as db:
-            cur = db.execute(
-                "INSERT INTO responsaveis(email, senha, aceito_termo, nome) VALUES (?, ?, 1, ?)",
+            inserted = db.execute(
+                "INSERT INTO responsaveis(email, senha, aceito_termo, nome) VALUES (?, ?, 1, ?) RETURNING id_responsavel",
                 (user.email.strip(), user.password_hash, clean_name),
-            )
-            user.id = str(cur.lastrowid)
+            ).fetchone()
+            user.id = str(inserted["id_responsavel"])
             user.name = clean_name
         return user
 

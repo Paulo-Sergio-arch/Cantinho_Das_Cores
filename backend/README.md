@@ -110,7 +110,8 @@ Para o **Bloquinho de Frutas (`frutas`)**, a regra definitiva normaliza `acertos
 | `ADMIN_API_KEY` | vazio | Chave administrativa (`X-Admin-Key`) exigida em `POST /api/system/backup` e `GET /api/system/backups`. |
 | `JWT_EXPIRE_MINUTES` | `60` | Validade do token (renovado automaticamente via `POST /api/auth/refresh`). |
 | `CORS_ORIGINS` | `http://localhost:5185,http://localhost:5173,https://cantinho-das-cores.vercel.app` | Origens do front separadas por vírgula. Em produção, só os domínios reais (ex.: URL da Vercel); `*` é recusado. |
-| `DATABASE_PATH` | `backend/data/cantinho_das_cores.sqlite3` | Caminho do SQLite em modo `WAL`. |
+| `DATABASE_URL` | vazio (usa SQLite) | URI PostgreSQL / Supabase (`postgresql://...`). Quando preenchida no Render, a API persiste tudo no Supabase. |
+| `DATABASE_PATH` | `backend/data/cantinho_das_cores.sqlite3` | Caminho do SQLite local em modo `WAL` (usado quando `DATABASE_URL` está vazio). |
 | `BACKUP_DIR` / `BACKUP_KEEP_COUNT` | `backend/data/backups` / `10` | Diretório e rotação automática de backups online. |
 | `AUTH_RATE_LIMIT_MAX_ATTEMPTS` / `WINDOW_SECONDS` | `5` / `60` | Proteção contra força bruta no login persistida no SQLite (`HTTP 429`). |
 | `REPORT_DELIVERY_MODE` / `SMTP_*` / `REPORT_WEBHOOK_URL` | `console` | Canal de envio de relatórios (`smtp`, `webhook` ou `console` somente em dev). |

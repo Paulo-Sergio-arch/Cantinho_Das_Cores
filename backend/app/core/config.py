@@ -14,6 +14,7 @@ class Settings(BaseSettings):
         "http://localhost:5185,http://localhost:5173,"
         "https://cantinho-das-cores.vercel.app"
     )
+    database_url: str | None = None   # PostgreSQL / Supabase URI (quando definido, substitui o SQLite local)
     database_path: str | None = None  # None = backend/data/cantinho_das_cores.sqlite3
     backup_dir: str | None = None     # None = backend/data/backups
     backup_keep_count: int = 10

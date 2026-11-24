@@ -1,7 +1,7 @@
-"""Repositório SQLite de perfis de crianças, incluindo preferência individual de voz (voz_ativa)."""
+"""Repositório de perfis de crianças (compatível com SQLite e PostgreSQL/Supabase), incluindo preferência individual de voz (voz_ativa)."""
 from dataclasses import dataclass
 from datetime import datetime
-from app.core.database import connect, to_id
+from app.core.database import as_datetime, connect, to_id
 
 
 @dataclass
@@ -18,11 +18,11 @@ class ChildRecord:
 class SQLiteChildRepository:
     def create(self, child: ChildRecord):
         with connect() as db:
-            cur = db.execute(
-                "INSERT INTO criancas(id_responsavel, apelido, idade, voz_ativa) VALUES (?, ?, ?, ?)",
+            inserted = db.execute(
+                "INSERT INTO criancas(id_responsavel, apelido, idade, voz_ativa) VALUES (?, ?, ?, ?) RETURNING id_crianca",
                 (int(child.responsible_id), child.name, child.age, int(bool(child.voice_enabled))),
-            )
-            row = db.execute("SELECT * FROM criancas WHERE id_crianca=?", (cur.lastrowid,)).fetchone()
+            ).fetchone()
+            row = db.execute("SELECT * FROM criancas WHERE id_crianca=?", (inserted["id_crianca"],)).fetchone()
         return self._record(row)
 
     def list_by_responsible(self, responsible_id):
@@ -63,12 +63,12 @@ class SQLiteChildRepository:
 
     @staticmethod
     def _record(r):
-        dt = datetime.fromisoformat(r["criado_em"])
+        dt = as_datetime(r["criado_em"])
         voz = bool(r["voz_ativa"]) if "voz_ativa" in r.keys() else True
         return ChildRecord(
             str(r["id_crianca"]),
             r["apelido"],
-            r["idade"],
+            int(r["idade"]),
             str(r["id_responsavel"]),
             dt,
             dt,

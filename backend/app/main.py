@@ -1,11 +1,10 @@
 import hmac
 import logging
-import sqlite3
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
-from app.core.database import create_backup, list_backups
+from app.core.database import INTEGRITY_ERRORS, create_backup, list_backups
 from app.modules.auth.router import router as auth_router
 from app.modules.children.router import router as children_router
 from app.modules.games.router import router as games_router
@@ -73,10 +72,9 @@ app.include_router(dashboard_router)
 app.include_router(reports_router)
 
 
-@app.exception_handler(sqlite3.IntegrityError)
-async def sqlite_constraint_error(_: Request, exc: sqlite3.IntegrityError):
+async def db_constraint_error(_: Request, exc: Exception):
     message = str(exc).lower()
-    if "unique" in message:
+    if "unique" in message or "duplicate key" in message:
         detail = "Este registro já existe."
         code = 409
     elif "foreign key" in message:
@@ -89,6 +87,10 @@ async def sqlite_constraint_error(_: Request, exc: sqlite3.IntegrityError):
         detail = "Não foi possível salvar os dados informados."
         code = 422
     return JSONResponse(status_code=code, content={"detail": detail})
+
+
+for _err_cls in INTEGRITY_ERRORS:
+    app.add_exception_handler(_err_cls, db_constraint_error)
 
 
 @app.exception_handler(Exception)
