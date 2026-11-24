@@ -26,12 +26,15 @@ uvicorn app.main:app --reload --port 8000
 
 Na primeira inicialização, a API cria `data/cantinho_das_cores.sqlite3`, executa o `schema.sql` e insere o jogo `frutas`, que existe no Front-End mas não estava na lista inicial de INSERTs entregue pela equipe. A inicialização é idempotente.
 
-## Módulo 1 — Autenticação
-- `POST /api/auth/register` — recebe `name`, `email`, `password` e `accepted_terms` (obrigatório e precisa ser `true`). O campo `name` é aceito para compatibilidade com o contrato atual da API, mas o schema da equipe não possui coluna para nome do responsável; o nome público é apresentado usando a parte anterior ao `@` do e-mail.
-- `POST /api/auth/login` — e-mail e senha; a busca de e-mail não diferencia maiúsculas/minúsculas.
+## Módulo 1 — Autenticação e Privacidade (LGPD)
+- `POST /api/auth/register` — recebe `name`, `email`, `password` e `accepted_terms` (obrigatório `true`) e persiste o nome do responsável via migração idempotente em `init_db()`.
+- `POST /api/auth/login` — e-mail e senha (case-insensitive) com proteção contra força bruta.
 - `POST /api/auth/guest` — token temporário de visitante.
 - `GET /api/auth/me` — usuário atual.
-- `POST /api/auth/logout` — logout stateless; o cliente deve descartar o token.
+- `POST /api/auth/change-password` — altera a senha do responsável autenticado mediante confirmação da senha atual.
+- `POST /api/auth/forgot-password` e `POST /api/auth/reset-password` — fluxo de recuperação de senha por código temporário de uso único (15 min).
+- `DELETE /api/auth/me` — exclui a conta do responsável e todos os dados vinculados em cascata (Direito à Eliminação — LGPD Art. 18, VI).
+- `POST /api/auth/logout` — revoga o `jti` do token no banco (`tokens_revogados`) e encerra a sessão.
 
 Senhas são armazenadas exclusivamente como hash Argon2. O token JWT contém o ID numérico do responsável do SQLite.
 
@@ -133,8 +136,8 @@ A suíte usa um **banco SQLite temporário** (`tests/conftest.py` define `DATABA
 - Backup online sem parar a API: via `POST /api/system/backup` (com header `X-Admin-Key`) ou CLI `python -m scripts.backup_db create|list|restore`.
 - Deploy recomendado em SQLite puro: Front-End na **Vercel** (`vercel.json`) + Back-End FastAPI no **Render** (`render.yaml`), **Railway** ou **Fly.io** (`backend/Dockerfile`) com volume persistente montado em `/var/data` ou `/srv/backend/data`.
 
-## Pontos conhecidos / evoluções futuras
-- O cadastro ainda não grava o nome do responsável no banco porque a tabela `responsaveis` do `schema.sql` oficial não possui coluna `nome` (exibe-se a parte antes do `@` do e-mail).
-- Fluxo de recuperação de senha ("Esqueci minha senha") ainda não implementado.
+## Evoluções implementadas além do schema base
+- `init_db()` aplica migração automática e idempotente (`ALTER TABLE responsaveis ADD COLUMN nome TEXT` e tabela `tokens_recuperacao_senha`), preservando o `schema.sql` original intacto.
+- Preferência individual de voz por criança (`criancas.voz_ativa` ↔ `voice_enabled`), recuperação/alteração de senha e exclusão completa de conta conforme a LGPD (`DELETE /api/auth/me`).
 
 

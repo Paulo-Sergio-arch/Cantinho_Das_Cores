@@ -19,7 +19,15 @@ def responsible_id(claims: dict = Depends(get_current_claims)) -> str:
 @router.post("", response_model=ChildPublic, status_code=status.HTTP_201_CREATED)
 def create_child(payload: ChildCreate, owner_id: str = Depends(responsible_id)):
     now = datetime.now(timezone.utc)
-    child = ChildRecord(id=str(uuid4()), name=payload.name, age=payload.age, responsible_id=owner_id, created_at=now, updated_at=now)
+    child = ChildRecord(
+        id=str(uuid4()),
+        name=payload.name,
+        age=payload.age,
+        responsible_id=owner_id,
+        created_at=now,
+        updated_at=now,
+        voice_enabled=payload.voice_enabled,
+    )
     return repository.create(child)
 
 @router.get("", response_model=list[ChildPublic])
