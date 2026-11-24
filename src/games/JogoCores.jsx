@@ -1,22 +1,56 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "motion/react";
+import { Check } from "lucide-react";
 import { CORES } from "../data/jogosData";
 import { emb, pick, rnd } from "../utils/aleatorio";
 import { falar } from "../utils/voz";
 import { tocarAcerto, tocarErro } from "../utils/sons";
 import Casca from "../components/Casca";
-import Arrasta from "../components/Arrasta";
-import { IconSetaDireita } from "../components/IconesUI";
+import { cn } from "../lib/cn";
+
+// Tons equilibrados (não fluorescentes), sombra 3D e forma geométrica auxiliar por cor (acessibilidade TEA / daltonismo)
+const ESTILO_COR = {
+  vermelho: { bg: "#D9534F", sombra: "#B03B37", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.62)", forma: "triangulo" },
+  azul: { bg: "#2B70D6", sombra: "#1E52A3", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "quadrado" },
+  amarelo: { bg: "#EAB938", sombra: "#C2941D", texto: "#1C2946", iconeFill: "#1C2946", forma: "hexagono" },
+  verde: { bg: "#2D8A56", sombra: "#1E663D", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.62)", forma: "losango" },
+  rosa: { bg: "#D66696", sombra: "#AC4873", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "circulo" },
+  laranja: { bg: "#DE8035", sombra: "#B3601E", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "estrela" },
+  roxo: { bg: "#7B61C9", sombra: "#5B44A3", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "pentagono" },
+  turquesa: { bg: "#249B92", sombra: "#18766F", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "trianguloInv" },
+  marrom: { bg: "#966544", sombra: "#734B30", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "trapezio" },
+};
+
+function FormaAuxiliar({ forma, fill }) {
+  return (
+    <svg viewBox="0 0 36 36" width="32" height="32" aria-hidden="true" className="shrink-0">
+      {forma === "triangulo" && <polygon points="18,4 33,31 3,31" fill={fill} />}
+      {forma === "trianguloInv" && <polygon points="3,6 33,6 18,32" fill={fill} />}
+      {forma === "quadrado" && <rect x="5" y="5" width="26" height="26" rx="3" fill={fill} />}
+      {forma === "hexagono" && <polygon points="18,3 31,10.5 31,25.5 18,33 5,25.5 5,10.5" fill={fill} />}
+      {forma === "losango" && <polygon points="18,2 34,18 18,34 2,18" fill={fill} />}
+      {forma === "circulo" && <circle cx="18" cy="18" r="14" fill={fill} />}
+      {forma === "estrela" && (
+        <polygon points="18,3 22,13 33,14 25,21 27,32 18,26 9,32 11,21 3,14 14,13" fill={fill} />
+      )}
+      {forma === "pentagono" && <polygon points="18,3 33,14 27,31 9,31 3,14" fill={fill} />}
+      {forma === "trapezio" && <polygon points="9,8 27,8 33,29 3,29" fill={fill} />}
+    </svg>
+  );
+}
+
+function capitalizar(texto = "") {
+  return texto ? texto.charAt(0).toUpperCase() + texto.slice(1) : "";
+}
 
 function gerarRodada(idade) {
   const nivel = String(idade);
-  const qtd = nivel === "10" ? 5 : nivel === "9" ? 4 : 3;
+  const qtd = nivel === "10" ? 5 : nivel === "9" ? 4 : 4;
   const alvo = rnd(CORES);
 
   let outras;
   if (nivel === "10") {
-    const parecidas = CORES.filter(
-      (c) => c.n !== alvo.n && alvo.evitar?.includes(c.n)
-    );
+    const parecidas = CORES.filter((c) => c.n !== alvo.n && alvo.evitar?.includes(c.n));
     const restantes = emb(
       CORES.filter((c) => c.n !== alvo.n && !parecidas.some((p) => p.n === c.n))
     );
@@ -27,9 +61,7 @@ function gerarRodada(idade) {
       qtd - 1
     );
   } else {
-    const distintas = CORES.filter(
-      (c) => c.n !== alvo.n && !alvo.evitar?.includes(c.n)
-    );
+    const distintas = CORES.filter((c) => c.n !== alvo.n && !alvo.evitar?.includes(c.n));
     const pool =
       distintas.length >= qtd - 1 ? distintas : CORES.filter((c) => c.n !== alvo.n);
     outras = pick(pool, qtd - 1);
@@ -41,12 +73,10 @@ function gerarRodada(idade) {
 export default function JogoCores(p) {
   const total = p.total ?? 5;
   const idade = p.idade ?? "8";
-  const mostrarNomes = Boolean(p.altoContraste);
   const [e, setE] = useState(0);
   const [r, setR] = useState(() => gerarRodada(idade));
   const [ok, setOk] = useState(null);
   const [tente, setTente] = useState(null);
-  const [sobre, setSobre] = useState(null);
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
   const timersRef = useRef([]);
@@ -60,7 +90,7 @@ export default function JogoCores(p) {
 
   useEffect(() => {
     if (e < total) {
-      falar(`Onde está o ${r.alvo.n}?`);
+      falar(`Toque na cor ${r.alvo.n}`);
     }
   }, [r, e, total]);
 
@@ -81,75 +111,86 @@ export default function JogoCores(p) {
         setE(proximo);
         setOk(null);
         if (proximo < total) setR(gerarRodada(idade));
-      }, 1500);
+      }, 1400);
     } else {
       setTente(c.n);
       setErros((x) => x + 1);
       tocarErro();
       falar("Tente de novo");
-      agendar(() => setTente(null), 700);
+      agendar(() => setTente(null), 650);
     }
   };
+
+  const nomeAlvo = capitalizar(r.alvo.n);
 
   return (
     <Casca
       {...p}
-      titulo="Acerte a cor"
+      titulo="Cores"
       estrelas={e}
       estatisticas={{ acertos, erros }}
-      fala={`Arraste a bolinha até o ${r.alvo.n}.`}
+      fala={`Toque na cor ${r.alvo.n}.`}
       falaVisual={
         <>
-          Arraste a bolinha até o <strong>{r.alvo.n}</strong>.
+          Toque na cor <strong>{nomeAlvo}</strong>
         </>
       }
     >
-      <div className={`cores ${r.ops.length >= 4 ? "cores-muitas" : ""}`}>
-        <div className="alvo">
-          <span className="anel">
-            <Arrasta
-              cru
-              label={`bolinha ${r.alvo.n}`}
-              onToque={() => falar(r.alvo.n)}
-              onSolta={(a) => escolher(r.ops.find((c) => c.n === a))}
-              onSobre={setSobre}
+      <div
+        className={cn(
+          "mx-auto grid w-full max-w-2xl grid-cols-1 gap-5 sm:grid-cols-2",
+          r.ops.length === 5 && "sm:grid-cols-2"
+        )}
+      >
+        {r.ops.map((c, idx) => {
+          const estilo = ESTILO_COR[c.n] || {
+            bg: c.h,
+            sombra: "rgba(31,45,77,0.28)",
+            texto: "#FFFFFF",
+            iconeFill: "rgba(255,255,255,0.65)",
+            forma: "circulo",
+          };
+          const acertou = ok === c.n;
+          const errou = tente === c.n;
+          const centralizarUltimo = r.ops.length === 5 && idx === 4;
+
+          return (
+            <motion.button
+              key={c.n}
+              type="button"
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 3, scale: 0.99 }}
+              transition={{ type: "spring", stiffness: 450, damping: 28 }}
+              onClick={() => escolher(c)}
+              aria-label={capitalizar(c.n)}
+              style={{
+                backgroundColor: estilo.bg,
+                color: estilo.texto,
+                boxShadow: `0 7px 0 ${estilo.sombra}`,
+              }}
+              className={cn(
+                "relative flex min-h-[112px] w-full items-center justify-center gap-4 rounded-[28px] px-6 py-5 font-display text-3xl font-semibold tracking-tight transition-[box-shadow,outline,transform]",
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6E9CE2] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F5F3EC]",
+                acertou && "ring-4 ring-[#6E9CE2] ring-offset-4 ring-offset-[#F5F3EC]",
+                errou && "animate-[balanca_0.42s_ease]",
+                centralizarUltimo && "sm:col-span-2 sm:mx-auto sm:max-w-[calc(50%-0.625rem)]",
+                "alto-contraste:border-3 alto-contraste:border-slate-950"
+              )}
             >
-              <i className="bola" style={{ background: r.alvo.h }} />
-            </Arrasta>
-          </span>
-          {mostrarNomes && <span className="bola-nome">{r.alvo.n}</span>}
-          <span className="cores-seta" aria-hidden="true">
-            <IconSetaDireita size={24} />
-          </span>
-        </div>
-        <div className="opcoes">
-          {r.ops.map((c) => {
-            const acertou = ok === c.n;
-            return (
-              <button
-                type="button"
-                key={c.n}
-                data-alvo={c.n}
-                aria-label={c.n}
-                className={`ficha ficha-cor ${acertou ? "certo" : ""} ${
-                  tente === c.n ? "tente" : ""
-                } ${sobre === c.n ? "sobre" : ""}`}
-                onClick={() => escolher(c)}
-              >
-                <i className="bola" style={{ background: c.h }}>
-                  {acertou && (
-                    <span className="bola-ok" aria-hidden="true">
-                      ✓
-                    </span>
-                  )}
-                </i>
-                {(acertou || mostrarNomes) && (
-                  <span className="bola-nome">{c.n}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+              <FormaAuxiliar forma={estilo.forma} fill={estilo.iconeFill} />
+              <span>{capitalizar(c.n)}</span>
+
+              {acertou && (
+                <span
+                  className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-success shadow-xs"
+                  aria-hidden="true"
+                >
+                  <Check size={19} strokeWidth={3} />
+                </span>
+              )}
+            </motion.button>
+          );
+        })}
       </div>
     </Casca>
   );

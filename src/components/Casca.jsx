@@ -1,13 +1,50 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, Volume2, VolumeX } from "lucide-react";
 import { cancelarFala, falar } from "../utils/voz";
 import { tocarVitoria } from "../utils/sons";
 import Estrelas from "./Estrelas";
 import Nuvi from "./Nuvi";
 import Vitoria from "./Vitoria";
 import Fim from "./Fim";
-import { Alert, Badge, Button } from "./ui";
+import { Alert, Button } from "./ui";
 import { cn } from "../lib/cn";
+
+function SwitchPill({ checked, onClick, label, dark = false }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onClick}
+      className="group flex flex-col items-center gap-1 focus-visible:outline-none"
+    >
+      <span
+        className={cn(
+          "relative inline-flex h-7 w-12 items-center rounded-full border transition-colors p-0.5",
+          "group-focus-visible:ring-3 group-focus-visible:ring-brand/30",
+          checked
+            ? dark
+              ? "bg-[#3C3832] border-[#3C3832]"
+              : "bg-[#5B82BA] border-[#5B82BA]"
+            : dark
+              ? "bg-[#544F47] border-[#544F47]"
+              : "bg-[#D9CDB7] border-[#CFC2AA]",
+          "alto-contraste:border-2 alto-contraste:border-slate-950"
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block h-5 w-5 rounded-full bg-[#FCFBF8] shadow-xs transition-transform",
+            checked ? "translate-x-5" : "translate-x-0"
+          )}
+        />
+      </span>
+      <span className="text-[11px] font-semibold text-ink leading-none whitespace-nowrap">
+        {label}
+      </span>
+    </button>
+  );
+}
 
 export default function Casca({
   titulo,
@@ -16,7 +53,10 @@ export default function Casca({
   idade = "8",
   calmo = false,
   som = true,
+  altoContraste = false,
   onToggleSom,
+  onToggleCalmo,
+  onToggleAltoContraste,
   fala,
   falaVisual,
   atrasoVitoria = 0,
@@ -129,88 +169,108 @@ export default function Casca({
   };
 
   return (
-    <section className="flex w-full flex-col gap-4">
+    <section className="flex w-full flex-col items-center gap-6" aria-label={titulo}>
+      <h1 className="sr-only">{titulo}</h1>
+
+      {/* Barra superior limpa idêntica ao layout sensorial aprovado */}
       <header
         className={cn(
-          "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-surface px-3.5 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.05)]",
+          "flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] px-4 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
           "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
         )}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={solicitarSaida}
-            aria-label="Voltar ao menu"
-            aria-expanded={!fim ? confirmandoSaida : undefined}
-            title="Voltar ao menu"
-            className="rounded-xl px-3"
-          >
-            <ArrowLeft size={18} />
-            <span className="hidden sm:inline">Voltar</span>
-          </Button>
+        {/* Esquerda: Voltar em pílula suave */}
+        <button
+          type="button"
+          onClick={solicitarSaida}
+          aria-label="Voltar ao menu"
+          aria-expanded={!fim ? confirmandoSaida : undefined}
+          className={cn(
+            "inline-flex min-h-10 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-4 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5]",
+            "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+          )}
+        >
+          <ChevronLeft size={17} aria-hidden="true" />
+          <span>Voltar</span>
+        </button>
 
-          <div className="min-w-0">
-            <h1 className="font-display text-lg sm:text-xl font-semibold text-ink truncate m-0 leading-tight">
-              {titulo}
-            </h1>
-          </div>
+        {/* Centro: Cápsula com 5 estrelas + Rodada X de Y */}
+        <div className="order-3 flex w-full justify-center sm:order-2 sm:w-auto">
+          <Estrelas n={estrelas} total={total} mostrarLegenda />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Estrelas n={estrelas} total={total} />
-          <Badge variant="brand" aria-label={`Nível ${idade} anos`}>
-            {idade} anos
-          </Badge>
+        {/* Direita: Áudio, Modo Calmo e Alto Contraste inline */}
+        <div className="order-2 flex items-center gap-4 sm:order-3">
           {onToggleSom && (
-            <Button
-              variant="outline"
-              size="icon"
+            <button
+              type="button"
               onClick={onToggleSom}
               aria-pressed={som}
-              aria-label={som ? "Silenciar voz durante o jogo" : "Ativar voz durante o jogo"}
-              title={som ? "Silenciar voz" : "Ativar voz"}
-              className={cn("h-10 w-10 rounded-xl", !som && "opacity-75")}
+              aria-label={som ? "Silenciar áudio" : "Ativar áudio"}
+              className="flex flex-col items-center gap-1 text-ink transition-opacity hover:opacity-80"
             >
-              {som ? <Volume2 size={18} /> : <VolumeX size={18} />}
-            </Button>
+              <span className="inline-flex h-7 w-7 items-center justify-center">
+                {som ? <Volume2 size={21} aria-hidden="true" /> : <VolumeX size={21} aria-hidden="true" />}
+              </span>
+              <span className="text-[11px] font-semibold leading-none">
+                {som ? "Áudio" : "Mudo"}
+              </span>
+            </button>
+          )}
+
+          {onToggleCalmo && (
+            <SwitchPill checked={calmo} onClick={onToggleCalmo} label="Modo Calmo" />
+          )}
+
+          {onToggleAltoContraste && (
+            <SwitchPill
+              checked={altoContraste}
+              onClick={onToggleAltoContraste}
+              label="Alto Contraste"
+              dark
+            />
           )}
         </div>
       </header>
 
       {confirmandoSaida && !fim && (
-        <Alert variant="warning" role="alertdialog" aria-labelledby="confirmar-saida-titulo">
-          <span id="confirmar-saida-titulo">
-            Quer mesmo sair desta partida? O progresso atual será encerrado.
-          </span>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="playful" size="sm" onClick={() => setConfirmandoSaida(false)}>
-              Continuar jogando
-            </Button>
-            <Button variant="outline" size="sm" onClick={sairConfirmado}>
-              Sair para o menu
-            </Button>
-          </div>
-        </Alert>
+        <div className="w-full max-w-2xl">
+          <Alert variant="warning" role="alertdialog" aria-labelledby="confirmar-saida-titulo">
+            <span id="confirmar-saida-titulo">
+              Quer mesmo sair desta partida? O progresso atual será encerrado.
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="playful" size="sm" onClick={() => setConfirmandoSaida(false)}>
+                Continuar jogando
+              </Button>
+              <Button variant="outline" size="sm" onClick={sairConfirmado}>
+                Sair para o menu
+              </Button>
+            </div>
+          </Alert>
+        </div>
       )}
 
       {vitoria && <Vitoria calmo={calmo} />}
+
       {fim ? (
         final && (
-          <Fim
-            total={total}
-            idade={idade}
-            estatisticas={estatisticas}
-            onNovo={onNovo}
-            onSair={sairConfirmado}
-            onFim={finalizar}
-          />
+          <div className="w-full max-w-2xl">
+            <Fim
+              total={total}
+              idade={idade}
+              estatisticas={estatisticas}
+              onNovo={onNovo}
+              onSair={sairConfirmado}
+              onFim={finalizar}
+            />
+          </div>
         )
       ) : (
-        <>
-          <Nuvi fala={fala} falaVisual={falaVisual} ouvivel className="mb-1" />
-          {children}
-        </>
+        <div className="flex w-full max-w-3xl flex-col items-center gap-7 pt-2">
+          <Nuvi variant="jogo" fala={fala} falaVisual={falaVisual} ouvivel />
+          <div className="w-full">{children}</div>
+        </div>
       )}
     </section>
   );

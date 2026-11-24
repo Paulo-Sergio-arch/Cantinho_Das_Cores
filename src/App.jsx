@@ -17,7 +17,6 @@ import * as authApi from "./services/auth";
 import * as criancasApi from "./services/criancas";
 import { listarJogos } from "./services/jogos";
 import { montarPayload, registrarPartida } from "./services/partidas";
-import Fundo from "./components/Fundo";
 import { Alert, Button } from "./components/ui";
 import Login from "./pages/Login";
 import Menu from "./pages/Menu";
@@ -534,10 +533,8 @@ export default function App() {
   return (
     <MotionConfig reducedMotion={calmo ? "always" : "user"}>
       <div className={classesRaiz}>
-        {ehMenuCenario && !calmo && !altoContraste && <Fundo variant="suave" />}
-
         {avisoApi && (
-          <div className="no-print relative z-20 w-full max-w-5xl px-4 pt-3 sm:px-6">
+          <div className="no-print relative z-20 w-full max-w-6xl px-4 pt-3 sm:px-6">
             <Alert variant={avisoApi.tipo === "ok" ? "success" : "error"}>
               <span>{avisoApi.texto}</span>
               <Button variant="outlineInst" size="sm" onClick={() => setAvisoApi(null)}>
@@ -615,7 +612,7 @@ export default function App() {
         )}
 
         {JogoAtivo && (
-          <main className="relative z-10 flex w-full max-w-2xl flex-col items-center px-4 py-5 sm:py-8">
+          <main className="relative z-10 flex w-full max-w-6xl flex-col items-center px-4 py-4 sm:px-6 sm:py-6">
             <JogoAtivo
               key={`${chave}-${rodadasEfetivas}-${idadeEfetiva}`}
               total={rodadasEfetivas}
@@ -624,6 +621,8 @@ export default function App() {
               som={som}
               altoContraste={altoContraste}
               onToggleSom={() => setSom((s) => !s)}
+              onToggleCalmo={() => setCalmo((c) => !c)}
+              onToggleAltoContraste={() => setAltoContraste((a) => !a)}
               onRegistrarAbandonoRef={abandonarJogoRef}
               onSair={voltarParaMenu}
               onNovo={() => {
