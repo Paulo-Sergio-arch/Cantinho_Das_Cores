@@ -55,6 +55,8 @@ export function definirAoExpirar(fn) {
 function mensagemAmigavel(status, detalhe) {
   if (typeof detalhe === "string" && detalhe && status < 500) return detalhe;
   if (Array.isArray(detalhe) && detalhe.length) {
+    const msg = String(detalhe[0]?.msg || "").replace(/^Value error,\s*/i, "");
+    if (msg && /[à-ÿ]|senha|nome|período|fuso|dados/i.test(msg)) return msg;
     const campo = detalhe[0]?.loc?.slice(-1)[0];
     return campo ? `Confira o campo "${campo}".` : "Confira os dados informados.";
   }
@@ -62,6 +64,7 @@ function mensagemAmigavel(status, detalhe) {
   if (status === 403) return "Você não tem permissão para fazer isso.";
   if (status === 404) return "Não encontramos o que você procura.";
   if (status === 422) return "Confira os dados informados.";
+  if (status === 429) return "Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.";
   if (status >= 500) return "O servidor teve um problema. Tente de novo em instantes.";
   return "Não foi possível concluir a operação.";
 }

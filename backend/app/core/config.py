@@ -10,14 +10,24 @@ class Settings(BaseSettings):
     app_env: str = "development"
     jwt_secret: str = DEV_JWT_SECRET
     jwt_expire_minutes: int = 60
-    cors_origins: str = "http://localhost:5185,http://localhost:5173,https://ca10v1ana.github.io"
+    cors_origins: str = (
+        "http://localhost:5185,http://localhost:5173,"
+        "https://cantinho-das-cores.vercel.app,https://ca10v1ana.github.io"
+    )
     database_path: str | None = None  # None = backend/data/cantinho_das_cores.sqlite3
     backup_dir: str | None = None     # None = backend/data/backups
     backup_keep_count: int = 10
 
-    # Segurança de autenticação, sessões e administração
+    # Segurança de autenticação, sessões, rotas públicas e administração
     auth_rate_limit_max_attempts: int = 5
     auth_rate_limit_window_seconds: int = 60
+    register_rate_limit_max_attempts: int = 10
+    register_rate_limit_window_seconds: int = 300
+    guest_rate_limit_max_attempts: int = 30
+    guest_rate_limit_window_seconds: int = 60
+    report_send_rate_limit_max_attempts: int = 10
+    report_send_rate_limit_window_seconds: int = 3600
+    enable_docs_in_production: bool = False
     admin_api_key: str = ""
 
     # Canal real de envio dos relatórios (console | smtp | webhook)
