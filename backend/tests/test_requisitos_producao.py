@@ -209,8 +209,15 @@ def test_rate_limiting_persistido_em_sqlite_bloqueia_tentativas_excessivas():
         r = client.post("/api/auth/login", json={"email": "alvo@example.com", "password": "errada"})
         assert r.status_code == 401
     with database.connect() as db:
-        qtd = db.execute("SELECT COUNT(*) FROM tentativas_login").fetchone()[0]
-    assert qtd == 5
+        qtd_ip = db.execute(
+            "SELECT COUNT(*) FROM tentativas_login WHERE chave LIKE '%:alvo@example.com' AND chave NOT LIKE 'acct:%'"
+        ).fetchone()[0]
+        qtd_conta = db.execute(
+            "SELECT COUNT(*) FROM tentativas_login WHERE chave = 'acct:alvo@example.com'"
+        ).fetchone()[0]
+    # Rate limit duplo: cada falha registra a chave ip:email e a chave acct:email.
+    assert qtd_ip == 5
+    assert qtd_conta == 5
     bloqueado = client.post("/api/auth/login", json={"email": "alvo@example.com", "password": SENHA})
     assert bloqueado.status_code == 429
     assert "Retry-After" in bloqueado.headers
