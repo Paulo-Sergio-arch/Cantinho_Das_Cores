@@ -9,13 +9,13 @@ import {
   YAxis,
 } from "recharts";
 import {
-  Check,
   CheckCircle2,
+  ChevronDown,
   Clock,
   Download,
-  Gamepad2,
   Trophy,
   User,
+  Users,
 } from "lucide-react";
 import { evolucao, historico, porJogo, resumo } from "../services/dashboard";
 import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Select } from "../components/ui";
@@ -31,28 +31,38 @@ function formatarDataCurta(iso) {
   }
 }
 
+function formatarDataCompleta(iso) {
+  try {
+    const comFuso = /(Z|[+-]\d\d:\d\d)$/.test(String(iso)) ? iso : `${iso}Z`;
+    return new Date(comFuso).toLocaleDateString("pt-BR");
+  } catch {
+    return "";
+  }
+}
+
 function formatarTempo(seg) {
   if (seg === null || seg === undefined) return "—";
   const total = Math.round(seg);
   const m = Math.floor(total / 60);
-  return m ? `${m} min ${String(total % 60).padStart(2, "0")} s` : `${total} s`;
+  return m ? `${m}m ${String(total % 60).padStart(2, "0")}s` : `${total}s`;
 }
 
 const pontos = (v) => (v === null || v === undefined ? "—" : `${Math.round(v)}`);
 
 const PERIODOS = [
-  { id: "", rotulo: "Todo o período" },
   { id: "7", rotulo: "7 dias" },
   { id: "30", rotulo: "30 dias" },
+  { id: "", rotulo: "Todo o período" },
 ];
 
+// Paleta suave harmoniosa para as barras de Desempenho por Jogo (fiel ao mockup)
 const COR_BARRA_JOGO = {
-  cores: "#2F6FD6",
-  encaixe: "#2D8A56",
-  corforma: "#8C72D1",
-  ligar: "#D9A226",
-  falar: "#D67A59",
-  frutas: "#CC6B7D",
+  cores: "#F1A2A2",
+  encaixe: "#C6B0EE",
+  corforma: "#92CCF0",
+  ligar: "#9AD9B0",
+  falar: "#F4C28E",
+  frutas: "#EE9EA4",
 };
 
 function escaparCsv(valor) {
@@ -98,7 +108,7 @@ function baixarCsv({ nomeCrianca, idadeCrianca, res, jogos, itens }) {
       r.incorrect_answers,
       r.completed ? r.score : "",
       r.duration_seconds ?? "",
-      formatarDataCurta(r.played_at),
+      formatarDataCompleta(r.played_at),
     ]),
   ];
 
@@ -119,7 +129,7 @@ function TooltipEvolucao({ active, payload }) {
   if (!active || !payload?.length) return null;
   const pt = payload[0].payload;
   return (
-    <div className="rounded-xl border border-inst-border bg-white px-3.5 py-2.5 text-xs shadow-lg">
+    <div className="rounded-xl border border-inst-border bg-white px-3 py-2 text-xs shadow-lg">
       <p className="m-0 font-bold text-ink">
         {pt.taxa}% · {pt.rotulo}
       </p>
@@ -135,31 +145,31 @@ function GraficoEvolucao({ serie }) {
 
   return (
     <div
-      className="h-64 w-full"
+      className="h-72 w-full sm:h-80 lg:h-[360px]"
       role="img"
       aria-label="Gráfico de evolução da pontuação média por dia"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={serie} margin={{ top: 12, right: 16, left: -12, bottom: 4 }}>
+        <AreaChart data={serie} margin={{ top: 14, right: 16, left: -14, bottom: 4 }}>
           <defs>
             <linearGradient id="areaPontuacao" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2F6FD6" stopOpacity={0.28} />
-              <stop offset="95%" stopColor="#2F6FD6" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#2F6FD6" stopOpacity={0.34} />
+              <stop offset="95%" stopColor="#2F6FD6" stopOpacity={0.03} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="4 4" stroke="#E2E8F0" vertical={false} />
+          <CartesianGrid strokeDasharray="3 4" stroke="#E2E8F0" />
           <XAxis
             dataKey="rotulo"
-            tick={{ fontSize: 12, fill: "#526280", fontWeight: 600 }}
-            axisLine={{ stroke: "#E2E8F0" }}
+            tick={{ fontSize: 12, fill: "#64748B", fontWeight: 500 }}
+            axisLine={{ stroke: "#CBD5E1" }}
             tickLine={false}
             dy={6}
           />
           <YAxis
             domain={[0, 100]}
-            ticks={[0, 25, 50, 75, 100]}
-            tickFormatter={(v) => `${v}%`}
-            tick={{ fontSize: 12, fill: "#526280", fontWeight: 600 }}
+            ticks={[0, 20, 40, 60, 80, 100]}
+            tickFormatter={(v) => (v === 100 ? "100%" : `${v}`)}
+            tick={{ fontSize: 12, fill: "#64748B", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
           />
@@ -167,11 +177,11 @@ function GraficoEvolucao({ serie }) {
           <Area
             type="monotone"
             dataKey="taxa"
-            stroke="#2F6FD6"
+            stroke="#2563EB"
             strokeWidth={3}
             fill="url(#areaPontuacao)"
-            dot={{ r: 4.5, fill: "#2F6FD6", stroke: "#FFFFFF", strokeWidth: 2 }}
-            activeDot={{ r: 6.5, fill: "#1E54AD", stroke: "#FFFFFF", strokeWidth: 2 }}
+            dot={{ r: 4, fill: "#2563EB", stroke: "#FFFFFF", strokeWidth: 2 }}
+            activeDot={{ r: 6.5, fill: "#1D4ED8", stroke: "#FFFFFF", strokeWidth: 2.5 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -179,29 +189,34 @@ function GraficoEvolucao({ serie }) {
   );
 }
 
-function KpiCard({ label, value, detail, icon: Icon, iconTone }) {
+// KPI minimalista idêntico ao print: ícone circular pastel à esquerda + rótulo/valor à direita
+function KpiCard({ label, value, accent, icon: Icon, iconTone }) {
   return (
-    <Card tone="institutional" className="p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="block text-xs font-bold uppercase tracking-wide text-ink-muted">
-            {label}
-          </span>
-          <strong className="mt-1.5 block font-display text-2xl sm:text-3xl font-semibold text-ink tabular-nums leading-tight">
-            {value}
-          </strong>
-          <span className="mt-1 block text-xs text-ink-muted leading-snug">{detail}</span>
-        </div>
+    <Card tone="institutional" className="px-4 py-4 sm:px-5">
+      <div className="flex items-center gap-3.5">
         <span
           className={cn(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
             iconTone,
             "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:text-slate-950"
           )}
           aria-hidden="true"
         >
-          <Icon size={20} />
+          <Icon size={21} strokeWidth={2} />
         </span>
+        <div className="min-w-0">
+          <span className="block text-xs font-semibold text-ink-muted leading-snug">
+            {label}
+          </span>
+          <div className="mt-0.5 flex items-baseline gap-1.5">
+            <strong className="font-display text-2xl font-semibold text-ink tabular-nums leading-tight">
+              {value}
+            </strong>
+            {accent && (
+              <span className="text-xs font-bold text-success truncate">{accent}</span>
+            )}
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -238,7 +253,7 @@ export default function PainelPais({
         resumo(idCrianca, d),
         porJogo(idCrianca, d),
         evolucao(idCrianca, d, jogoFiltro || undefined),
-        historico(idCrianca, jogoFiltro || undefined, 15, 0, d),
+        historico(idCrianca, jogoFiltro || undefined, 8, 0, d),
       ]);
       setDados({ res, jogos, evo, hist });
     } catch (e) {
@@ -261,7 +276,7 @@ export default function PainelPais({
       const pagina = await historico(
         idCrianca,
         jogoFiltro || undefined,
-        15,
+        10,
         dados.hist.items.length,
         dias || undefined
       );
@@ -333,11 +348,42 @@ export default function PainelPais({
 
   return (
     <section className="flex w-full flex-col gap-5" aria-label="Painel de acompanhamento para pais e professores">
-      {/* Cabeçalho institucional */}
-      <Card tone="institutional" className="no-print p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3 py-1 text-xs font-bold text-ink">
+      {/* SUBCABEÇALHO LIMPO EM LINHA ÚNICA (fiel ao protótipo, sem caixa extra) */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-display text-xl sm:text-2xl font-semibold text-ink m-0">
+            Acompanhamento Pedagógico
+          </h1>
+
+          {/* Seletor em pílula da criança */}
+          {criancas.length > 1 ? (
+            <div className="relative inline-flex items-center">
+              <span
+                className="pointer-events-none absolute left-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand font-display text-xs font-semibold text-white"
+                aria-hidden="true"
+              >
+                {inicialCrianca}
+              </span>
+              <select
+                aria-label="Selecionar criança"
+                value={criancaId}
+                onChange={(e) => onSelecionarCrianca(e.target.value)}
+                className="min-h-9 appearance-none rounded-full border border-inst-border bg-white py-1 pl-10 pr-8 text-sm font-semibold text-ink shadow-2xs transition-colors hover:border-inst-border-strong focus-visible:border-brand focus-visible:outline-none"
+              >
+                {criancas.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} · {c.age} anos
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2.5 text-ink-muted"
+                aria-hidden="true"
+              />
+            </div>
+          ) : (
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-inst-border bg-white px-2.5 py-1 pr-3.5 text-sm font-semibold text-ink shadow-2xs">
               <span
                 className="flex h-6 w-6 items-center justify-center rounded-full bg-brand font-display text-xs font-semibold text-white"
                 aria-hidden="true"
@@ -347,14 +393,36 @@ export default function PainelPais({
               <span>
                 {nomeCrianca} · {idadeCrianca} anos
               </span>
-            </div>
-            <h1 className="font-display text-2xl font-semibold text-ink m-0">
-              Acompanhamento Pedagógico
-            </h1>
-            <p className="mt-1 mb-0 text-sm text-ink-muted">
-              Pontuação, tempo e acertos consideram apenas partidas concluídas. Partidas abandonadas constam nas
-              contagens e no histórico.
-            </p>
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Filtro segmentado de período */}
+          <div
+            className="inline-flex rounded-xl border border-inst-border bg-white p-1 shadow-2xs alto-contraste:border-2 alto-contraste:border-slate-950"
+            role="group"
+            aria-label="Período"
+          >
+            {PERIODOS.map((p) => {
+              const ativo = dias === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={ativo}
+                  onClick={() => setDias(p.id)}
+                  className={cn(
+                    "min-h-8 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors sm:px-3",
+                    ativo
+                      ? "bg-inst-subtle text-ink font-bold alto-contraste:bg-slate-950 alto-contraste:text-white"
+                      : "text-ink-muted hover:text-ink"
+                  )}
+                >
+                  {p.rotulo}
+                </button>
+              );
+            })}
           </div>
 
           {res && res.total_matches > 0 && (
@@ -371,80 +439,15 @@ export default function PainelPais({
                 })
               }
             >
-              <Download size={16} />
+              <Download size={15} />
               Exportar CSV
             </Button>
           )}
         </div>
-
-        {/* Barra de filtros */}
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-inst-border pt-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {criancas.length > 1 && (
-              <label className="flex items-center gap-2 text-xs font-bold text-ink-muted" htmlFor="filtro-crianca">
-                <span>Criança</span>
-                <Select
-                  id="filtro-crianca"
-                  value={criancaId}
-                  onChange={(e) => onSelecionarCrianca(e.target.value)}
-                  className="min-h-10 w-auto py-1.5 text-sm"
-                >
-                  {criancas.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.age} anos)
-                    </option>
-                  ))}
-                </Select>
-              </label>
-            )}
-            <label className="flex items-center gap-2 text-xs font-bold text-ink-muted" htmlFor="filtro-jogo">
-              <span>Jogo</span>
-              <Select
-                id="filtro-jogo"
-                value={jogoFiltro}
-                onChange={(e) => setJogoFiltro(e.target.value)}
-                className="min-h-10 w-auto py-1.5 text-sm"
-              >
-                <option value="">Todos os jogos</option>
-                {(dados?.jogos || []).map((j) => (
-                  <option key={j.game_id} value={j.game_id}>
-                    {j.name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-          </div>
-
-          <div
-            className="inline-flex rounded-xl border border-inst-border bg-inst-subtle p-1 alto-contraste:bg-white alto-contraste:border-slate-950"
-            role="group"
-            aria-label="Período"
-          >
-            {PERIODOS.map((p) => {
-              const ativo = dias === p.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  aria-pressed={ativo}
-                  onClick={() => setDias(p.id)}
-                  className={cn(
-                    "min-h-9 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
-                    ativo
-                      ? "bg-white text-ink shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
-                      : "text-ink-muted hover:text-ink"
-                  )}
-                >
-                  {p.rotulo}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </Card>
+      </div>
 
       {carregando && !dados && (
-        <p className="no-print text-center text-sm font-semibold text-ink-muted" role="status">
+        <p className="no-print py-8 text-center text-sm font-semibold text-ink-muted" role="status">
           Carregando indicadores…
         </p>
       )}
@@ -469,221 +472,175 @@ export default function PainelPais({
 
       {res && res.total_matches > 0 && (
         <>
-          {/* 4 Cards de KPI */}
-          <div className="no-print grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* 4 CARDS DE KPI (ícone pastel à esquerda) */}
+          <div className="no-print grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
-              label="Partidas"
-              value={res.total_matches}
-              detail={`${res.completed_matches} concluídas · ${res.abandoned_matches} abandonadas`}
-              icon={Gamepad2}
-              iconTone="bg-[#EEE9FC] text-[#6B4EC9]"
+              label="Partidas Concluídas"
+              value={res.completed_matches}
+              accent={res.abandoned_matches > 0 ? `de ${res.total_matches}` : undefined}
+              icon={Users}
+              iconTone="bg-[#EAE2FB] text-[#6B4EC9]"
             />
             <KpiCard
-              label="Pontuação média"
+              label="Pontuação Média"
               value={res.average_score === null ? "—" : `${pontos(res.average_score)}%`}
-              detail={
-                res.average_score === null
-                  ? "Nenhuma partida concluída"
-                  : `${res.total_correct} acertos · ${res.total_errors} ${res.total_errors === 1 ? "erro" : "erros"}`
-              }
               icon={Trophy}
-              iconTone="bg-brand-soft text-brand"
+              iconTone="bg-[#DFEEFF] text-[#2563EB]"
             />
             <KpiCard
-              label="Tempo médio"
+              label="Tempo Médio"
               value={formatarTempo(res.average_duration_seconds)}
-              detail="por partida concluída"
               icon={Clock}
-              iconTone="bg-success-soft text-success"
+              iconTone="bg-[#DCF5E7] text-[#1D874B]"
             />
             <KpiCard
-              label="Taxa de conclusão"
+              label="Taxa de Conclusão"
               value={`${res.completion_rate}%`}
-              detail="das partidas iniciadas"
               icon={CheckCircle2}
-              iconTone="bg-[#FCECED] text-[#C94440]"
+              iconTone="bg-[#FCE2E2] text-[#C94440]"
             />
           </div>
 
-          {/* Bento Grid: Evolução (Recharts) + Desempenho por Jogo */}
-          <div className="no-print grid grid-cols-1 gap-5 lg:grid-cols-12">
-            <Card tone="institutional" className="lg:col-span-7">
-              <CardHeader>
+          {/* BENTO GRID ASSIMÉTRICO: Evolução à esquerda | Desempenho + Histórico empilhados à direita */}
+          <div className="no-print grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+            {/* Coluna Esquerda: Evolução da Pontuação */}
+            <Card tone="institutional" className="lg:col-span-6 xl:col-span-6">
+              <CardHeader className="pb-2">
                 <CardTitle>Evolução da Pontuação</CardTitle>
-                {serie.length > 0 && (
-                  <Badge variant="muted">
-                    {serie.length === 1
-                      ? "1 dia com partidas"
-                      : `Últimos ${serie.length} dias`}
-                  </Badge>
+                {(dados?.jogos || []).length > 0 && (
+                  <Select
+                    aria-label="Filtrar evolução por jogo"
+                    value={jogoFiltro}
+                    onChange={(e) => setJogoFiltro(e.target.value)}
+                    className="min-h-8 w-auto rounded-lg py-1 pl-2.5 pr-7 text-xs font-semibold"
+                  >
+                    <option value="">Todos os jogos</option>
+                    {dados.jogos.map((j) => (
+                      <option key={j.game_id} value={j.game_id}>
+                        {j.name}
+                      </option>
+                    ))}
+                  </Select>
                 )}
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-1">
                 {serie.length > 0 ? (
                   <GraficoEvolucao serie={serie} />
                 ) : (
-                  <p className="py-12 text-center text-sm text-ink-muted">
+                  <p className="py-16 text-center text-sm text-ink-muted">
                     Sem partidas concluídas para montar o gráfico neste filtro.
                   </p>
                 )}
               </CardContent>
             </Card>
 
-            <Card tone="institutional" className="lg:col-span-5">
-              <CardHeader>
-                <CardTitle>Desempenho por Jogo</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {dados.jogos.map((j) => {
-                  const pct = j.average_score === null ? 0 : Math.round(j.average_score);
-                  const cor = COR_BARRA_JOGO[j.game_id] || "#2F6FD6";
-                  return (
-                    <div key={j.game_id} className="space-y-1.5">
-                      <div className="flex items-center justify-between gap-2 text-sm">
-                        <strong className="font-bold text-ink">{j.name}</strong>
-                        <span className="font-bold text-ink tabular-nums">
-                          {j.average_score === null ? "—" : `${pct}%`}
-                        </span>
-                      </div>
+            {/* Coluna Direita: Desempenho por Jogo + Histórico Recente */}
+            <div className="flex flex-col gap-5 lg:col-span-6 xl:col-span-6">
+              <Card tone="institutional">
+                <CardHeader className="pb-2">
+                  <CardTitle>Desempenho por Jogo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3.5">
+                  {dados.jogos.map((j) => {
+                    const pct = j.average_score === null ? 0 : Math.round(j.average_score);
+                    const cor = COR_BARRA_JOGO[j.game_id] || "#92CCF0";
+                    return (
                       <div
-                        className="h-2.5 w-full overflow-hidden rounded-full bg-inst-subtle alto-contraste:border alto-contraste:border-slate-950 alto-contraste:bg-white"
-                        aria-hidden="true"
-                      >
-                        <div
-                          className="h-full rounded-full transition-all duration-300 alto-contraste:bg-slate-950"
-                          style={{ width: `${pct}%`, backgroundColor: cor }}
-                        />
-                      </div>
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted">
-                        <span>
-                          {j.total_matches === 0
+                        key={j.game_id}
+                        className="space-y-1.5"
+                        title={
+                          j.total_matches === 0
                             ? "Ainda não jogou"
-                            : `${j.completed_matches}/${j.total_matches} concluídas · ${j.total_errors} ${j.total_errors === 1 ? "erro" : "erros"}`}
-                        </span>
-                        {j.average_duration_seconds !== null && j.average_duration_seconds !== undefined && (
-                          <span>{formatarTempo(j.average_duration_seconds)}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Histórico Recente */}
-          <Card tone="institutional" className="no-print">
-            <CardHeader>
-              <CardTitle>Histórico de Atividades</CardTitle>
-              <Badge variant="muted">
-                {dados.hist.items.length} de {dados.hist.total}
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              {dados.hist.items.length === 0 ? (
-                <p className="m-0 text-sm text-ink-muted">Nenhuma atividade encontrada para este filtro.</p>
-              ) : (
-                <>
-                  {/* Tabela Desktop */}
-                  <div className="hidden overflow-x-auto md:block">
-                    <table className="w-full border-collapse text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-inst-border text-xs font-bold uppercase tracking-wider text-ink-muted">
-                          <th className="py-3 pr-4">Jogo</th>
-                          <th className="py-3 px-3">Situação</th>
-                          <th className="py-3 px-3">Acertos</th>
-                          <th className="py-3 px-3">Erros</th>
-                          <th className="py-3 px-3">Pontuação</th>
-                          <th className="py-3 px-3">Tempo</th>
-                          <th className="py-3 pl-3 text-right">Data</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-inst-border/70">
-                        {dados.hist.items.map((r) => (
-                          <tr key={r.id} className="hover:bg-inst-subtle/40 transition-colors">
-                            <td className="py-3 pr-4 font-bold text-ink">{r.game_name}</td>
-                            <td className="py-3 px-3">
-                              <Badge variant={r.completed ? "success" : "warning"}>
-                                {r.completed && <Check size={12} />}
-                                {r.completed ? "Concluída" : "Abandonada"}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 font-bold text-success tabular-nums">{r.correct_answers}</td>
-                            <td className="py-3 px-3 text-ink-muted tabular-nums">{r.incorrect_answers}</td>
-                            <td className="py-3 px-3 font-bold text-ink tabular-nums">
-                              {r.completed ? `${r.score}%` : "—"}
-                            </td>
-                            <td className="py-3 px-3 text-ink-muted">{formatarTempo(r.duration_seconds)}</td>
-                            <td className="py-3 pl-3 text-right text-ink-muted tabular-nums">
-                              {formatarDataCurta(r.played_at)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Cards Mobile */}
-                  <ul className="m-0 list-none space-y-3 p-0 md:hidden" aria-label="Lista de atividades">
-                    {dados.hist.items.map((r) => (
-                      <li
-                        key={r.id}
-                        className="rounded-2xl border border-inst-border bg-inst-subtle/40 p-4 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                            : `${j.completed_matches}/${j.total_matches} concluídas · ${j.total_errors} erro(s) · ${formatarTempo(j.average_duration_seconds)}`
+                        }
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <strong className="text-sm font-bold text-ink">{r.game_name}</strong>
-                          <Badge variant={r.completed ? "success" : "warning"}>
-                            {r.completed && <Check size={12} />}
-                            {r.completed ? "Concluída" : "Abandonada"}
-                          </Badge>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span className="font-semibold text-ink">{j.name}</span>
+                          <span className="text-xs font-bold text-ink tabular-nums">
+                            {j.average_score === null ? "—" : `(${pct}%)`}
+                          </span>
                         </div>
-                        <dl className="mt-3 mb-0 grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <dt className="text-ink-muted">Pontuação</dt>
-                            <dd className="m-0 font-bold text-ink">{r.completed ? `${r.score}%` : "—"}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-ink-muted">Acertos / Erros</dt>
-                            <dd className="m-0 font-bold text-ink">
-                              <span className="text-success">{r.correct_answers}</span> / {r.incorrect_answers}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="text-ink-muted">Tempo</dt>
-                            <dd className="m-0 font-semibold text-ink">{formatarTempo(r.duration_seconds)}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-ink-muted">Data</dt>
-                            <dd className="m-0 font-semibold text-ink">{formatarDataCurta(r.played_at)}</dd>
-                          </div>
-                        </dl>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
+                        <div
+                          className="h-2 w-full overflow-hidden rounded-full bg-slate-200/80 alto-contraste:border alto-contraste:border-slate-950 alto-contraste:bg-white"
+                          aria-hidden="true"
+                        >
+                          <div
+                            className="h-full rounded-full transition-all duration-300 alto-contraste:bg-slate-950"
+                            style={{ width: `${pct}%`, backgroundColor: cor }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
 
-              {mais.erro && (
-                <Alert variant="error" className="mt-4">
-                  {mais.erro}
-                </Alert>
-              )}
+              <Card tone="institutional">
+                <CardHeader className="pb-2">
+                  <CardTitle>Histórico Recente</CardTitle>
+                  <span className="text-xs font-semibold text-ink-muted">
+                    {dados.hist.items.length} de {dados.hist.total}
+                  </span>
+                </CardHeader>
+                <CardContent>
+                  {dados.hist.items.length === 0 ? (
+                    <p className="m-0 text-sm text-ink-muted">Nenhuma atividade para este filtro.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-inst-border text-xs font-semibold text-ink-muted">
+                            <th className="py-2 pr-3 font-semibold">Jogo</th>
+                            <th className="py-2 px-2 font-semibold">Data</th>
+                            <th className="py-2 px-2 font-semibold">Pontuação</th>
+                            <th className="py-2 pl-2 text-right font-semibold">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-inst-border/70">
+                          {dados.hist.items.map((r) => (
+                            <tr key={r.id} className="hover:bg-inst-subtle/40 transition-colors">
+                              <td className="py-2.5 pr-3 font-semibold text-ink">{r.game_name}</td>
+                              <td className="py-2.5 px-2 text-xs text-ink-muted tabular-nums whitespace-nowrap">
+                                {formatarDataCompleta(r.played_at)}
+                              </td>
+                              <td className="py-2.5 px-2 font-semibold text-ink tabular-nums">
+                                {r.completed ? `${r.score}%` : "—"}
+                              </td>
+                              <td className="py-2.5 pl-2 text-right">
+                                <Badge variant={r.completed ? "success" : "warning"}>
+                                  {r.completed ? "Concluída" : "Abandonada"}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
 
-              {dados.hist.items.length < dados.hist.total && (
-                <div className="mt-4 flex justify-center">
-                  <Button
-                    variant="outlineInst"
-                    size="sm"
-                    disabled={mais.carregando}
-                    aria-busy={mais.carregando}
-                    onClick={verMais}
-                  >
-                    {mais.carregando ? "Carregando…" : "Carregar mais atividades"}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  {mais.erro && (
+                    <Alert variant="error" className="mt-3">
+                      {mais.erro}
+                    </Alert>
+                  )}
+
+                  {dados.hist.items.length < dados.hist.total && (
+                    <div className="mt-3 flex justify-center">
+                      <Button
+                        variant="outlineInst"
+                        size="sm"
+                        disabled={mais.carregando}
+                        aria-busy={mais.carregando}
+                        onClick={verMais}
+                      >
+                        {mais.carregando ? "Carregando…" : "Ver mais atividades"}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </>
       )}
 
