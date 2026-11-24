@@ -201,7 +201,7 @@ export default function PinPaisModal({
       ) : (
         <div className="flex flex-col items-center gap-5 py-1">
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-brand alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pais-soft text-pais"
             aria-hidden="true"
           >
             <IconeCabeca size={22} />
@@ -222,18 +222,17 @@ export default function PinPaisModal({
                   className={cn(
                     "flex h-13 w-12 items-center justify-center rounded-2xl border-2 transition-all",
                     preenchido
-                      ? "border-brand bg-brand-soft/60"
+                      ? "border-pais bg-pais-soft/60"
                       : ativo
-                        ? "border-brand/50 bg-white"
-                        : "border-inst-border bg-inst-subtle/40",
-                    "alto-contraste:bg-white alto-contraste:border-slate-950"
+                        ? "border-pais/50 bg-white"
+                        : "border-inst-border bg-inst-subtle/40"
                   )}
                 >
                   <span
                     className={cn(
                       "h-3.5 w-3.5 rounded-full transition-transform",
                       preenchido
-                        ? "scale-100 bg-brand alto-contraste:bg-slate-950"
+                        ? "scale-100 bg-pais"
                         : "scale-0 bg-transparent"
                     )}
                   />
@@ -262,7 +261,7 @@ export default function PinPaisModal({
                     onClick={apagarDigito}
                     disabled={digitos.length === 0}
                     aria-label="Apagar último dígito"
-                    className="flex h-12 items-center justify-center rounded-2xl border border-inst-border bg-inst-subtle/60 text-ink transition-colors hover:bg-inst-subtle active:scale-95 disabled:opacity-40 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                    className="flex h-12 items-center justify-center rounded-2xl border border-inst-border bg-inst-subtle/60 text-ink transition-colors hover:bg-inst-subtle active:scale-95 disabled:opacity-40"
                   >
                     <Delete size={19} aria-hidden="true" />
                   </button>
@@ -273,7 +272,7 @@ export default function PinPaisModal({
                   key={tecla}
                   type="button"
                   onClick={() => inserirDigito(tecla)}
-                  className="flex h-12 items-center justify-center rounded-2xl border border-inst-border bg-white font-display text-xl font-semibold text-ink shadow-2xs transition-all hover:bg-inst-subtle/60 active:scale-95 alto-contraste:border-2 alto-contraste:border-slate-950"
+                  className="flex h-12 items-center justify-center rounded-2xl border border-inst-border bg-white font-display text-xl font-semibold text-ink shadow-2xs transition-all hover:bg-inst-subtle/60 active:scale-95"
                 >
                   {tecla}
                 </button>
@@ -285,7 +284,7 @@ export default function PinPaisModal({
             <button
               type="button"
               onClick={() => setConfirmandoReset(true)}
-              className="text-xs font-bold text-ink-muted underline hover:text-brand"
+              className="text-xs font-bold text-ink-muted underline hover:text-pais"
             >
               Esqueci meu PIN
             </button>

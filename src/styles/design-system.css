@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant alto-contraste (&:where(.alto-contraste, .alto-contraste *));
 @custom-variant modo-calmo (&:where(.modo-calmo, .modo-calmo *));
 
 @theme {
@@ -8,7 +7,7 @@
   --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
   --font-display: "Fredoka", "Atkinson Hyperlegible", system-ui, sans-serif;
 
-  /* Superfícies sensoriais calmas (TEA — sem branco estourado) */
+  /* Superfícies sensoriais calmas (Área Infantil TEA) */
   --color-canvas: #F6F4EE;
   --color-canvas-jogo: #F5F3EC;
   --color-surface: #FCFBF8;
@@ -16,19 +15,24 @@
   --color-surface-border: #E5DFD2;
   --color-surface-border-strong: #CFC7B6;
 
-  /* Superfícies institucionais (Pais, Professores e Gestão) */
-  --color-inst-bg: #F8FAFC;
-  --color-inst-surface: #FFFFFF;
-  --color-inst-subtle: #F1F5F9;
-  --color-inst-border: #E2E8F0;
-  --color-inst-border-strong: #CBD5E1;
+  /* Superfícies editoriais quentes (Área dos Pais e Professores) */
+  --color-inst-bg: #F4F1EA;
+  --color-inst-surface: #FDFCFA;
+  --color-inst-subtle: #EFEBE2;
+  --color-inst-border: #E4DDD0;
+  --color-inst-border-strong: #CEC5B4;
 
-  /* Paleta acessível (tons equilibrados, não fluorescentes) */
+  /* Paleta acessível equilibrada + Verde-Petróleo editorial para Área dos Pais */
   --color-ink: #1F2D4D;
-  --color-ink-muted: #526280;
+  --color-ink-muted: #56647D;
   --color-brand: #2F6FD6;
   --color-brand-deep: #1E54AD;
   --color-brand-soft: #EAF2FF;
+  --color-pais: #1F6E63;
+  --color-pais-deep: #17574E;
+  --color-pais-soft: #E5F3F0;
+  --color-terracota: #D67456;
+  --color-terracota-soft: #FBECE6;
   --color-success: #2D8A56;
   --color-success-deep: #1F683F;
   --color-success-soft: #E9F6EE;
@@ -41,12 +45,13 @@
 }
 
 :root {
-  /* Compatibilidade com variáveis usadas nos componentes de jogos */
   --tinta: #1F2D4D;
-  --tinta-suave: #526280;
+  --tinta-suave: #56647D;
   --azul: #2F6FD6;
   --azul-sombra: #1E54AD;
   --azul-claro: #EAF2FF;
+  --pais: #1F6E63;
+  --pais-sombra: #17574E;
   --verde: #2D8A56;
   --verde-sombra: #1F683F;
   --verde-claro: #E9F6EE;
@@ -57,16 +62,12 @@
   --erro: #C94440;
   --erro-sombra: #962B28;
   --erro-claro: #FDECEC;
-  --alerta-bg: #FDF6DF;
-  --alerta-borda: #E8B638;
-  --alerta-texto: #6B4700;
   --borda-azul: #A8C9F2;
 
-  --inst-bg: #F8FAFC;
-  --inst-surface: #FFFFFF;
-  --inst-surface-alt: #F8FAFC;
-  --inst-borda: #E2E8F0;
-  --inst-borda-forte: #CBD5E1;
+  --inst-bg: #F4F1EA;
+  --inst-surface: #FDFCFA;
+  --inst-borda: #E4DDD0;
+  --inst-borda-forte: #CEC5B4;
 
   --fonte-texto: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
   --fonte-titulo: "Fredoka", "Atkinson Hyperlegible", system-ui, sans-serif;
@@ -96,12 +97,12 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--azul);
+    outline: 3px solid var(--pais);
     outline-offset: 2px;
   }
 }
 
-/* Shell raiz e modos globais de acessibilidade */
+/* Shell raiz e contextos de tela */
 .cc {
   position: relative;
   min-height: 100vh;
@@ -125,7 +126,7 @@
 }
 
 .cc.area-institucional {
-  background-color: #F8FAFC;
+  background: linear-gradient(180deg, #EFEBE1 0%, #F5F2EB 220px, #F6F4EE 100%);
 }
 
 .cc.area-login {
@@ -137,13 +138,13 @@
   font-size: 19px;
 }
 
-.cc.fonte-maior .cc-scale-text {
-  font-size: 1.12em;
+/* Modo Calmo (TEA): remove animações/pulsos, aquece o fundo e reduz saturação dos estímulos */
+.cc.modo-calmo {
+  background-color: #F1EFE8;
 }
 
-/* Modo calmo (remove distrações visuais e animações) */
-.cc.modo-calmo.area-menu-cenario {
-  background: #F6F4EE;
+.cc.modo-calmo .palco-jogo {
+  filter: saturate(0.8);
 }
 
 .cc.modo-calmo *,
@@ -163,61 +164,7 @@
   }
 }
 
-/* Modo Alto Contraste (WCAG AAA) */
-.cc.alto-contraste {
-  --tinta: #0F172A;
-  --tinta-suave: #1E293B;
-  --azul: #0F4CC0;
-  --azul-sombra: #082B73;
-  --verde: #116B38;
-  --verde-sombra: #074221;
-  --amarelo: #FFD029;
-  --amarelo-sombra: #0F172A;
-  --creme: #FFFFFF;
-  --erro: #991B1B;
-  --erro-sombra: #450A0A;
-  --borda-azul: #0F172A;
-  --inst-bg: #FFFFFF;
-  --inst-surface: #FFFFFF;
-  --inst-borda: #0F172A;
-  --inst-borda-forte: #0F172A;
-  background: #FFFFFF !important;
-  color: #0F172A;
-}
-
-.cc.alto-contraste :focus-visible {
-  outline: 3px solid #0F172A;
-  outline-offset: 3px;
-}
-
-.cc.alto-contraste .cores,
-.cc.alto-contraste .linha,
-.cc.alto-contraste .ligar,
-.cc.alto-contraste .grade2,
-.cc.alto-contraste .fala-card,
-.cc.alto-contraste .frutas-hud,
-.cc.alto-contraste .frutas-tabuleiro,
-.cc.alto-contraste .ficha {
-  background: #FFFFFF !important;
-  border: 2px solid #0F172A !important;
-  box-shadow: none !important;
-}
-
-.cc.alto-contraste .ficha.par {
-  background: #FFFFFF !important;
-  border: 3px solid #0F172A !important;
-}
-
-.cc.alto-contraste .titulo {
-  -webkit-text-stroke: 0;
-  text-shadow: none;
-}
-
-.cc.alto-contraste .titulo span {
-  color: #0F172A !important;
-}
-
-/* Cenário ilustrado reutilizável (Login, Menu suavizado e Vitória) */
+/* Cenário ilustrado reutilizável (Login e Vitória) */
 .fundo {
   position: fixed;
   inset: 0;
@@ -246,7 +193,6 @@
   height: clamp(130px, 19vw, 240px);
 }
 
-/* Estilos utilitários de título lúdico e componentes de jogo preservados */
 .titulo {
   font-family: var(--fonte-titulo);
   font-weight: 600;
@@ -254,7 +200,7 @@
   margin: 0;
 }
 
-/* Fichas interativas usadas nos jogos (Cores, Encaixe, Ligar, Cor e Forma) */
+/* Fichas interativas usadas nos jogos */
 .ficha {
   position: relative;
   display: inline-flex;
@@ -262,10 +208,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 84px;
-  min-height: 84px;
-  padding: 12px;
-  border-radius: 24px;
+  min-width: 0;
+  min-height: 76px;
+  padding: 10px;
+  border-radius: 22px;
   border: 2px solid #E5DFD2;
   background: #FCFBF8;
   color: var(--tinta);
@@ -316,11 +262,10 @@
 }
 
 .ficha.par {
-  opacity: 0.92;
+  opacity: 0.94;
   border-color: var(--verde);
 }
 
-/* Animação suave de erro / feedback nos jogos */
 @keyframes balanca {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }
@@ -350,7 +295,7 @@
   animation: confete-cai linear forwards;
 }
 
-/* Botões utilitários compatíveis com jogos legados (ex: JogoFalar, JogoFrutas) */
+/* Botões táteis para jogos (JogoFalar, JogoFrutas, ErrorBoundary) */
 .btn {
   --btn-sombra: var(--azul-sombra);
   display: inline-flex;
@@ -359,11 +304,11 @@
   gap: 8px;
   font-family: var(--fonte-titulo);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1rem;
   border: 0;
-  border-radius: 18px;
-  padding: 11px 22px;
-  min-height: 48px;
+  border-radius: 16px;
+  padding: 10px 20px;
+  min-height: 46px;
   background: var(--azul);
   color: #FFFFFF;
   box-shadow: 0 4px 0 var(--btn-sombra);
@@ -413,12 +358,11 @@
 .btn.peq-acao {
   min-height: 44px;
   padding: 8px 16px;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   border-radius: 14px;
   box-shadow: 0 3px 0 var(--btn-sombra);
 }
 
-/* Estilos de impressão para relatórios pedagógicos */
 @media print {
   body,
   .cc {

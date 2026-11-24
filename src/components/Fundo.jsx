@@ -16,7 +16,6 @@ export default function Fundo({ variant = "suave", className = "" }) {
       className={cn(
         "fundo",
         local && "fundo-local",
-        "alto-contraste:opacity-0",
         className
       )}
       aria-hidden="true"

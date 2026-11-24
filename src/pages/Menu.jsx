@@ -8,7 +8,6 @@ import {
   Box,
   ChevronRight,
   Cloud,
-  Contrast,
   Gauge,
   KeyRound,
   Lock,
@@ -31,7 +30,6 @@ import {
 } from "lucide-react";
 import {
   CORES_AUTISMO,
-  CORES_AUTISMO_CONTRASTE,
   FAIXAS_ETARIAS,
   obterFaixaEtaria,
 } from "../data/jogosData";
@@ -45,11 +43,11 @@ import PerfisCriancas from "./PerfisCriancas";
 
 const PainelPais = lazy(() => import("./PainelPais"));
 
-const CORES_AVATAR = ["#2F6FD6", "#2D8A56", "#8C72D1", "#D67A59", "#CC6B7D", "#2A8F85"];
+const CORES_AVATAR = ["#1F6E63", "#D67456", "#7E64C4", "#3E6FB0", "#C88E26", "#B86077"];
 
 function corAvatar(nome = "") {
   const limpo = nome.trim();
-  if (!limpo) return "#5B82BA";
+  if (!limpo) return "#1F6E63";
   let soma = 0;
   for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
   return CORES_AVATAR[soma % CORES_AVATAR.length];
@@ -140,8 +138,7 @@ function SettingRowSwitch({ active, onClick, icon: Icon, iconBg, title, descript
         <span
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-            iconBg,
-            "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+            iconBg
           )}
           aria-hidden="true"
         >
@@ -157,7 +154,7 @@ function SettingRowSwitch({ active, onClick, icon: Icon, iconBg, title, descript
         aria-hidden="true"
         className={cn(
           "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors",
-          active ? "bg-brand alto-contraste:bg-slate-950" : "bg-slate-300"
+          active ? "bg-pais" : "bg-[#D5CEBE]"
         )}
       >
         <span
@@ -189,8 +186,6 @@ export default function Menu({
   onToggleVelocidade,
   fonteMaior,
   onToggleFonteMaior,
-  altoContraste,
-  onToggleAltoContraste,
   calmo,
   onToggleCalmo,
   totalRodadas,
@@ -231,7 +226,7 @@ export default function Menu({
   const ehAreaPais = aba === "perfis" || aba === "pais";
   const bloqueadoPorPin = ehAreaPais && !visitante && !areaPaisLiberada;
   const abasAtuais = ehAreaPais ? ABAS_PAIS : ABAS_INFANTIS;
-  const temModoAtivo = calmo || altoContraste || fonteMaior || !som;
+  const temModoAtivo = calmo || fonteMaior || !som;
   const inicialCrianca = (criancaAtiva?.name || "?").trim().charAt(0).toUpperCase();
 
   const solicitarAcessoPais = (destino = "pais") => {
@@ -326,24 +321,23 @@ export default function Menu({
 
   return (
     <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-6 px-3.5 pt-3.5 pb-12 sm:gap-8 sm:px-6 sm:pt-4">
-      {/* NAVBAR SIMÉTRICA EM 3 COLUNAS NO DESKTOP ([1fr_auto_1fr]) — centro cravado! */}
+      {/* NAVBAR SIMÉTRICA EM 3 COLUNAS NO DESKTOP ([1fr_auto_1fr]) */}
       <header className="no-print w-full">
         <div
           className={cn(
             "grid grid-cols-[1fr_auto] items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 sm:px-4 md:grid-cols-[1fr_auto_1fr]",
             ehAreaPais
-              ? "border-inst-border bg-inst-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-              : "border-[#DDD6C7] bg-[#FCFBF8] shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
-            "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
+              ? "border-inst-border bg-inst-surface shadow-[0_2px_10px_rgba(31,45,77,0.04)]"
+              : "border-[#DDD6C7] bg-[#FCFBF8] shadow-[0_2px_10px_rgba(31,45,77,0.04)]"
           )}
         >
-          {/* Coluna 1 (Esquerda): Marca ou Voltar aos Jogos */}
+          {/* Esquerda */}
           <div className="justify-self-start">
             {ehAreaPais ? (
               <button
                 type="button"
                 onClick={voltarParaJogos}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-inst-border bg-inst-subtle px-3.5 py-1.5 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-slate-200/75 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-inst-border bg-inst-subtle px-3.5 py-1.5 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-[#E5DFD2]"
               >
                 <ArrowLeft size={16} aria-hidden="true" />
                 <span>Voltar aos Jogos</span>
@@ -353,12 +347,11 @@ export default function Menu({
             )}
           </div>
 
-          {/* Coluna 2 (Centro exato no desktop / Linha 2 limpa no celular): 2 abas */}
+          {/* Centro cravado */}
           <nav
             className={cn(
               "col-span-2 order-3 grid w-full grid-cols-2 gap-1 rounded-full p-1 md:col-span-1 md:order-2 md:flex md:w-auto md:justify-self-center",
-              ehAreaPais ? "bg-inst-subtle" : "bg-[#EFECE3]",
-              "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950"
+              ehAreaPais ? "bg-inst-subtle" : "bg-[#EFECE3]"
             )}
             aria-label={ehAreaPais ? "Navegação da Área dos Pais" : "Navegação infantil"}
             role="tablist"
@@ -377,9 +370,9 @@ export default function Menu({
                     "min-h-9 rounded-full px-5 py-1.5 text-center text-sm font-semibold whitespace-nowrap transition-all",
                     ativa
                       ? ehAreaPais
-                        ? "bg-brand text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
-                        : "bg-[#5B82BA] text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
-                      : "text-ink-muted hover:text-ink alto-contraste:text-slate-950"
+                        ? "bg-pais text-white shadow-2xs"
+                        : "bg-[#5B82BA] text-white shadow-2xs"
+                      : "text-ink-muted hover:text-ink"
                   )}
                   onClick={() => onAlterarAba(item.id)}
                   onKeyDown={(ev) => aoTeclarAba(ev, idx)}
@@ -390,7 +383,7 @@ export default function Menu({
             })}
           </nav>
 
-          {/* Coluna 3 (Direita): Perfil da criança ativa + Botão de Ajustes */}
+          {/* Direita */}
           <div className="order-2 flex items-center gap-2 justify-self-end md:order-3">
             {!ehAreaPais && (
               <>
@@ -399,17 +392,17 @@ export default function Menu({
                     type="button"
                     onClick={onSair}
                     title="Modo visitante — toque para entrar ou criar conta"
-                    className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                    className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5]"
                   >
                     <span>Visitante</span>
-                    <span className="hidden sm:inline text-xs font-bold text-[#4F75AE]">· Entrar</span>
+                    <span className="hidden sm:inline text-xs font-bold text-pais">· Entrar</span>
                   </button>
                 ) : criancaAtiva ? (
                   <button
                     type="button"
                     onClick={() => solicitarAcessoPais("perfis")}
                     title={`Perfil ativo: ${criancaAtiva.name} (${criancaAtiva.age} anos) · Toque para trocar na Área dos Pais`}
-                    className="inline-flex min-h-9 max-w-[165px] sm:max-w-none items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] py-1 pl-1.5 pr-3 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                    className="inline-flex min-h-9 max-w-[165px] sm:max-w-none items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] py-1 pl-1.5 pr-3 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5]"
                   >
                     <span
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
@@ -448,14 +441,13 @@ export default function Menu({
                 "relative inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
                 ehAreaPais
                   ? "border-inst-border bg-white text-ink hover:bg-inst-subtle"
-                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]",
-                "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]"
               )}
             >
               <SlidersHorizontal size={17} aria-hidden="true" />
               {temModoAtivo && (
                 <span
-                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand ring-2 ring-white"
+                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-pais ring-2 ring-white"
                   aria-hidden="true"
                 />
               )}
@@ -475,7 +467,7 @@ export default function Menu({
         </div>
       )}
 
-      {/* MODAL DE AJUSTES REDESENHADO — listas agrupadas limpas estilo iOS/Linear */}
+      {/* MODAL DE AJUSTES */}
       <Dialog
         open={abrirPrefs}
         onClose={() => setAbrirPrefs(false)}
@@ -509,16 +501,15 @@ export default function Menu({
           </>
         }
       >
-        {/* Atalho destacado para a Área dos Pais (quando está no Espaço Infantil) */}
         {!ehAreaPais && (
           <button
             type="button"
             onClick={() => solicitarAcessoPais("pais")}
-            className="flex w-full items-center justify-between gap-3 rounded-2xl border border-[#DDD6C7] bg-[#F6F4EE] px-4 py-3.5 text-left transition-colors hover:bg-[#EFECE3] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+            className="flex w-full items-center justify-between gap-3 rounded-2xl border border-pais/25 bg-pais-soft/75 px-4 py-3.5 text-left transition-colors hover:bg-pais-soft"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#5B82BA] text-white alto-contraste:bg-slate-950"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pais text-white"
                 aria-hidden="true"
               >
                 <Lock size={18} />
@@ -532,7 +523,7 @@ export default function Menu({
                 </span>
               </div>
             </div>
-            <ChevronRight size={18} className="shrink-0 text-ink-muted" aria-hidden="true" />
+            <ChevronRight size={18} className="shrink-0 text-pais" aria-hidden="true" />
           </button>
         )}
 
@@ -541,22 +532,14 @@ export default function Menu({
           <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
             Conforto sensorial (TEA)
           </h3>
-          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white">
             <SettingRowSwitch
               active={calmo}
               onClick={onToggleCalmo}
               icon={Cloud}
-              iconBg="bg-[#E6EFFC] text-[#3E6BB3]"
+              iconBg="bg-pais-soft text-pais"
               title="Modo calmo"
-              description="Reduz animações e movimentos"
-            />
-            <SettingRowSwitch
-              active={altoContraste}
-              onClick={onToggleAltoContraste}
-              icon={Contrast}
-              iconBg="bg-slate-100 text-slate-800"
-              title="Alto contraste"
-              description="Bordas e contraste reforçados (WCAG AAA)"
+              description="Remove animações e suaviza as cores"
             />
             <SettingRowSwitch
               active={fonteMaior}
@@ -574,7 +557,7 @@ export default function Menu({
           <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
             Áudio e narração
           </h3>
-          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+          <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white">
             <SettingRowSwitch
               active={som}
               onClick={onToggleSom}
@@ -592,7 +575,6 @@ export default function Menu({
               description={efeitos ? "Sons suaves de acerto" : "Efeitos desligados"}
             />
 
-            {/* Ritmo da fala inline */}
             <div className="flex items-center justify-between gap-3 px-4 py-3">
               <div className="flex items-center gap-3 min-w-0">
                 <span
@@ -656,7 +638,7 @@ export default function Menu({
           <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
             Partidas
           </h3>
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-inst-border bg-white px-4 py-3 alto-contraste:border-2 alto-contraste:border-slate-950">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-inst-border bg-white px-4 py-3">
             <div className="flex items-center gap-3 min-w-0">
               <span
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FDF6DF] text-[#BA8C1D]"
@@ -700,7 +682,7 @@ export default function Menu({
             <h3 className="m-0 px-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Segurança e conta
             </h3>
-            <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+            <div className="divide-y divide-inst-border rounded-2xl border border-inst-border bg-white">
               <button
                 type="button"
                 onClick={abrirAlterarPin}
@@ -708,7 +690,7 @@ export default function Menu({
               >
                 <span className="flex items-center gap-3 text-sm font-bold text-ink">
                   <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pais-soft text-pais"
                     aria-hidden="true"
                   >
                     <KeyRound size={17} />
@@ -732,7 +714,7 @@ export default function Menu({
                   >
                     <span className="flex items-center gap-3 text-sm font-bold text-ink">
                       <span
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-terracota-soft text-terracota"
                         aria-hidden="true"
                       >
                         <ShieldCheck size={17} />
@@ -813,7 +795,7 @@ export default function Menu({
         )}
       </Dialog>
 
-      {/* MODAL DO PIN DE 4 DÍGITOS (Parental Gate) */}
+      {/* MODAL DO PIN DE 4 DÍGITOS */}
       <PinPaisModal
         open={modalPin.aberto}
         modo={modalPin.modo}
@@ -823,7 +805,7 @@ export default function Menu({
         onEsqueciPin={onSair}
       />
 
-      {/* ABA 1: JOGOS — aberto, respirável e fiel à imagem aprovada */}
+      {/* ABA 1: JOGOS */}
       {aba === "jogos" && (
         <div
           id="painel-jogos"
@@ -836,6 +818,7 @@ export default function Menu({
           <section className="w-full pt-1" aria-label="Boas-vindas e nível de dificuldade">
             <Nuvi
               variant="menu"
+              calmo={calmo}
               fala={
                 criancaAtiva
                   ? `Olá, ${criancaAtiva.name}! O que vamos brincar hoje?`
@@ -879,8 +862,8 @@ export default function Menu({
                         className={cn(
                           "min-h-8 rounded-full border px-3.5 py-1 text-sm font-semibold transition-all",
                           ativo
-                            ? "border-[#5B82BA] bg-[#5B82BA] text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:border-slate-950"
-                            : "border-[#DDD6C7] bg-[#F3EFE6] text-ink hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950",
+                            ? "border-[#5B82BA] bg-[#5B82BA] text-white shadow-2xs"
+                            : "border-[#DDD6C7] bg-[#F3EFE6] text-ink hover:bg-[#EAE3D5]",
                           idadeTravada && !ativo && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -910,7 +893,6 @@ export default function Menu({
             </div>
           )}
 
-          {/* Grid 3x2 limpo de cards uniformes em marfim */}
           <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {jogos.map((j) => {
               const estilo = ESTILO_CARD_JOGO[j.id] || ESTILO_CARD_JOGO.cores;
@@ -922,18 +904,14 @@ export default function Menu({
                 <motion.button
                   key={j.id}
                   type="button"
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.985 }}
+                  whileHover={calmo ? undefined : { y: -3 }}
+                  whileTap={calmo ? undefined : { scale: 0.985 }}
                   transition={{ type: "spring", stiffness: 420, damping: 28 }}
                   onClick={() => onSelecionarJogo(j.id)}
-                  className={cn(
-                    "group flex flex-col justify-between overflow-hidden rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] text-left",
-                    "shadow-[0_3px_0_#DDD6C7,0_6px_16px_rgba(31,45,77,0.04)] transition-shadow hover:border-[#BFC7D6] hover:shadow-[0_4px_0_#CFC7B6,0_10px_22px_rgba(31,45,77,0.06)]",
-                    "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-[0_4px_0_#0F172A]"
-                  )}
+                  className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] text-left shadow-[0_3px_0_#DDD6C7,0_6px_16px_rgba(31,45,77,0.04)] transition-shadow hover:border-[#BFC7D6] hover:shadow-[0_4px_0_#CFC7B6,0_10px_22px_rgba(31,45,77,0.06)]"
                 >
                   <span
-                    className="block h-1.5 w-full alto-contraste:bg-slate-950"
+                    className="block h-1.5 w-full"
                     style={{ backgroundColor: estilo.faixa }}
                     aria-hidden="true"
                   />
@@ -941,7 +919,7 @@ export default function Menu({
                   <div className="flex flex-col gap-4 px-5 pt-5 pb-4">
                     <div className="flex items-center gap-4">
                       <span
-                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-transform group-hover:scale-105 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-transform group-hover:scale-105"
                         style={{ backgroundColor: estilo.badgeBg, color: estilo.iconeCor }}
                       >
                         <IconeCard size={28} strokeWidth={1.75} aria-hidden="true" />
@@ -966,9 +944,9 @@ export default function Menu({
                         )}
                         aria-hidden="true"
                       />
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#EFECE3] alto-contraste:border alto-contraste:border-slate-950 alto-contraste:bg-white">
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#EFECE3]">
                         <div
-                          className="h-full rounded-full transition-all duration-300 alto-contraste:bg-slate-950"
+                          className="h-full rounded-full transition-all duration-300"
                           style={{
                             width: `${concluidas > 0 ? Math.max(18, progressoPct) : 0}%`,
                             backgroundColor: estilo.barra,
@@ -1066,8 +1044,8 @@ export default function Menu({
                 ref={shapeRef}
                 height="clamp(360px, 56vh, 520px)"
                 depth={depthFisica}
-                colors={altoContraste ? CORES_AUTISMO_CONTRASTE : CORES_AUTISMO}
-                background={altoContraste ? "#FFFFFF" : "#F6F4EE"}
+                colors={CORES_AUTISMO}
+                background="#F6F4EE"
                 count={22}
                 size={40}
                 paused={calmo}
@@ -1080,13 +1058,13 @@ export default function Menu({
         </section>
       )}
 
-      {/* ACESSO DISCRETO À ÁREA DOS PAIS NO RODAPÉ DO ESPAÇO INFANTIL */}
+      {/* ACESSO DISCRETO À ÁREA DOS PAIS NO RODAPÉ */}
       {!ehAreaPais && (
         <footer className="no-print pt-2">
           <button
             type="button"
             onClick={() => solicitarAcessoPais("pais")}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#FCFBF8]/80 px-4 py-1.5 text-xs font-bold text-ink-muted transition-colors hover:bg-[#FCFBF8] hover:text-ink alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#FCFBF8]/80 px-4 py-1.5 text-xs font-bold text-ink-muted transition-colors hover:bg-[#FCFBF8] hover:text-pais"
           >
             <Lock size={13} aria-hidden="true" />
             <span>Área dos Pais e Professores</span>
@@ -1098,7 +1076,7 @@ export default function Menu({
       {bloqueadoPorPin && (
         <Card tone="institutional" className="w-full max-w-md p-8 text-center">
           <div
-            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-brand"
+            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pais-soft text-pais"
             aria-hidden="true"
           >
             <Lock size={24} />
@@ -1122,14 +1100,14 @@ export default function Menu({
         </Card>
       )}
 
-      {/* ABA 3: PERFIS DAS CRIANÇAS (dentro da Área dos Pais) */}
+      {/* ABA 3: PERFIS DAS CRIANÇAS */}
       {aba === "perfis" && !bloqueadoPorPin && (
         <div id="painel-perfis" role="tabpanel" aria-labelledby="tab-perfis" className="w-full">
           <PerfisCriancas visitante={visitante} onEntrarConta={onSair} {...perfis} />
         </div>
       )}
 
-      {/* ABA 4: PAINEL DE PAIS E PROFESSORES (dentro da Área dos Pais) */}
+      {/* ABA 4: PAINEL DE PAIS E PROFESSORES */}
       {aba === "pais" && !bloqueadoPorPin && (
         <div id="painel-pais" role="tabpanel" aria-labelledby="tab-pais" className="w-full">
           <Suspense

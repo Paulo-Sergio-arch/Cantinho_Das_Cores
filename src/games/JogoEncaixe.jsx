@@ -84,50 +84,58 @@ export default function JogoEncaixe(p) {
             : "Arraste cada peça até o buraco com o mesmo formato."
       }
     >
-      <div className="linha encaixe-pecas">
-        {it.pecas.map(({ f, cor }) => (
-          <Arrasta
-            key={f.n}
-            label={`peça ${f.n}`}
-            disabled={feito.includes(f.n)}
-            onSobre={setSobre}
-            className={`${sel === f.n ? "sel" : ""} ${
-              feito.includes(f.n) ? "feito" : ""
-            }`}
-            onToque={() => {
-              setSel(f.n);
-              tocarSelecao();
-              falar(f.n);
-            }}
-            onSolta={(a) => encaixar(f.n, a)}
-          >
-            <Forma f={f} cor={cor} />
-          </Arrasta>
-        ))}
-      </div>
-      <div className={`linha chao ${sel ? "alvos-ativos" : ""}`}>
-        {it.buracos.map((b) => {
-          const encaixado = feito.includes(b.f.n);
-          return (
-            <button
-              type="button"
-              key={b.f.n}
-              data-alvo={b.f.n}
-              disabled={encaixado}
-              aria-label={`buraco ${b.f.n}`}
-              className={`ficha buraco ${encaixado ? "certo" : ""} ${
-                tente === b.f.n ? "tente" : ""
-              } ${sobre === b.f.n ? "sobre" : ""}`}
-              onClick={() => encaixar(sel, b.f.n)}
-            >
-              <Forma
-                f={b.f}
-                cor={encaixado ? b.corReal : b.cor}
-                oco={!encaixado}
-              />
-            </button>
-          );
-        })}
+      <div className="encaixe-wrap">
+        <div className="encaixe-secao encaixe-pecas">
+          <p className="encaixe-rotulo">1. Escolha ou arraste uma peça</p>
+          <div className="linha-grid">
+            {it.pecas.map(({ f, cor }) => (
+              <Arrasta
+                key={f.n}
+                label={`peça ${f.n}`}
+                disabled={feito.includes(f.n)}
+                onSobre={setSobre}
+                className={`${sel === f.n ? "sel" : ""} ${
+                  feito.includes(f.n) ? "feito" : ""
+                }`}
+                onToque={() => {
+                  setSel(f.n);
+                  tocarSelecao();
+                  falar(f.n);
+                }}
+                onSolta={(a) => encaixar(f.n, a)}
+              >
+                <Forma f={f} cor={cor} />
+              </Arrasta>
+            ))}
+          </div>
+        </div>
+        <div className={`encaixe-secao chao ${sel ? "alvos-ativos" : ""}`}>
+          <p className="encaixe-rotulo">2. Encaixe no contorno igual</p>
+          <div className="linha-grid">
+            {it.buracos.map((b) => {
+              const encaixado = feito.includes(b.f.n);
+              return (
+                <button
+                  type="button"
+                  key={b.f.n}
+                  data-alvo={b.f.n}
+                  disabled={encaixado}
+                  aria-label={`buraco ${b.f.n}`}
+                  className={`ficha buraco ${encaixado ? "certo" : ""} ${
+                    tente === b.f.n ? "tente" : ""
+                  } ${sobre === b.f.n ? "sobre" : ""}`}
+                  onClick={() => encaixar(sel, b.f.n)}
+                >
+                  <Forma
+                    f={b.f}
+                    cor={encaixado ? b.corReal : b.cor}
+                    oco={!encaixado}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </Casca>
   );

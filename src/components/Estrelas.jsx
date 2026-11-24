@@ -7,10 +7,7 @@ export default function Estrelas({ n, total = 5, mostrarLegenda = false }) {
 
   return (
     <div
-      className={cn(
-        "inline-flex flex-col items-center justify-center rounded-full border border-[#DDD6C7] bg-[#F6F4EE] px-5 py-1.5",
-        "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-      )}
+      className="inline-flex flex-col items-center justify-center rounded-full border border-[#DDD6C7] bg-[#F6F4EE] px-4 py-1.5 sm:px-5"
       role="img"
       aria-label={`${n} de ${total} estrelas`}
     >
@@ -26,13 +23,13 @@ export default function Estrelas({ n, total = 5, mostrarLegenda = false }) {
               className="inline-flex items-center justify-center"
             >
               <Star
-                size={21}
+                size={20}
                 strokeWidth={1.8}
                 className={cn(
                   "transition-colors",
                   preenchida
-                    ? "fill-[#E8B638] text-[#C9941A] alto-contraste:fill-slate-950 alto-contraste:text-slate-950"
-                    : "fill-transparent text-[#C7B382] alto-contraste:text-slate-400"
+                    ? "fill-[#E8B638] text-[#C9941A]"
+                    : "fill-transparent text-[#C7B382]"
                 )}
                 aria-hidden="true"
               />

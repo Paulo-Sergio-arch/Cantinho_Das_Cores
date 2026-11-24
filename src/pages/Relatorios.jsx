@@ -219,7 +219,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
             <li
               key={r.id}
               className={cn(
-                "rounded-2xl border border-inst-border bg-white p-4 alto-contraste:border-2 alto-contraste:border-slate-950",
+                "rounded-2xl border border-inst-border bg-white p-4",
                 aberto !== r.id && "no-print"
               )}
             >
@@ -273,7 +273,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
                   <article className="rel-documento rounded-2xl border border-inst-border bg-inst-subtle/40 p-5 sm:p-6">
                     <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-inst-border pb-3">
                       <div>
-                        <span className="text-xs font-bold uppercase tracking-wider text-brand">
+                        <span className="text-xs font-bold uppercase tracking-wider text-pais">
                           Cantinho das Cores · Relatório Pedagógico
                         </span>
                         <h3 className="font-display text-xl font-semibold text-ink mt-0.5 mb-0">

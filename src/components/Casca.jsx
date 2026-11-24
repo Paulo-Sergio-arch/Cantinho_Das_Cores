@@ -9,7 +9,7 @@ import Fim from "./Fim";
 import { Alert, Button } from "./ui";
 import { cn } from "../lib/cn";
 
-function SwitchPill({ checked, onClick, label, dark = false }) {
+function SwitchPill({ checked, onClick, label }) {
   return (
     <button
       type="button"
@@ -21,15 +21,10 @@ function SwitchPill({ checked, onClick, label, dark = false }) {
       <span
         className={cn(
           "relative inline-flex h-7 w-12 items-center rounded-full border transition-colors p-0.5",
-          "group-focus-visible:ring-3 group-focus-visible:ring-brand/30",
+          "group-focus-visible:ring-3 group-focus-visible:ring-pais/30",
           checked
-            ? dark
-              ? "bg-[#3C3832] border-[#3C3832]"
-              : "bg-[#5B82BA] border-[#5B82BA]"
-            : dark
-              ? "bg-[#544F47] border-[#544F47]"
-              : "bg-[#D9CDB7] border-[#CFC2AA]",
-          "alto-contraste:border-2 alto-contraste:border-slate-950"
+            ? "bg-pais border-pais"
+            : "bg-[#D9CDB7] border-[#CFC2AA]"
         )}
       >
         <span
@@ -53,10 +48,8 @@ export default function Casca({
   idade = "8",
   calmo = false,
   som = true,
-  altoContraste = false,
   onToggleSom,
   onToggleCalmo,
-  onToggleAltoContraste,
   fala,
   falaVisual,
   atrasoVitoria = 0,
@@ -169,38 +162,32 @@ export default function Casca({
   };
 
   return (
-    <section className="flex w-full flex-col items-center gap-6" aria-label={titulo}>
+    <section className="flex w-full flex-col items-center gap-5 sm:gap-6" aria-label={titulo}>
       <h1 className="sr-only">{titulo}</h1>
 
-      {/* Barra superior limpa idêntica ao layout sensorial aprovado */}
-      <header
-        className={cn(
-          "flex w-full flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] px-4 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
-          "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
-        )}
-      >
-        {/* Esquerda: Voltar em pílula suave */}
-        <button
-          type="button"
-          onClick={solicitarSaida}
-          aria-label="Voltar ao menu"
-          aria-expanded={!fim ? confirmandoSaida : undefined}
-          className={cn(
-            "inline-flex min-h-10 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-4 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5]",
-            "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-          )}
-        >
-          <ChevronLeft size={17} aria-hidden="true" />
-          <span>Voltar</span>
-        </button>
+      {/* Barra superior simétrica em 3 colunas no desktop ([1fr_auto_1fr]) — estrelas perfeitamente centralizadas */}
+      <header className="grid w-full grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] px-3.5 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.04)] sm:px-4 md:grid-cols-[1fr_auto_1fr]">
+        {/* Coluna 1 (Esquerda): Voltar */}
+        <div className="justify-self-start">
+          <button
+            type="button"
+            onClick={solicitarSaida}
+            aria-label="Voltar ao menu"
+            aria-expanded={!fim ? confirmandoSaida : undefined}
+            className="inline-flex min-h-10 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5]"
+          >
+            <ChevronLeft size={17} aria-hidden="true" />
+            <span>Voltar</span>
+          </button>
+        </div>
 
-        {/* Centro: Cápsula com 5 estrelas + Rodada X de Y */}
-        <div className="order-3 flex w-full justify-center sm:order-2 sm:w-auto">
+        {/* Coluna 2 (Centro exato): Cápsula de estrelas + Rodada */}
+        <div className="col-span-2 order-3 flex justify-center md:col-span-1 md:order-2 md:justify-self-center">
           <Estrelas n={estrelas} total={total} mostrarLegenda />
         </div>
 
-        {/* Direita: Áudio, Modo Calmo e Alto Contraste inline */}
-        <div className="order-2 flex items-center gap-4 sm:order-3">
+        {/* Coluna 3 (Direita): Áudio + Modo Calmo */}
+        <div className="order-2 flex items-center gap-4 justify-self-end md:order-3">
           {onToggleSom && (
             <button
               type="button"
@@ -220,15 +207,6 @@ export default function Casca({
 
           {onToggleCalmo && (
             <SwitchPill checked={calmo} onClick={onToggleCalmo} label="Modo Calmo" />
-          )}
-
-          {onToggleAltoContraste && (
-            <SwitchPill
-              checked={altoContraste}
-              onClick={onToggleAltoContraste}
-              label="Alto Contraste"
-              dark
-            />
           )}
         </div>
       </header>
@@ -267,8 +245,8 @@ export default function Casca({
           </div>
         )
       ) : (
-        <div className="flex w-full max-w-3xl flex-col items-center gap-7 pt-2">
-          <Nuvi variant="jogo" fala={fala} falaVisual={falaVisual} ouvivel />
+        <div className="palco-jogo flex w-full max-w-3xl flex-col items-center gap-5 sm:gap-7 pt-1">
+          <Nuvi variant="jogo" calmo={calmo} fala={fala} falaVisual={falaVisual} ouvivel />
           <div className="w-full">{children}</div>
         </div>
       )}
