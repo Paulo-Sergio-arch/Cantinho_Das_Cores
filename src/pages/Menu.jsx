@@ -2,6 +2,7 @@ import { lazy, Suspense, useRef, useState } from "react";
 import { motion } from "motion/react";
 import {
   Apple,
+  ArrowLeft,
   Bell,
   BellOff,
   Box,
@@ -9,6 +10,7 @@ import {
   Cloud,
   Contrast,
   Gauge,
+  KeyRound,
   Lock,
   LogOut,
   MessageCircle,
@@ -33,7 +35,9 @@ import {
   FAIXAS_ETARIAS,
   obterFaixaEtaria,
 } from "../data/jogosData";
+import { temPinPais } from "../utils/pinPais";
 import Nuvi from "../components/Nuvi";
+import PinPaisModal from "../components/PinPaisModal";
 import { ShapePhysics } from "../components/shape-physics";
 import { Alert, Button, Card, Dialog, Input, Select } from "../components/ui";
 import { cn } from "../lib/cn";
@@ -57,11 +61,14 @@ function MarcaCompacta() {
   );
 }
 
-const ABAS = [
-  { id: "jogos", rotulo: "Jogos", rotuloCurto: "Jogos" },
-  { id: "bloquinhos", rotulo: "Bloquinhos", rotuloCurto: "Blocos" },
-  { id: "perfis", rotulo: "Crianças", rotuloCurto: "Crianças" },
-  { id: "pais", rotulo: "Pais e Professores", rotuloCurto: "Pais" },
+const ABAS_INFANTIS = [
+  { id: "jogos", rotulo: "Jogos" },
+  { id: "bloquinhos", rotulo: "Bloquinhos" },
+];
+
+const ABAS_PAIS = [
+  { id: "pais", rotulo: "Desempenho" },
+  { id: "perfis", rotulo: "Crianças" },
 ];
 
 // Paleta calma e dessaturada + ícone limpo de linha para os 6 cards do Menu (TEA)
@@ -172,6 +179,7 @@ export default function Menu({
   jogosCarregando,
   jogosErro,
   onRecarregarJogos,
+  usuarioId,
   resp,
   visitante,
   criancaAtiva,
@@ -211,6 +219,9 @@ export default function Menu({
 }) {
   const [abrirPrefs, setAbrirPrefs] = useState(false);
   const [abrirConta, setAbrirConta] = useState(false);
+  const [areaPaisLiberada, setAreaPaisLiberada] = useState(false);
+  const [modalPin, setModalPin] = useState({ aberto: false, modo: "verificar", destino: "pais" });
+  const [avisoPin, setAvisoPin] = useState("");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [senhaExclusao, setSenhaExclusao] = useState("");
@@ -218,19 +229,65 @@ export default function Menu({
   const [erroConta, setErroConta] = useState("");
   const [ocupadoConta, setOcupadoConta] = useState(false);
   const shapeRef = useRef(null);
+
   const faixaAtual = obterFaixaEtaria(idade);
-  const ehInstitucional = aba === "perfis" || aba === "pais";
+  const ehAreaPais = aba === "perfis" || aba === "pais";
+  const bloqueadoPorPin = ehAreaPais && !visitante && !areaPaisLiberada;
+  const abasAtuais = ehAreaPais ? ABAS_PAIS : ABAS_INFANTIS;
   const temModoAtivo = calmo || altoContraste || fonteMaior || !som;
+
+  const solicitarAcessoPais = (destino = "pais") => {
+    setAvisoPin("");
+    if (visitante || areaPaisLiberada) {
+      onAlterarAba(destino);
+      return;
+    }
+    const jaTemPin = temPinPais(usuarioId);
+    setModalPin({
+      aberto: true,
+      modo: jaTemPin ? "verificar" : "criar",
+      destino,
+    });
+  };
+
+  const voltarParaJogos = () => {
+    setAreaPaisLiberada(false);
+    setAbrirConta(false);
+    setAvisoPin("");
+    onAlterarAba("jogos");
+  };
+
+  const abrirAlterarPin = () => {
+    setAbrirPrefs(false);
+    setAvisoPin("");
+    setModalPin({
+      aberto: true,
+      modo: temPinPais(usuarioId) ? "alterar" : "criar",
+      destino: null,
+    });
+  };
+
+  const aoConfirmarPin = () => {
+    const modoAnterior = modalPin.modo;
+    const destino = modalPin.destino;
+    setModalPin({ aberto: false, modo: "verificar", destino: "pais" });
+    setAreaPaisLiberada(true);
+    if (modoAnterior === "alterar") {
+      setAvisoPin("PIN da Área dos Pais atualizado com sucesso.");
+    } else if (destino) {
+      onAlterarAba(destino);
+    }
+  };
 
   const aoTeclarAba = (ev, idx) => {
     if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft" && ev.key !== "Home" && ev.key !== "End") return;
     ev.preventDefault();
     let proximo = idx;
-    if (ev.key === "ArrowRight") proximo = (idx + 1) % ABAS.length;
-    if (ev.key === "ArrowLeft") proximo = (idx - 1 + ABAS.length) % ABAS.length;
+    if (ev.key === "ArrowRight") proximo = (idx + 1) % abasAtuais.length;
+    if (ev.key === "ArrowLeft") proximo = (idx - 1 + abasAtuais.length) % abasAtuais.length;
     if (ev.key === "Home") proximo = 0;
-    if (ev.key === "End") proximo = ABAS.length - 1;
-    onAlterarAba(ABAS[proximo].id);
+    if (ev.key === "End") proximo = abasAtuais.length - 1;
+    onAlterarAba(abasAtuais[proximo].id);
   };
 
   const salvarNovaSenha = async (ev) => {
@@ -270,31 +327,42 @@ export default function Menu({
 
   return (
     <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-6 px-3.5 pt-3.5 pb-14 sm:gap-8 sm:px-6 sm:pt-4">
-      {/* NAVBAR MINIMALISTA — limpa no desktop e no celular */}
+      {/* NAVBAR SEPARADA POR CONTEXTO: Espaço Infantil (2 abas) vs. Área dos Pais (2 abas + Voltar) */}
       <header className="no-print w-full">
         <div
           className={cn(
             "flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border px-3.5 py-2.5 sm:px-4",
-            ehInstitucional
+            ehAreaPais
               ? "border-inst-border bg-inst-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
               : "border-[#DDD6C7] bg-[#FCFBF8] shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
             "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
           )}
         >
-          {/* Esquerda: Marca */}
-          <MarcaCompacta />
+          {/* Esquerda: Marca no Espaço Infantil | Botão Voltar aos Jogos na Área dos Pais */}
+          {ehAreaPais ? (
+            <button
+              type="button"
+              onClick={voltarParaJogos}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-inst-border bg-inst-subtle px-3.5 py-1.5 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-slate-200/75 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              <span>Voltar aos Jogos</span>
+            </button>
+          ) : (
+            <MarcaCompacta />
+          )}
 
-          {/* Centro (desktop) / Linha 2 limpa (mobile): 4 abas sem quebra de linha */}
+          {/* Centro (desktop) / Linha 2 (mobile): apenas 2 abas super limpas */}
           <nav
             className={cn(
-              "order-3 grid w-full grid-cols-4 gap-1 rounded-full p-1 lg:order-2 lg:flex lg:w-auto lg:items-center",
-              ehInstitucional ? "bg-inst-subtle" : "bg-[#EFECE3]",
+              "order-3 grid w-full grid-cols-2 gap-1 rounded-full p-1 md:order-2 md:flex md:w-auto md:items-center",
+              ehAreaPais ? "bg-inst-subtle" : "bg-[#EFECE3]",
               "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950"
             )}
-            aria-label="Navegação principal"
+            aria-label={ehAreaPais ? "Navegação da Área dos Pais" : "Navegação infantil"}
             role="tablist"
           >
-            {ABAS.map((item, idx) => {
+            {abasAtuais.map((item, idx) => {
               const ativa = aba === item.id;
               return (
                 <button
@@ -305,9 +373,9 @@ export default function Menu({
                   aria-selected={ativa}
                   aria-controls={`painel-${item.id}`}
                   className={cn(
-                    "min-h-9 rounded-full px-2 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-all sm:px-3.5 sm:text-sm",
+                    "min-h-9 rounded-full px-4 py-1.5 text-center text-sm font-semibold whitespace-nowrap transition-all",
                     ativa
-                      ? ehInstitucional
+                      ? ehAreaPais
                         ? "bg-brand text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
                         : "bg-[#5B82BA] text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
                       : "text-ink-muted hover:text-ink alto-contraste:text-slate-950"
@@ -315,61 +383,49 @@ export default function Menu({
                   onClick={() => onAlterarAba(item.id)}
                   onKeyDown={(ev) => aoTeclarAba(ev, idx)}
                 >
-                  <span className="sm:hidden">{item.rotuloCurto}</span>
-                  <span className="hidden sm:inline">{item.rotulo}</span>
+                  {item.rotulo}
                 </button>
               );
             })}
           </nav>
 
-          {/* Direita: apenas Perfil + Botão único de Ajustes (abre Modal) */}
-          <div className="order-2 flex items-center gap-2 lg:order-3">
-            {visitante ? (
-              <button
-                type="button"
-                onClick={onSair}
-                title="Modo visitante — toque para entrar ou criar conta"
-                className={cn(
-                  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
-                  ehInstitucional
-                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
-                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]",
-                  "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-                )}
-              >
-                <span>Visitante</span>
-                <span className="hidden sm:inline text-xs font-bold text-brand">· Entrar</span>
-              </button>
-            ) : criancaAtiva ? (
-              <button
-                type="button"
-                onClick={() => onAlterarAba("perfis")}
-                title={`Trocar criança · Responsável: ${resp}`}
-                className={cn(
-                  "inline-flex min-h-9 max-w-[140px] sm:max-w-none items-center gap-1.5 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
-                  ehInstitucional
-                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
-                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]",
-                  "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
-                )}
-              >
-                <span className="truncate">{criancaAtiva.name}</span>
-                <span className="hidden sm:inline text-ink-muted">· {criancaAtiva.age} anos</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onAlterarAba("perfis")}
-                title={resp}
-                className={cn(
-                  "inline-flex min-h-9 items-center gap-1 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
-                  ehInstitucional
-                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
-                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]"
-                )}
-              >
-                <span>+ Criança</span>
-              </button>
+          {/* Direita: Controles enxutos conforme o espaço */}
+          <div className="order-2 flex items-center gap-2 md:order-3">
+            {!ehAreaPais && (
+              <>
+                {visitante ? (
+                  <button
+                    type="button"
+                    onClick={onSair}
+                    title="Modo visitante — toque para entrar ou criar conta"
+                    className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                  >
+                    <span>Visitante</span>
+                    <span className="hidden sm:inline text-xs font-bold text-[#4F75AE]">· Entrar</span>
+                  </button>
+                ) : criancaAtiva ? (
+                  <button
+                    type="button"
+                    onClick={() => solicitarAcessoPais("perfis")}
+                    title={`Trocar criança (requer PIN) · Responsável: ${resp}`}
+                    className="inline-flex min-h-9 max-w-[120px] sm:max-w-none items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                  >
+                    <span className="truncate">{criancaAtiva.name}</span>
+                    <span className="hidden sm:inline text-ink-muted">· {criancaAtiva.age} anos</span>
+                  </button>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => solicitarAcessoPais("pais")}
+                  title="Entrar na Área dos Pais e Professores (protegida por PIN)"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-[#DDD6C7] bg-[#F6F4EE] px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                >
+                  <Lock size={14} className="shrink-0 text-ink-muted" aria-hidden="true" />
+                  <span className="hidden sm:inline">Área dos Pais</span>
+                  <span className="sm:hidden">Pais</span>
+                </button>
+              </>
             )}
 
             <button
@@ -377,11 +433,11 @@ export default function Menu({
               onClick={() => setAbrirPrefs(true)}
               aria-haspopup="dialog"
               aria-expanded={abrirPrefs}
-              aria-label="Abrir ajustes de acessibilidade e conta"
-              title="Ajustes e acessibilidade"
+              aria-label="Abrir ajustes"
+              title={ehAreaPais ? "Ajustes, PIN e conta" : "Ajustes sensoriais e áudio"}
               className={cn(
                 "relative inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
-                ehInstitucional
+                ehAreaPais
                   ? "border-inst-border bg-white text-ink hover:bg-inst-subtle"
                   : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]",
                 "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
@@ -399,27 +455,44 @@ export default function Menu({
         </div>
       </header>
 
-      {/* MODAL DE AJUSTES (acessibilidade, som, rodadas e conta LGPD) */}
+      {avisoPin && (
+        <div className="no-print w-full">
+          <Alert variant="success">
+            <span>{avisoPin}</span>
+            <Button variant="outlineInst" size="sm" onClick={() => setAvisoPin("")}>
+              Fechar
+            </Button>
+          </Alert>
+        </div>
+      )}
+
+      {/* MODAL DE AJUSTES (sensorial para todos; PIN, LGPD e Sair apenas na Área dos Pais) */}
       <Dialog
         open={abrirPrefs}
         onClose={() => setAbrirPrefs(false)}
         title="Ajustes e Acessibilidade"
-        subtitle="Personalize conforto sensorial, áudio e preferências da conta."
+        subtitle={
+          ehAreaPais || visitante
+            ? "Personalize conforto sensorial, áudio e preferências da conta."
+            : "Personalize conforto sensorial e áudio para a brincadeira."
+        }
         titleId="modal-ajustes-titulo"
-        footerClassName="justify-between"
+        footerClassName={ehAreaPais || visitante ? "justify-between" : "justify-end"}
         footer={
           <>
-            <Button
-              variant="outlineInst"
-              size="sm"
-              onClick={() => {
-                setAbrirPrefs(false);
-                onSair();
-              }}
-            >
-              <LogOut size={15} />
-              {visitante ? "Voltar ao login" : "Sair da conta"}
-            </Button>
+            {(ehAreaPais || visitante) && (
+              <Button
+                variant="outlineInst"
+                size="sm"
+                onClick={() => {
+                  setAbrirPrefs(false);
+                  onSair();
+                }}
+              >
+                <LogOut size={15} />
+                {visitante ? "Voltar ao login" : "Sair da conta"}
+              </Button>
+            )}
             <Button variant="institutional" size="sm" onClick={() => setAbrirPrefs(false)}>
               Concluir
             </Button>
@@ -477,7 +550,7 @@ export default function Menu({
           </div>
         </div>
 
-        {/* Seção 2: Rodadas e Voz do Dispositivo */}
+        {/* Seção 2: Preferências dos Jogos */}
         <div className="space-y-3 border-t border-inst-border pt-4">
           <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
             Preferências dos jogos
@@ -538,92 +611,122 @@ export default function Menu({
           )}
         </div>
 
-        {/* Seção 3: Conta e Privacidade (LGPD) */}
-        {!visitante && (onAlterarSenha || onExcluirConta) && (
-          <div className="space-y-3 border-t border-inst-border pt-4">
+        {/* Seção 3: Segurança do PIN e Conta LGPD (apenas na Área dos Pais desbloqueada) */}
+        {!visitante && ehAreaPais && areaPaisLiberada && (
+          <div className="space-y-2.5 border-t border-inst-border pt-4">
+            <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
+              Segurança e conta do responsável
+            </h3>
+
             <button
               type="button"
-              aria-expanded={abrirConta}
-              onClick={() => {
-                setAbrirConta((v) => !v);
-                setErroConta("");
-                setMsgConta("");
-              }}
+              onClick={abrirAlterarPin}
               className="flex w-full items-center justify-between rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3 text-left transition-colors hover:bg-inst-subtle"
             >
               <span className="flex items-center gap-2.5 text-sm font-bold text-ink">
-                <ShieldCheck size={18} className="text-brand" aria-hidden="true" />
-                Minha conta e privacidade (LGPD)
+                <KeyRound size={17} className="text-brand" aria-hidden="true" />
+                Alterar PIN de 4 dígitos da Área dos Pais
               </span>
-              <ChevronRight
-                size={17}
-                className={cn("text-ink-muted transition-transform", abrirConta && "rotate-90")}
-                aria-hidden="true"
-              />
+              <ChevronRight size={17} className="text-ink-muted" aria-hidden="true" />
             </button>
 
-            {abrirConta && (
-              <div className="space-y-3 pt-1">
-                <form
-                  onSubmit={salvarNovaSenha}
-                  className="space-y-2.5 rounded-2xl border border-inst-border bg-white p-4"
+            {(onAlterarSenha || onExcluirConta) && (
+              <>
+                <button
+                  type="button"
+                  aria-expanded={abrirConta}
+                  onClick={() => {
+                    setAbrirConta((v) => !v);
+                    setErroConta("");
+                    setMsgConta("");
+                  }}
+                  className="flex w-full items-center justify-between rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3 text-left transition-colors hover:bg-inst-subtle"
                 >
-                  <strong className="block text-sm text-ink">Alterar senha</strong>
-                  <Input
-                    type="password"
-                    placeholder="Senha atual"
-                    value={senhaAtual}
-                    onChange={(e) => setSenhaAtual(e.target.value)}
+                  <span className="flex items-center gap-2.5 text-sm font-bold text-ink">
+                    <ShieldCheck size={17} className="text-brand" aria-hidden="true" />
+                    Minha conta e privacidade (LGPD)
+                  </span>
+                  <ChevronRight
+                    size={17}
+                    className={cn("text-ink-muted transition-transform", abrirConta && "rotate-90")}
+                    aria-hidden="true"
                   />
-                  <Input
-                    type="password"
-                    placeholder="Nova senha (mín. 8 caracteres)"
-                    value={novaSenha}
-                    onChange={(e) => setNovaSenha(e.target.value)}
-                  />
-                  <Button
-                    type="submit"
-                    variant="institutional"
-                    size="sm"
-                    disabled={ocupadoConta}
-                    aria-busy={ocupadoConta}
-                  >
-                    Salvar nova senha
-                  </Button>
-                </form>
+                </button>
 
-                <form
-                  onSubmit={confirmarExclusaoConta}
-                  className="space-y-2.5 rounded-2xl border border-red-200 bg-danger-soft/40 p-4"
-                >
-                  <strong className="block text-sm text-danger">Excluir minha conta (LGPD)</strong>
-                  <p className="m-0 text-xs text-ink-muted">
-                    Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.
-                  </p>
-                  <Input
-                    type="password"
-                    placeholder="Confirme sua senha para excluir"
-                    value={senhaExclusao}
-                    onChange={(e) => setSenhaExclusao(e.target.value)}
-                  />
-                  <Button
-                    type="submit"
-                    variant="danger"
-                    size="sm"
-                    disabled={ocupadoConta}
-                    aria-busy={ocupadoConta}
-                  >
-                    Excluir conta e todos os dados
-                  </Button>
-                </form>
+                {abrirConta && (
+                  <div className="space-y-3 pt-1">
+                    <form
+                      onSubmit={salvarNovaSenha}
+                      className="space-y-2.5 rounded-2xl border border-inst-border bg-white p-4"
+                    >
+                      <strong className="block text-sm text-ink">Alterar senha</strong>
+                      <Input
+                        type="password"
+                        placeholder="Senha atual"
+                        value={senhaAtual}
+                        onChange={(e) => setSenhaAtual(e.target.value)}
+                      />
+                      <Input
+                        type="password"
+                        placeholder="Nova senha (mín. 8 caracteres)"
+                        value={novaSenha}
+                        onChange={(e) => setNovaSenha(e.target.value)}
+                      />
+                      <Button
+                        type="submit"
+                        variant="institutional"
+                        size="sm"
+                        disabled={ocupadoConta}
+                        aria-busy={ocupadoConta}
+                      >
+                        Salvar nova senha
+                      </Button>
+                    </form>
 
-                {erroConta && <Alert variant="error">{erroConta}</Alert>}
-                {msgConta && <Alert variant="success">{msgConta}</Alert>}
-              </div>
+                    <form
+                      onSubmit={confirmarExclusaoConta}
+                      className="space-y-2.5 rounded-2xl border border-red-200 bg-danger-soft/40 p-4"
+                    >
+                      <strong className="block text-sm text-danger">Excluir minha conta (LGPD)</strong>
+                      <p className="m-0 text-xs text-ink-muted">
+                        Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.
+                      </p>
+                      <Input
+                        type="password"
+                        placeholder="Confirme sua senha para excluir"
+                        value={senhaExclusao}
+                        onChange={(e) => setSenhaExclusao(e.target.value)}
+                      />
+                      <Button
+                        type="submit"
+                        variant="danger"
+                        size="sm"
+                        disabled={ocupadoConta}
+                        aria-busy={ocupadoConta}
+                      >
+                        Excluir conta e todos os dados
+                      </Button>
+                    </form>
+
+                    {erroConta && <Alert variant="error">{erroConta}</Alert>}
+                    {msgConta && <Alert variant="success">{msgConta}</Alert>}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
       </Dialog>
+
+      {/* MODAL DO PIN DE 4 DÍGITOS (Parental Gate) */}
+      <PinPaisModal
+        open={modalPin.aberto}
+        modo={modalPin.modo}
+        usuarioId={usuarioId}
+        onClose={() => setModalPin((m) => ({ ...m, aberto: false }))}
+        onSucesso={aoConfirmarPin}
+        onEsqueciPin={onSair}
+      />
 
       {/* ABA 1: JOGOS — aberto, respirável e fiel à imagem aprovada */}
       {aba === "jogos" && (
@@ -882,15 +985,43 @@ export default function Menu({
         </section>
       )}
 
-      {/* ABA 3: PERFIS DAS CRIANÇAS */}
-      {aba === "perfis" && (
+      {/* PROTEÇÃO DE ACESSO DIRETO (F5 / URL) NA ÁREA DOS PAIS */}
+      {bloqueadoPorPin && (
+        <Card tone="institutional" className="w-full max-w-md p-8 text-center">
+          <div
+            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft text-brand"
+            aria-hidden="true"
+          >
+            <Lock size={24} />
+          </div>
+          <h1 className="font-display text-xl font-semibold text-ink m-0">
+            Área protegida por PIN
+          </h1>
+          <p className="mt-2 mb-6 text-sm text-ink-muted leading-relaxed">
+            Para proteger perfis das crianças, relatórios e configurações, digite o PIN de 4 dígitos do responsável.
+          </p>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            <Button variant="outlineInst" size="sm" onClick={voltarParaJogos}>
+              <ArrowLeft size={15} />
+              Voltar aos Jogos
+            </Button>
+            <Button variant="institutional" size="sm" onClick={() => solicitarAcessoPais(aba)}>
+              <Lock size={15} />
+              {temPinPais(usuarioId) ? "Digitar PIN" : "Criar PIN"}
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* ABA 3: PERFIS DAS CRIANÇAS (dentro da Área dos Pais) */}
+      {aba === "perfis" && !bloqueadoPorPin && (
         <div id="painel-perfis" role="tabpanel" aria-labelledby="tab-perfis" className="w-full">
           <PerfisCriancas visitante={visitante} onEntrarConta={onSair} {...perfis} />
         </div>
       )}
 
-      {/* ABA 4: PAINEL DE PAIS E PROFESSORES */}
-      {aba === "pais" && (
+      {/* ABA 4: PAINEL DE PAIS E PROFESSORES (dentro da Área dos Pais) */}
+      {aba === "pais" && !bloqueadoPorPin && (
         <div id="painel-pais" role="tabpanel" aria-labelledby="tab-pais" className="w-full">
           <Suspense
             fallback={

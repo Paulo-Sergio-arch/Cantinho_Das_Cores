@@ -568,6 +568,7 @@ export default function App() {
             jogosCarregando={catalogo.carregando}
             jogosErro={catalogo.erro}
             onRecarregarJogos={carregarJogos}
+            usuarioId={usuario?.id ?? usuario?.email ?? ""}
             resp={usuario?.name || usuario?.email || ""}
             visitante={Boolean(usuario?.is_guest)}
             criancaAtiva={criancaAtiva}
