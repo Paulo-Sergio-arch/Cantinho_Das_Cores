@@ -121,7 +121,7 @@ export default function JogoFalar(p) {
         <div className="acoes">
           <button
             type="button"
-            className={`btn ${!ouviu && !tocando ? "guia-pulsar" : ""}`}
+            className={`btn ${!ouviu && !tocando && !p.calmo ? "guia-pulsar" : ""}`}
             onClick={ouvir}
             disabled={bloq}
             aria-busy={tocando}

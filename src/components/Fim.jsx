@@ -37,7 +37,7 @@ export default function Fim({ total = 5, estatisticas, idade, onNovo, onSair, on
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28 }}
-      className="relative w-full overflow-hidden rounded-3xl border border-surface-border bg-gradient-to-b from-[#E7F4FF] via-[#F4F8F4] to-[#E2F3E4] p-6 sm:p-8 shadow-[0_8px_24px_rgba(31,45,77,0.08)] alto-contraste:bg-none alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+      className="relative w-full overflow-hidden rounded-3xl border border-surface-border bg-gradient-to-b from-[#E7F4FF] via-[#F4F8F4] to-[#E2F3E4] p-6 sm:p-8 shadow-[0_8px_24px_rgba(31,45,77,0.08)]"
     >
       <Fundo variant="vitoria" />
 

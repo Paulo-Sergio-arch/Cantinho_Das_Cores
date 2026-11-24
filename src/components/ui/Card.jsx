@@ -8,8 +8,7 @@ export function Card({ className, tone = "calm", ...props }) {
         tone === "calm" &&
           "bg-surface border border-surface-border shadow-[0_4px_16px_rgba(31,45,77,0.05),0_2px_0_#E5DFD2]",
         tone === "institutional" &&
-          "rounded-2xl bg-inst-surface border border-inst-border shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_12px_rgba(15,23,42,0.03)]",
-        "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none",
+          "rounded-2xl bg-inst-surface border border-inst-border shadow-[0_1px_2px_rgba(31,45,77,0.04),0_6px_18px_rgba(31,45,77,0.03)]",
         className
       )}
       {...props}
@@ -20,7 +19,7 @@ export function Card({ className, tone = "calm", ...props }) {
 export function CardHeader({ className, ...props }) {
   return (
     <div
-      className={cn("flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-3", className)}
+      className={cn("flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-3 sm:px-6", className)}
       {...props}
     />
   );
@@ -42,5 +41,5 @@ export function CardDescription({ className, ...props }) {
 }
 
 export function CardContent({ className, ...props }) {
-  return <div className={cn("px-6 pb-6", className)} {...props} />;
+  return <div className={cn("px-5 pb-5 sm:px-6 sm:pb-6", className)} {...props} />;
 }

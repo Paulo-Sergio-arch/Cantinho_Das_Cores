@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
-  Contrast,
+  Cloud,
   Eye,
   EyeOff,
   HeartHandshake,
@@ -142,7 +142,7 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
     <main className="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
       {/* Lado Esquerdo: Cenário ilustrado da marca + Nuvi + Selos de confiança */}
       <section
-        className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#CBE8FF] via-[#E8F6FE] to-[#D6F0DC] px-6 py-8 sm:px-12 sm:py-10 lg:min-h-screen alto-contraste:bg-none alto-contraste:bg-white alto-contraste:border-b-2 lg:alto-contraste:border-b-0 lg:alto-contraste:border-r-2 alto-contraste:border-slate-950"
+        className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#CBE8FF] via-[#E8F6FE] to-[#D6F0DC] px-6 py-8 sm:px-12 sm:py-10 lg:min-h-screen"
         aria-label="Apresentação do Cantinho das Cores"
       >
         <Fundo variant="login" />
@@ -174,15 +174,15 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
         </motion.div>
 
         <div className="relative z-10 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm">
             <HeartHandshake size={18} className="shrink-0 text-brand" aria-hidden="true" />
             <span>Inclusivo (TEA)</span>
           </div>
-          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
-            <Contrast size={18} className="shrink-0 text-success" aria-hidden="true" />
-            <span>Alto Contraste &amp; Calmo</span>
+          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm">
+            <Cloud size={18} className="shrink-0 text-pais" aria-hidden="true" />
+            <span>Modo Calmo &amp; Voz</span>
           </div>
-          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/75 px-3.5 py-2.5 text-xs font-bold text-ink shadow-xs backdrop-blur-sm">
             <ShieldCheck size={18} className="shrink-0 text-ink" aria-hidden="true" />
             <span>Protegido pela LGPD</span>
           </div>
@@ -198,14 +198,14 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
           className="w-full max-w-md"
         >
           <form
-            className="rounded-3xl border border-inst-border bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)] alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
+            className="rounded-3xl border border-inst-border bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)]"
             onSubmit={enviar}
             noValidate
             aria-describedby={erro || aviso ? "login-erro" : undefined}
           >
             {/* Segmented switcher */}
             <div
-              className="mb-6 grid grid-cols-2 rounded-xl bg-inst-subtle p-1 alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950"
+              className="mb-6 grid grid-cols-2 rounded-xl bg-inst-subtle p-1"
               role="group"
               aria-label="Modo de acesso"
             >
@@ -214,7 +214,7 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
                 className={cn(
                   "min-h-10 rounded-lg px-3 py-2 text-sm font-bold transition-all",
                   modo === "entrar"
-                    ? "bg-white text-ink shadow-xs alto-contraste:bg-slate-950 alto-contraste:text-white"
+                    ? "bg-white text-ink shadow-xs"
                     : "text-ink-muted hover:text-ink"
                 )}
                 aria-pressed={modo === "entrar"}
@@ -227,7 +227,7 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
                 className={cn(
                   "min-h-10 rounded-lg px-3 py-2 text-sm font-bold transition-all",
                   cadastro
-                    ? "bg-white text-ink shadow-xs alto-contraste:bg-slate-950 alto-contraste:text-white"
+                    ? "bg-white text-ink shadow-xs"
                     : "text-ink-muted hover:text-ink"
                 )}
                 aria-pressed={cadastro}

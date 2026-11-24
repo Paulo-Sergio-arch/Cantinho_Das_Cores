@@ -35,7 +35,7 @@ export default function Vitoria({ calmo = false }) {
         initial={{ scale: 0.85, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 360, damping: 24 }}
-        className="flex flex-col items-center gap-3 rounded-3xl border border-surface-border bg-surface px-10 py-8 shadow-2xl alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:bg-white"
+        className="flex flex-col items-center gap-3 rounded-3xl border border-surface-border bg-surface px-10 py-8 shadow-2xl"
       >
         <div
           className="flex h-20 w-20 items-center justify-center rounded-full bg-warn-soft border border-warn/40"

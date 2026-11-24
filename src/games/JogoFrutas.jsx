@@ -501,7 +501,7 @@ export default function JogoFrutas(p) {
           className={`frutas-tabuleiro ${quadrado ? "quadrado-ativo" : ""}`}
           style={{
             gridTemplateColumns: `repeat(${cfg.tamanho}, 1fr)`,
-            borderColor: quadrado && frutaAtiva ? frutaAtiva.cor : "#ffffff",
+            borderColor: quadrado && frutaAtiva ? frutaAtiva.cor : "#E5DFD2",
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}

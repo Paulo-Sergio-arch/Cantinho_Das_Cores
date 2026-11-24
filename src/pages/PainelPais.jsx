@@ -22,6 +22,16 @@ import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Select 
 import { cn } from "../lib/cn";
 import Relatorios from "./Relatorios";
 
+const CORES_AVATAR = ["#1F6E63", "#D67456", "#7E64C4", "#3E6FB0", "#C88E26", "#B86077"];
+
+function corAvatar(nome = "") {
+  const limpo = nome.trim();
+  if (!limpo) return "#1F6E63";
+  let soma = 0;
+  for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
+  return CORES_AVATAR[soma % CORES_AVATAR.length];
+}
+
 function formatarDataCurta(iso) {
   try {
     const comFuso = /(Z|[+-]\d\d:\d\d)$/.test(String(iso)) ? iso : `${iso}Z`;
@@ -55,14 +65,14 @@ const PERIODOS = [
   { id: "", rotulo: "Todo o período" },
 ];
 
-// Paleta suave harmoniosa para as barras de Desempenho por Jogo (fiel ao mockup)
+// Paleta editorial quente e diversa para as barras de Desempenho por Jogo
 const COR_BARRA_JOGO = {
-  cores: "#F1A2A2",
-  encaixe: "#C6B0EE",
-  corforma: "#92CCF0",
-  ligar: "#9AD9B0",
-  falar: "#F4C28E",
-  frutas: "#EE9EA4",
+  cores: "#5C89C7",
+  encaixe: "#3B9B7E",
+  corforma: "#9A82D1",
+  ligar: "#E0AE4C",
+  falar: "#DE8668",
+  frutas: "#D47B8B",
 };
 
 function escaparCsv(valor) {
@@ -153,15 +163,15 @@ function GraficoEvolucao({ serie }) {
         <AreaChart data={serie} margin={{ top: 14, right: 16, left: -14, bottom: 4 }}>
           <defs>
             <linearGradient id="areaPontuacao" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2F6FD6" stopOpacity={0.34} />
-              <stop offset="95%" stopColor="#2F6FD6" stopOpacity={0.03} />
+              <stop offset="0%" stopColor="#1F6E63" stopOpacity={0.32} />
+              <stop offset="95%" stopColor="#1F6E63" stopOpacity={0.03} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 4" stroke="#E2E8F0" />
+          <CartesianGrid strokeDasharray="3 4" stroke="#E4DDD0" />
           <XAxis
             dataKey="rotulo"
-            tick={{ fontSize: 12, fill: "#64748B", fontWeight: 500 }}
-            axisLine={{ stroke: "#CBD5E1" }}
+            tick={{ fontSize: 12, fill: "#697386", fontWeight: 500 }}
+            axisLine={{ stroke: "#D5CEBE" }}
             tickLine={false}
             dy={6}
           />
@@ -169,7 +179,7 @@ function GraficoEvolucao({ serie }) {
             domain={[0, 100]}
             ticks={[0, 20, 40, 60, 80, 100]}
             tickFormatter={(v) => (v === 100 ? "100%" : `${v}`)}
-            tick={{ fontSize: 12, fill: "#64748B", fontWeight: 500 }}
+            tick={{ fontSize: 12, fill: "#697386", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
           />
@@ -177,11 +187,11 @@ function GraficoEvolucao({ serie }) {
           <Area
             type="monotone"
             dataKey="taxa"
-            stroke="#2563EB"
+            stroke="#1F6E63"
             strokeWidth={3}
             fill="url(#areaPontuacao)"
-            dot={{ r: 4, fill: "#2563EB", stroke: "#FFFFFF", strokeWidth: 2 }}
-            activeDot={{ r: 6.5, fill: "#1D4ED8", stroke: "#FFFFFF", strokeWidth: 2.5 }}
+            dot={{ r: 4, fill: "#1F6E63", stroke: "#FDFCFA", strokeWidth: 2 }}
+            activeDot={{ r: 6.5, fill: "#17574E", stroke: "#FDFCFA", strokeWidth: 2.5 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -189,16 +199,19 @@ function GraficoEvolucao({ serie }) {
   );
 }
 
-// KPI minimalista idêntico ao print: ícone circular pastel à esquerda + rótulo/valor à direita
-function KpiCard({ label, value, accent, icon: Icon, iconTone }) {
+function KpiCard({ label, value, accent, icon: Icon, iconTone, topAccent }) {
   return (
-    <Card tone="institutional" className="px-4 py-4 sm:px-5">
-      <div className="flex items-center gap-3.5">
+    <Card tone="institutional" className="relative overflow-hidden px-4 py-4 sm:px-5">
+      <span
+        className="absolute inset-x-0 top-0 h-1"
+        style={{ backgroundColor: topAccent }}
+        aria-hidden="true"
+      />
+      <div className="flex items-center gap-3.5 pt-0.5">
         <span
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full",
-            iconTone,
-            "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+            iconTone
           )}
           aria-hidden="true"
         >
@@ -213,7 +226,7 @@ function KpiCard({ label, value, accent, icon: Icon, iconTone }) {
               {value}
             </strong>
             {accent && (
-              <span className="text-xs font-bold text-success truncate">{accent}</span>
+              <span className="text-xs font-bold text-pais truncate">{accent}</span>
             )}
           </div>
         </div>
@@ -348,18 +361,18 @@ export default function PainelPais({
 
   return (
     <section className="flex w-full flex-col gap-5" aria-label="Painel de acompanhamento para pais e professores">
-      {/* SUBCABEÇALHO LIMPO EM LINHA ÚNICA (fiel ao protótipo, sem caixa extra) */}
+      {/* SUBCABEÇALHO EDITORIAL QUENTE */}
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="font-display text-xl sm:text-2xl font-semibold text-ink m-0">
             Acompanhamento Pedagógico
           </h1>
 
-          {/* Seletor em pílula da criança */}
           {criancas.length > 1 ? (
             <div className="relative inline-flex items-center">
               <span
-                className="pointer-events-none absolute left-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand font-display text-xs font-semibold text-white"
+                className="pointer-events-none absolute left-2 flex h-6 w-6 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
+                style={{ backgroundColor: corAvatar(nomeCrianca) }}
                 aria-hidden="true"
               >
                 {inicialCrianca}
@@ -368,7 +381,7 @@ export default function PainelPais({
                 aria-label="Selecionar criança"
                 value={criancaId}
                 onChange={(e) => onSelecionarCrianca(e.target.value)}
-                className="min-h-9 appearance-none rounded-full border border-inst-border bg-white py-1 pl-10 pr-8 text-sm font-semibold text-ink shadow-2xs transition-colors hover:border-inst-border-strong focus-visible:border-brand focus-visible:outline-none"
+                className="min-h-9 appearance-none rounded-full border border-inst-border bg-inst-surface py-1 pl-10 pr-8 text-sm font-semibold text-ink shadow-2xs transition-colors hover:border-inst-border-strong focus-visible:border-pais focus-visible:outline-none"
               >
                 {criancas.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -383,9 +396,10 @@ export default function PainelPais({
               />
             </div>
           ) : (
-            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-inst-border bg-white px-2.5 py-1 pr-3.5 text-sm font-semibold text-ink shadow-2xs">
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-inst-border bg-inst-surface px-2.5 py-1 pr-3.5 text-sm font-semibold text-ink shadow-2xs">
               <span
-                className="flex h-6 w-6 items-center justify-center rounded-full bg-brand font-display text-xs font-semibold text-white"
+                className="flex h-6 w-6 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
+                style={{ backgroundColor: corAvatar(nomeCrianca) }}
                 aria-hidden="true"
               >
                 {inicialCrianca}
@@ -398,9 +412,8 @@ export default function PainelPais({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Filtro segmentado de período */}
           <div
-            className="inline-flex rounded-xl border border-inst-border bg-white p-1 shadow-2xs alto-contraste:border-2 alto-contraste:border-slate-950"
+            className="inline-flex rounded-xl border border-inst-border bg-inst-surface p-1 shadow-2xs"
             role="group"
             aria-label="Período"
           >
@@ -415,7 +428,7 @@ export default function PainelPais({
                   className={cn(
                     "min-h-8 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors sm:px-3",
                     ativo
-                      ? "bg-inst-subtle text-ink font-bold alto-contraste:bg-slate-950 alto-contraste:text-white"
+                      ? "bg-pais text-white font-bold shadow-2xs"
                       : "text-ink-muted hover:text-ink"
                   )}
                 >
@@ -472,39 +485,42 @@ export default function PainelPais({
 
       {res && res.total_matches > 0 && (
         <>
-          {/* 4 CARDS DE KPI (ícone pastel à esquerda) */}
+          {/* 4 CARDS DE KPI COM PALETA QUENTE DIVERSIFICADA */}
           <div className="no-print grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
               label="Partidas Concluídas"
               value={res.completed_matches}
               accent={res.abandoned_matches > 0 ? `de ${res.total_matches}` : undefined}
               icon={Users}
-              iconTone="bg-[#EAE2FB] text-[#6B4EC9]"
+              iconTone="bg-[#EFE9FA] text-[#6F52B8]"
+              topAccent="#9A82D1"
             />
             <KpiCard
               label="Pontuação Média"
               value={res.average_score === null ? "—" : `${pontos(res.average_score)}%`}
               icon={Trophy}
-              iconTone="bg-[#DFEEFF] text-[#2563EB]"
+              iconTone="bg-[#FDF3DA] text-[#B37E14]"
+              topAccent="#E0AE4C"
             />
             <KpiCard
               label="Tempo Médio"
               value={formatarTempo(res.average_duration_seconds)}
               icon={Clock}
-              iconTone="bg-[#DCF5E7] text-[#1D874B]"
+              iconTone="bg-pais-soft text-pais"
+              topAccent="#3B9B7E"
             />
             <KpiCard
               label="Taxa de Conclusão"
               value={`${res.completion_rate}%`}
               icon={CheckCircle2}
-              iconTone="bg-[#FCE2E2] text-[#C94440]"
+              iconTone="bg-terracota-soft text-terracota"
+              topAccent="#DE8668"
             />
           </div>
 
-          {/* BENTO GRID ASSIMÉTRICO: Evolução à esquerda | Desempenho + Histórico empilhados à direita */}
+          {/* BENTO GRID ASSIMÉTRICO */}
           <div className="no-print grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-            {/* Coluna Esquerda: Evolução da Pontuação */}
-            <Card tone="institutional" className="lg:col-span-6 xl:col-span-6">
+            <Card tone="institutional" className="lg:col-span-6">
               <CardHeader className="pb-2">
                 <CardTitle>Evolução da Pontuação</CardTitle>
                 {(dados?.jogos || []).length > 0 && (
@@ -534,8 +550,7 @@ export default function PainelPais({
               </CardContent>
             </Card>
 
-            {/* Coluna Direita: Desempenho por Jogo + Histórico Recente */}
-            <div className="flex flex-col gap-5 lg:col-span-6 xl:col-span-6">
+            <div className="flex flex-col gap-5 lg:col-span-6">
               <Card tone="institutional">
                 <CardHeader className="pb-2">
                   <CardTitle>Desempenho por Jogo</CardTitle>
@@ -543,7 +558,7 @@ export default function PainelPais({
                 <CardContent className="space-y-3.5">
                   {dados.jogos.map((j) => {
                     const pct = j.average_score === null ? 0 : Math.round(j.average_score);
-                    const cor = COR_BARRA_JOGO[j.game_id] || "#92CCF0";
+                    const cor = COR_BARRA_JOGO[j.game_id] || "#3B9B7E";
                     return (
                       <div
                         key={j.game_id}
@@ -561,11 +576,11 @@ export default function PainelPais({
                           </span>
                         </div>
                         <div
-                          className="h-2 w-full overflow-hidden rounded-full bg-slate-200/80 alto-contraste:border alto-contraste:border-slate-950 alto-contraste:bg-white"
+                          className="h-2.5 w-full overflow-hidden rounded-full bg-inst-subtle"
                           aria-hidden="true"
                         >
                           <div
-                            className="h-full rounded-full transition-all duration-300 alto-contraste:bg-slate-950"
+                            className="h-full rounded-full transition-all duration-300"
                             style={{ width: `${pct}%`, backgroundColor: cor }}
                           />
                         </div>

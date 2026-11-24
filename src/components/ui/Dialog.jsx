@@ -50,7 +50,6 @@ export function Dialog({
         transition={{ type: "spring", stiffness: 420, damping: 32 }}
         className={cn(
           "flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-inst-border bg-inst-surface shadow-2xl sm:max-h-[85vh] sm:rounded-3xl",
-          "alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none",
           className
         )}
       >

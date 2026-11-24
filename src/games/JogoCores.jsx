@@ -8,7 +8,6 @@ import { tocarAcerto, tocarErro } from "../utils/sons";
 import Casca from "../components/Casca";
 import { cn } from "../lib/cn";
 
-// Tons equilibrados (não fluorescentes), sombra 3D e forma geométrica auxiliar por cor (acessibilidade TEA / daltonismo)
 const ESTILO_COR = {
   vermelho: { bg: "#D9534F", sombra: "#B03B37", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.62)", forma: "triangulo" },
   azul: { bg: "#2B70D6", sombra: "#1E52A3", texto: "#FFFFFF", iconeFill: "rgba(255,255,255,0.68)", forma: "quadrado" },
@@ -23,7 +22,11 @@ const ESTILO_COR = {
 
 function FormaAuxiliar({ forma, fill }) {
   return (
-    <svg viewBox="0 0 36 36" width="32" height="32" aria-hidden="true" className="shrink-0">
+    <svg
+      viewBox="0 0 36 36"
+      aria-hidden="true"
+      className="h-6 w-6 shrink-0 sm:h-8 sm:w-8"
+    >
       {forma === "triangulo" && <polygon points="18,4 33,31 3,31" fill={fill} />}
       {forma === "trianguloInv" && <polygon points="3,6 33,6 18,32" fill={fill} />}
       {forma === "quadrado" && <rect x="5" y="5" width="26" height="26" rx="3" fill={fill} />}
@@ -45,7 +48,7 @@ function capitalizar(texto = "") {
 
 function gerarRodada(idade) {
   const nivel = String(idade);
-  const qtd = nivel === "10" ? 5 : nivel === "9" ? 4 : 4;
+  const qtd = nivel === "10" ? 5 : 4;
   const alvo = rnd(CORES);
 
   let outras;
@@ -73,6 +76,7 @@ function gerarRodada(idade) {
 export default function JogoCores(p) {
   const total = p.total ?? 5;
   const idade = p.idade ?? "8";
+  const calmo = Boolean(p.calmo);
   const [e, setE] = useState(0);
   const [r, setR] = useState(() => gerarRodada(idade));
   const [ok, setOk] = useState(null);
@@ -136,12 +140,7 @@ export default function JogoCores(p) {
         </>
       }
     >
-      <div
-        className={cn(
-          "mx-auto grid w-full max-w-2xl grid-cols-1 gap-5 sm:grid-cols-2",
-          r.ops.length === 5 && "sm:grid-cols-2"
-        )}
-      >
+      <div className="mx-auto grid w-full max-w-2xl grid-cols-2 gap-3 sm:gap-5">
         {r.ops.map((c, idx) => {
           const estilo = ESTILO_COR[c.n] || {
             bg: c.h,
@@ -158,34 +157,33 @@ export default function JogoCores(p) {
             <motion.button
               key={c.n}
               type="button"
-              whileHover={{ y: -2 }}
-              whileTap={{ y: 3, scale: 0.99 }}
+              whileHover={calmo ? undefined : { y: -2 }}
+              whileTap={calmo ? undefined : { y: 3, scale: 0.99 }}
               transition={{ type: "spring", stiffness: 450, damping: 28 }}
               onClick={() => escolher(c)}
               aria-label={capitalizar(c.n)}
               style={{
                 backgroundColor: estilo.bg,
                 color: estilo.texto,
-                boxShadow: `0 7px 0 ${estilo.sombra}`,
+                boxShadow: `0 6px 0 ${estilo.sombra}`,
               }}
               className={cn(
-                "relative flex min-h-[112px] w-full items-center justify-center gap-4 rounded-[28px] px-6 py-5 font-display text-3xl font-semibold tracking-tight transition-[box-shadow,outline,transform]",
-                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6E9CE2] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F5F3EC]",
-                acertou && "ring-4 ring-[#6E9CE2] ring-offset-4 ring-offset-[#F5F3EC]",
-                errou && "animate-[balanca_0.42s_ease]",
-                centralizarUltimo && "sm:col-span-2 sm:mx-auto sm:max-w-[calc(50%-0.625rem)]",
-                "alto-contraste:border-3 alto-contraste:border-slate-950"
+                "relative flex min-h-[84px] sm:min-h-[112px] w-full items-center justify-center gap-2.5 sm:gap-4 rounded-[22px] sm:rounded-[28px] px-3 py-4 sm:px-6 sm:py-5 font-display text-lg sm:text-3xl font-semibold tracking-tight transition-[box-shadow,outline,transform]",
+                "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6E9CE2] focus-visible:ring-offset-3 focus-visible:ring-offset-[#F5F3EC]",
+                acertou && "ring-4 ring-[#6E9CE2] ring-offset-3 ring-offset-[#F5F3EC]",
+                errou && !calmo && "animate-[balanca_0.42s_ease]",
+                centralizarUltimo && "col-span-2 mx-auto w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.625rem)]"
               )}
             >
               <FormaAuxiliar forma={estilo.forma} fill={estilo.iconeFill} />
-              <span>{capitalizar(c.n)}</span>
+              <span className="truncate">{capitalizar(c.n)}</span>
 
               {acertou && (
                 <span
-                  className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-success shadow-xs"
+                  className="absolute right-2.5 top-2.5 sm:right-4 sm:top-4 inline-flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-white text-success shadow-xs"
                   aria-hidden="true"
                 >
-                  <Check size={19} strokeWidth={3} />
+                  <Check size={17} strokeWidth={3} />
                 </span>
               )}
             </motion.button>

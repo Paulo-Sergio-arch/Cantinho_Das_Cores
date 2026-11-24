@@ -88,7 +88,6 @@ export default function App() {
   const [efeitos, setEfeitos] = useState(() => lerStorage("cc_efeitos", true));
   const [velocidade, setVelocidade] = useState(() => lerStorage("cc_vel", "calma"));
   const [fonteMaior, setFonteMaior] = useState(() => lerStorage("cc_fonte_maior", false));
-  const [altoContraste, setAltoContraste] = useState(() => lerStorage("cc_contraste", false));
   const [calmo, setCalmo] = useState(() => lerStorage("cc_calmo", false));
   const [totalRodadas, setTotalRodadas] = useState(() => lerStorage("cc_total", 5));
   const [idade, setIdade] = useState(() => lerStorage("cc_idade", "8"));
@@ -118,10 +117,6 @@ export default function App() {
   useEffect(() => {
     gravarStorage("cc_fonte_maior", fonteMaior);
   }, [fonteMaior]);
-
-  useEffect(() => {
-    gravarStorage("cc_contraste", altoContraste);
-  }, [altoContraste]);
 
   useEffect(() => {
     gravarStorage("cc_calmo", calmo);
@@ -524,7 +519,6 @@ export default function App() {
     ehJogo ? "area-jogo" : "",
     ehAreaInstitucional ? "area-institucional" : "",
     fonteMaior ? "fonte-maior" : "",
-    altoContraste ? "alto-contraste" : "",
     calmo ? "modo-calmo" : "",
   ]
     .filter(Boolean)
@@ -585,8 +579,6 @@ export default function App() {
             }
             fonteMaior={fonteMaior}
             onToggleFonteMaior={() => setFonteMaior((f) => !f)}
-            altoContraste={altoContraste}
-            onToggleAltoContraste={() => setAltoContraste((a) => !a)}
             calmo={calmo}
             onToggleCalmo={() => setCalmo((c) => !c)}
             totalRodadas={rodadasEfetivas}
@@ -613,17 +605,15 @@ export default function App() {
         )}
 
         {JogoAtivo && (
-          <main className="relative z-10 flex w-full max-w-6xl flex-col items-center px-4 py-4 sm:px-6 sm:py-6">
+          <main className="relative z-10 flex w-full max-w-6xl flex-col items-center px-3.5 py-4 sm:px-6 sm:py-6">
             <JogoAtivo
               key={`${chave}-${rodadasEfetivas}-${idadeEfetiva}`}
               total={rodadasEfetivas}
               idade={idadeEfetiva}
               calmo={calmo}
               som={som}
-              altoContraste={altoContraste}
               onToggleSom={() => setSom((s) => !s)}
               onToggleCalmo={() => setCalmo((c) => !c)}
-              onToggleAltoContraste={() => setAltoContraste((a) => !a)}
               onRegistrarAbandonoRef={abandonarJogoRef}
               onSair={voltarParaMenu}
               onNovo={() => {

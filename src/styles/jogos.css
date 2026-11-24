@@ -1,6 +1,4 @@
-/* Palcos e peças dos 6 jogos — Estética Sensorial Calma (TEA)
- * Superfícies neutras em marfim (#FCFBF8) para que a cor exista apenas
- * onde ela é estímulo pedagógico da atividade. */
+/* Palcos e peças dos jogos — Responsivos para Celular, Tablet e Desktop */
 
 .cru {
   position: relative;
@@ -30,160 +28,72 @@
 
 .acoes {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 18px;
-}
-
-/* Jogo 1: Acerte a cor */
-.bola {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  border: 5px solid #FFFFFF;
-  box-shadow: 0 5px 0 rgba(31, 45, 77, 0.16), inset 0 -7px 0 rgba(0, 0, 0, 0.1);
-}
-
-.bola-ok {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.96);
-  color: var(--verde);
-  font-size: 1.45rem;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 2px 6px rgba(31, 45, 77, 0.2);
-}
-
-.cores {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #FCFBF8;
-  border: 2px solid #E5DFD2;
-  border-radius: 28px;
-  min-height: 360px;
-  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
-}
-
-.alvo {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 16px;
-}
-
-.cores-seta {
-  position: absolute;
-  right: -16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #FCFBF8;
-  color: var(--azul);
-  border: 2px solid #D5CEBE;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 2px 6px rgba(31, 45, 77, 0.08);
-  pointer-events: none;
-  z-index: 2;
-}
-
-.ficha-cor {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px;
-}
-
-.bola-nome {
-  font-family: var(--fonte-titulo);
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  color: var(--tinta);
-  background: #EFECE3;
-  padding: 2px 11px;
-  border-radius: 999px;
-}
-
-.anel {
-  display: grid;
-  place-items: center;
-  width: clamp(114px, 32vw, 160px);
-  height: clamp(114px, 32vw, 160px);
-  border-radius: 50%;
-  border: 3px dashed #BFCAD9;
-  background: #F6F4EE;
-}
-
-.anel .bola {
-  width: clamp(78px, 24vw, 112px);
-  height: clamp(78px, 24vw, 112px);
-  border-width: 7px;
-}
-
-.opcoes {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  gap: 12px;
-  border-left: 2px dashed #DDD6C6;
-  padding: 16px 12px;
-}
-
-.cores.cores-muitas .opcoes {
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: center;
-  gap: 12px;
-}
-
-.cores.cores-muitas .opcoes .ficha {
-  min-width: 82px;
-  min-height: 82px;
-}
-
-.cores.cores-muitas .opcoes .bola {
-  width: 58px;
-  height: 58px;
+  width: 100%;
 }
 
 /* Jogo 2: Encaixe as formas */
-.linha {
+.encaixe-wrap {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.encaixe-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
   border-radius: 26px;
-  padding: 16px;
+  padding: 14px;
   box-shadow: 0 4px 14px rgba(31, 45, 77, 0.04), 0 3px 0 #E5DFD2;
 }
 
-.linha.chao {
-  background: #F3EFE6;
+.encaixe-secao.chao {
+  background: #EFECE3;
   border-color: #DDD6C6;
-  margin-top: 12px;
+}
+
+.encaixe-rotulo {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+.linha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+  gap: 10px;
+  justify-items: center;
+  align-items: center;
+  width: 100%;
+}
+
+.encaixe-pecas .ficha,
+.encaixe-secao .ficha {
+  width: 100%;
+  max-width: 106px;
+  aspect-ratio: 1;
+  min-height: 74px;
+  padding: 8px;
 }
 
 .encaixe-pecas .ficha {
   cursor: grab;
+}
+
+.encaixe-secao .ficha svg {
+  width: min(100%, 66px);
+  height: min(100%, 66px);
 }
 
 .buraco {
@@ -207,87 +117,102 @@
 /* Jogo 3: Ligue ao nome */
 .ligar {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(84px, 0.74fr) minmax(0, 1.4fr);
+  gap: 10px;
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
-  border-radius: 28px;
-  padding: 16px;
+  border-radius: 26px;
+  padding: 12px;
   box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
+  width: 100%;
 }
 
 .col {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .col .ficha {
-  min-height: 74px;
+  min-height: 68px;
   width: 100%;
-  padding: 8px 12px;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.col .ficha.par {
+  padding-top: 22px;
 }
 
 .pictograma-svg {
   display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 .par-selo {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 5px;
+  right: 6px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: var(--verde);
   color: #FFFFFF;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .pal {
   font-family: var(--fonte-titulo);
-  font-size: clamp(1.2rem, 4.2vw, 1.5rem);
+  font-size: clamp(0.95rem, 3.6vw, 1.42rem);
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 /* Jogo 4: Cor e forma */
 .grade2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
-  border-radius: 28px;
-  padding: 18px;
+  border-radius: 26px;
+  padding: 14px;
   box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
-}
-
-.grade2.grade3 {
-  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
 }
 
 .grade2 .ficha {
-  min-height: 128px;
+  min-height: 112px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
 }
 
-.grade2.grade3 .ficha {
-  min-height: 112px;
+.grade2 .ficha svg {
+  width: clamp(58px, 16vw, 88px);
+  height: clamp(58px, 16vw, 88px);
 }
 
 .selo-ok-card {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--verde);
   color: #FFFFFF;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   display: grid;
   place-items: center;
@@ -297,20 +222,21 @@
 .fala-card {
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
-  border-radius: 28px;
-  padding: 24px 18px;
+  border-radius: 26px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
 }
 
 .fala-ilustracao {
   display: grid;
   place-items: center;
-  width: 108px;
-  height: 108px;
-  border-radius: 26px;
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
   background: #F6F4EE;
   border: 2px solid #E5DFD2;
   margin-bottom: 10px;
@@ -319,33 +245,35 @@
 .palavra {
   font-family: var(--fonte-titulo);
   font-weight: 600;
-  font-size: clamp(2rem, 8.5vw, 3rem);
+  font-size: clamp(1.65rem, 7vw, 2.85rem);
   line-height: 1.15;
   color: var(--tinta);
   margin-top: 2px;
   text-align: center;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .silabas {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 14px;
   font-family: var(--fonte-titulo);
   font-weight: 600;
-  font-size: 1.55rem;
+  font-size: clamp(1.08rem, 4.4vw, 1.48rem);
 }
 
 .silabas span.silaba-texto,
 .silaba-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 46px;
+  gap: 5px;
+  min-height: 44px;
   border: 2px solid #E5DFD2;
-  padding: 6px 16px;
-  border-radius: 16px;
+  padding: 6px 13px;
+  border-radius: 15px;
   background: #F6F4EE;
   color: var(--tinta);
   box-shadow: 0 3px 0 #DDD6C6;
@@ -374,15 +302,16 @@
 }
 
 .frase {
-  margin: 16px 0 0;
-  font-size: 1.12rem;
+  margin: 14px 0 0;
+  font-size: clamp(0.98rem, 3.6vw, 1.12rem);
   font-weight: 700;
   background: #F6F4EE;
   border: 1px solid #E5DFD2;
   border-radius: 16px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   text-align: center;
   color: var(--tinta);
+  max-width: 100%;
 }
 
 .guia-pulsar {
@@ -391,7 +320,7 @@
 
 .dica-fala {
   margin: 12px 0 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
   text-align: center;
   color: var(--tinta-suave);
@@ -402,39 +331,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
 }
 
 .frutas-hud {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   width: 100%;
+  max-width: 440px;
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
   border-radius: 22px;
-  padding: 10px 14px;
+  padding: 10px 12px;
   box-shadow: 0 3px 0 #E5DFD2;
 }
 
 .frutas-metas {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .fruta-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: #F6F4EE;
   border: 2px solid #DDD6C6;
-  border-radius: 14px;
-  padding: 4px 10px 4px 6px;
+  border-radius: 13px;
+  padding: 3px 9px 3px 5px;
   font-weight: 700;
-  font-size: 0.92rem;
+  font-size: 0.86rem;
 }
 
 .fruta-meta.ok {
@@ -451,11 +384,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 76px;
-  padding: 6px 12px;
+  min-width: 68px;
+  padding: 6px 10px;
   border-radius: 14px;
-  background: #EAF2FF;
-  border: 2px solid #C2D8F7;
+  background: #E5F3F0;
+  border: 2px solid #B9DDD4;
+  color: #17574E;
   line-height: 1.1;
   flex-shrink: 0;
 }
@@ -467,7 +401,7 @@
 }
 
 .jogadas-rotulo {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -475,20 +409,20 @@
 
 .jogadas-valor {
   font-family: var(--fonte-titulo);
-  font-size: 1.4rem;
+  font-size: 1.32rem;
 }
 
 .frutas-tabuleiro {
   position: relative;
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
   aspect-ratio: 1;
   display: grid;
-  gap: 7px;
-  padding: 14px;
+  gap: 5px;
+  padding: 10px;
   background: #FCFBF8;
   border: 2px solid #E5DFD2;
-  border-radius: 28px;
+  border-radius: 26px;
   box-shadow: 0 6px 20px rgba(31, 45, 77, 0.06), 0 4px 0 #E5DFD2;
   touch-action: none;
   user-select: none;
@@ -496,9 +430,9 @@
 
 .frutas-linhas {
   position: absolute;
-  inset: 14px;
-  width: calc(100% - 28px);
-  height: calc(100% - 28px);
+  inset: 10px;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
   pointer-events: none;
   z-index: 2;
 }
@@ -506,12 +440,12 @@
 .fruta-peca {
   position: relative;
   z-index: 3;
-  width: 88%;
-  height: 88%;
+  width: 92%;
+  height: 92%;
   margin: auto;
-  border: 3px solid #FFFFFF;
+  border: 2.5px solid #FFFFFF;
   border-radius: 50%;
-  padding: 4px;
+  padding: 3px;
   display: grid;
   place-items: center;
   transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
@@ -573,48 +507,65 @@
   }
 }
 
-@media (max-width: 480px) {
-  .bola {
-    width: 64px;
-    height: 64px;
+/* Tablet e Desktop (>= 560px) */
+@media (min-width: 560px) {
+  .encaixe-secao {
+    padding: 18px;
   }
 
-  .cores.cores-muitas .opcoes .ficha {
-    min-width: 66px;
-    min-height: 66px;
-  }
-
-  .cores.cores-muitas .opcoes .bola {
-    width: 46px;
-    height: 46px;
-  }
-
-  .linha {
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .linha.chao {
-    margin-top: 10px;
-  }
-
-  .linha .ficha {
-    min-width: 72px;
-    min-height: 72px;
-    border-radius: 20px;
-  }
-
-  .linha .ficha svg {
-    width: 50px;
-    height: 50px;
+  .linha-grid {
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 12px;
   }
 
   .ligar {
-    gap: 10px;
-    padding: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
   }
 
-  .silabas {
-    font-size: 1.45rem;
+  .col .ficha {
+    min-height: 76px;
+    padding: 10px 14px;
+  }
+
+  .col .ficha.par {
+    padding-top: 10px;
+    padding-right: 44px;
+  }
+
+  .grade2 {
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .grade2.grade3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .grade2 .ficha {
+    min-height: 128px;
+  }
+
+  .fala-card {
+    padding: 26px 24px;
+  }
+
+  .frutas-tabuleiro {
+    gap: 7px;
+    padding: 14px;
+  }
+
+  .frutas-linhas {
+    inset: 14px;
+    width: calc(100% - 28px);
+    height: calc(100% - 28px);
+  }
+
+  .fruta-peca {
+    width: 88%;
+    height: 88%;
+    border-width: 3px;
+    padding: 4px;
   }
 }
