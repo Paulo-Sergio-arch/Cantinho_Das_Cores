@@ -37,14 +37,19 @@ const META_JOGOS = {
 };
 
 const CHAVE_FILA = "cc_fila_partidas";
+const CHAVE_FEITOS_MAPA = "cc_feitos_por_perfil";
 const INICIO_PAGINA = Date.now();
 
 function lerFila() {
   return lerStorage(CHAVE_FILA, []);
 }
 
+// Mapeia qualquer idade cadastrada (3..18 anos) para um dos 3 níveis pedagógicos do front (8=Fácil, 9=Médio, 10=Avançado).
 function idadeDoPerfil(idade) {
-  return String(Math.min(10, Math.max(8, Number(idade) || 8)));
+  const n = Number(idade) || 8;
+  if (n <= 8) return "8";
+  if (n === 9) return "9";
+  return "10";
 }
 
 function lerStorage(chave, fallback) {
@@ -87,7 +92,8 @@ export default function App() {
   const [totalRodadas, setTotalRodadas] = useState(() => lerStorage("cc_total", 5));
   const [idade, setIdade] = useState(() => lerStorage("cc_idade", "8"));
   const [chave, setChave] = useState(0);
-  const [feitos, setFeitos] = useState(() => lerStorage("cc_feitos", {}));
+  const [feitosMapa, setFeitosMapa] = useState(() => lerStorage(CHAVE_FEITOS_MAPA, {}));
+  const [feitosVisitante, setFeitosVisitante] = useState({});
   const [vozes, setVozes] = useState([]);
   const [vozSel, setVozSel] = useState(() => lerStorage("cc_voz", ""));
   const [depthFisica, setDepthFisica] = useState("3d");
@@ -141,6 +147,7 @@ export default function App() {
     salvarToken("");
     setUsuario(null);
     setCriancas([]);
+    setFeitosVisitante({});
     setAvisoLogin(aviso);
     setTela("login");
     sincronizarUrl("login", "jogos", { replace: true });
@@ -151,7 +158,7 @@ export default function App() {
     return () => definirAoExpirar(null);
   }, [limparSessao]);
 
-  // Restaura a sessão a partir do token da aba, confirmando com GET /api/auth/me e preservando a rota (F5).
+  // Restaura a sessão a partir do token salvo, confirmando com GET /api/auth/me e preservando a rota (F5).
   useEffect(() => {
     if (!lerToken()) {
       sincronizarUrl("login", "jogos", { replace: true });
@@ -172,7 +179,7 @@ export default function App() {
       })
       .catch((e) => {
         if (!ativo) return;
-        if (e.status === 401) return; // aoExpirar já cuidou do aviso
+        if (e.status === 401) return;
         setAvisoLogin(e.message);
         setTela("login");
         sincronizarUrl("login", "jogos", { replace: true });
@@ -212,7 +219,7 @@ export default function App() {
     if (!usuario || !lerToken()) return;
     let timerId = null;
     let cancelado = false;
-    const MARGEM_MS = 5 * 60 * 1000; // renova 5 minutos antes de expirar
+    const MARGEM_MS = 5 * 60 * 1000;
 
     const agendar = () => {
       if (cancelado || !lerToken()) return;
@@ -226,7 +233,7 @@ export default function App() {
           if (!cancelado && atualizado) setUsuario(atualizado);
           agendar();
         } catch {
-          // Em 401 o callback aoExpirar encerra a sessão; falhas temporárias tentam novamente ao voltar foco.
+          // Em 401 o callback aoExpirar encerra a sessão
         }
       }, espera);
     };
@@ -280,6 +287,10 @@ export default function App() {
         const valido = lista.some((c) => String(c.id) === String(atual));
         const novo = valido ? atual : lista[0]?.id ?? "";
         gravarStorage("cc_crianca", novo);
+        const perfilEscolhido = lista.find((c) => String(c.id) === String(novo));
+        if (perfilEscolhido && perfilEscolhido.voice_enabled !== undefined) {
+          setSom(Boolean(perfilEscolhido.voice_enabled));
+        }
         return novo;
       });
     } catch (e) {
@@ -293,9 +304,17 @@ export default function App() {
   }, [responsavel?.id, carregarCriancas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const criancaAtiva = criancas.find((c) => String(c.id) === String(ativaId)) || null;
-  // Com perfil ativo, a idade vem do perfil e as partidas têm 5 rodadas (regra do banco: concluída = 5 acertos).
   const idadeEfetiva = criancaAtiva ? idadeDoPerfil(criancaAtiva.age) : idade;
   const rodadasEfetivas = criancaAtiva ? 5 : totalRodadas;
+
+  const chavePerfilFeitos =
+    responsavel && criancaAtiva
+      ? `resp:${responsavel.id}:child:${criancaAtiva.id}`
+      : responsavel
+        ? `resp:${responsavel.id}:sem_perfil`
+        : null;
+
+  const feitosAtuais = chavePerfilFeitos ? feitosMapa[chavePerfilFeitos] || {} : feitosVisitante;
 
   // Fila de partidas pendentes (falha de rede/servidor): fica no navegador e é reenviada depois.
   const enviarFila = useCallback(async () => {
@@ -308,9 +327,7 @@ export default function App() {
           gravarStorage(CHAVE_FILA, lerFila().filter((i) => i.chave !== item.chave));
           setAvisoApi({ texto: "Partidas pendentes enviadas.", tipo: "ok" });
         } catch (e) {
-          // Rede, servidor ou sessão expirada (401): mantém a partida na fila para o próximo login do mesmo responsável.
           if (e.rede || e.status >= 500 || e.status === 401) break;
-          // Rejeitada pela API (ex.: criança removida): descartar para não travar a fila.
           gravarStorage(CHAVE_FILA, lerFila().filter((i) => i.chave !== item.chave));
         }
       }
@@ -352,6 +369,7 @@ export default function App() {
 
   const aoAutenticar = (u) => {
     setUsuario(u);
+    setFeitosVisitante({});
     setAvisoLogin("");
     setAvisoApi(null);
     setAbaMenu("jogos");
@@ -382,6 +400,12 @@ export default function App() {
     sincronizarUrl("menu", novaAba);
   };
 
+  const excluirConta = async (senhaConfirmacao) => {
+    cancelarFala();
+    await authApi.excluirMinhaConta(senhaConfirmacao);
+    limparSessao("Sua conta e todos os dados vinculados foram excluídos com sucesso.");
+  };
+
   const selecionarJogo = (id) => {
     cancelarFala();
     setChave((c) => c + 1);
@@ -397,13 +421,21 @@ export default function App() {
 
   const gravarSessao = async (id, resumo, incrementarConcluidos, opcoes = {}) => {
     if (incrementarConcluidos) {
-      setFeitos((f) => {
-        const atualizado = { ...f, [id]: (f[id] || 0) + 1 };
-        gravarStorage("cc_feitos", atualizado);
-        return atualizado;
-      });
+      if (chavePerfilFeitos) {
+        setFeitosMapa((mapa) => {
+          const anterior = mapa[chavePerfilFeitos] || {};
+          const atualizado = {
+            ...mapa,
+            [chavePerfilFeitos]: { ...anterior, [id]: (anterior[id] || 0) + 1 },
+          };
+          gravarStorage(CHAVE_FEITOS_MAPA, atualizado);
+          return atualizado;
+        });
+      } else {
+        setFeitosVisitante((f) => ({ ...f, [id]: (f[id] || 0) + 1 }));
+      }
     }
-    if (!responsavel || !criancaAtiva) return; // visitante ou sem perfil: nada é salvo
+    if (!responsavel || !criancaAtiva) return;
 
     const chaveSessao = `${responsavel.id}-${criancaAtiva.id}-${id}-${chave}-${INICIO_PAGINA}`;
     if (enviadasRef.current.has(chaveSessao)) return;
@@ -411,8 +443,11 @@ export default function App() {
 
     const payload = montarPayload(criancaAtiva.id, id, resumo, new Date().toISOString());
     if (opcoes.aoFechar) {
-      // A página está fechando: tentativa única, sem fila (evita duplicar se o envio chegar).
-      registrarPartida(payload, { keepalive: true }).catch(() => {});
+      registrarPartida(payload, { keepalive: true }).catch((e) => {
+        if (e.rede || e.status >= 500) {
+          gravarStorage(CHAVE_FILA, [...lerFila(), { chave: chaveSessao, donoId: responsavel.id, payload }]);
+        }
+      });
       return;
     }
     try {
@@ -436,15 +471,20 @@ export default function App() {
     onSelecionar: (id) => {
       setAtivaId(id);
       gravarStorage("cc_crianca", id);
+      const escolhida = criancas.find((c) => String(c.id) === String(id));
+      if (escolhida && escolhida.voice_enabled !== undefined) {
+        setSom(Boolean(escolhida.voice_enabled));
+      }
     },
-    onSalvar: async ({ id, nome, idade: idadeForm }) => {
+    onSalvar: async ({ id, nome, idade: idadeForm, vozAtiva }) => {
       const salva = id
-        ? await criancasApi.editarCrianca(id, { nome, idade: idadeForm })
-        : await criancasApi.criarCrianca({ nome, idade: idadeForm });
+        ? await criancasApi.editarCrianca(id, { nome, idade: idadeForm, vozAtiva })
+        : await criancasApi.criarCrianca({ nome, idade: idadeForm, vozAtiva });
       setCriancas((lista) => (id ? lista.map((c) => (c.id === id ? salva : c)) : [...lista, salva]));
-      if (!id) {
+      if (!id || String(ativaId) === String(salva.id)) {
         setAtivaId(salva.id);
         gravarStorage("cc_crianca", salva.id);
+        if (salva.voice_enabled !== undefined) setSom(Boolean(salva.voice_enabled));
       }
     },
     onExcluir: async (id) => {
@@ -555,10 +595,12 @@ export default function App() {
           seedFisica={seedFisica}
           onReiniciarBloquinhos={() => setSeedFisica((s) => s + 1)}
           onSair={sair}
+          onAlterarSenha={authApi.alterarSenha}
+          onExcluirConta={excluirConta}
           vozes={vozes}
           vozSel={vozSel}
           onTrocarVoz={trocarVoz}
-          feitos={feitos}
+          feitos={feitosAtuais}
           onSelecionarJogo={selecionarJogo}
         />
       )}

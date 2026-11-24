@@ -90,6 +90,8 @@ export default function Menu({
   idadeTravada,
   rodadasTravadas,
   onSair,
+  onAlterarSenha,
+  onExcluirConta,
   vozes,
   vozSel,
   onTrocarVoz,
@@ -97,6 +99,13 @@ export default function Menu({
   onSelecionarJogo,
 }) {
   const [abrirPrefs, setAbrirPrefs] = useState(false);
+  const [abrirConta, setAbrirConta] = useState(false);
+  const [senhaAtual, setSenhaAtual] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [senhaExclusao, setSenhaExclusao] = useState("");
+  const [msgConta, setMsgConta] = useState("");
+  const [erroConta, setErroConta] = useState("");
+  const [ocupadoConta, setOcupadoConta] = useState(false);
   const shapeRef = useRef(null);
   const faixaAtual = obterFaixaEtaria(idade);
 
@@ -109,6 +118,41 @@ export default function Menu({
     if (ev.key === "Home") proximo = 0;
     if (ev.key === "End") proximo = ABAS.length - 1;
     onAlterarAba(ABAS[proximo].id);
+  };
+
+  const salvarNovaSenha = async (ev) => {
+    ev.preventDefault();
+    if (ocupadoConta || !onAlterarSenha) return;
+    setErroConta("");
+    setMsgConta("");
+    if (!senhaAtual) return setErroConta("Digite sua senha atual.");
+    if (novaSenha.length < 8) return setErroConta("A nova senha precisa ter pelo menos 8 caracteres.");
+    setOcupadoConta(true);
+    try {
+      await onAlterarSenha({ senhaAtual, novaSenha });
+      setSenhaAtual("");
+      setNovaSenha("");
+      setMsgConta("Senha atualizada com sucesso.");
+    } catch (e) {
+      setErroConta(e.message);
+    } finally {
+      setOcupadoConta(false);
+    }
+  };
+
+  const confirmarExclusaoConta = async (ev) => {
+    ev.preventDefault();
+    if (ocupadoConta || !onExcluirConta) return;
+    setErroConta("");
+    setMsgConta("");
+    if (!senhaExclusao) return setErroConta("Confirme sua senha para excluir a conta e todos os dados.");
+    setOcupadoConta(true);
+    try {
+      await onExcluirConta(senhaExclusao);
+    } catch (e) {
+      setErroConta(e.message);
+      setOcupadoConta(false);
+    }
   };
 
   return (
@@ -257,6 +301,72 @@ export default function Menu({
                   ))}
                 </select>
               </label>
+            )}
+            {!visitante && (onAlterarSenha || onExcluirConta) && (
+              <div style={{ borderTop: "1px dashed rgba(43,58,103,0.18)", paddingTop: "8px" }}>
+                <button
+                  type="button"
+                  className="chip"
+                  aria-expanded={abrirConta}
+                  onClick={() => {
+                    setAbrirConta((v) => !v);
+                    setErroConta("");
+                    setMsgConta("");
+                  }}
+                >
+                  {abrirConta ? "Ocultar dados da conta" : "Minha conta e privacidade (LGPD)"}
+                </button>
+                {abrirConta && (
+                  <div style={{ display: "grid", gap: "12px", marginTop: "10px" }}>
+                    <form onSubmit={salvarNovaSenha} style={{ display: "grid", gap: "8px", maxWidth: "400px" }}>
+                      <strong>Alterar senha</strong>
+                      <input
+                        className="campo-input"
+                        type="password"
+                        placeholder="Senha atual"
+                        value={senhaAtual}
+                        onChange={(e) => setSenhaAtual(e.target.value)}
+                      />
+                      <input
+                        className="campo-input"
+                        type="password"
+                        placeholder="Nova senha (mín. 8 caracteres)"
+                        value={novaSenha}
+                        onChange={(e) => setNovaSenha(e.target.value)}
+                      />
+                      <button type="submit" className="btn peq" disabled={ocupadoConta} aria-busy={ocupadoConta}>
+                        Salvar nova senha
+                      </button>
+                    </form>
+
+                    <form onSubmit={confirmarExclusaoConta} style={{ display: "grid", gap: "8px", maxWidth: "400px" }}>
+                      <strong>Excluir minha conta (LGPD)</strong>
+                      <small>Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.</small>
+                      <input
+                        className="campo-input"
+                        type="password"
+                        placeholder="Confirme sua senha para excluir"
+                        value={senhaExclusao}
+                        onChange={(e) => setSenhaExclusao(e.target.value)}
+                      />
+                      <button type="submit" className="btn perigo peq" disabled={ocupadoConta} aria-busy={ocupadoConta}>
+                        Excluir conta e todos os dados
+                      </button>
+                    </form>
+
+                    {erroConta && (
+                      <p className="erro" role="alert">
+                        {erroConta}
+                      </p>
+                    )}
+                    {msgConta && (
+                      <div className="aviso-api ok" role="status">
+                        <span>{msgConta}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

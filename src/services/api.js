@@ -1,7 +1,8 @@
-// Cliente HTTP único do front: URL base, token, cabeçalho Authorization e tratamento de erros.
+// Cliente HTTP único do front: URL base, token (sessionStorage ou localStorage), Authorization e erros amigáveis.
 const BASE = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 const CHAVE_TOKEN = "cc_token";
 const CHAVE_TOKEN_EXP = "cc_token_exp";
+const CHAVE_PERSISTIR = "cc_persistir_sessao";
 
 let aoExpirar = null;
 
@@ -13,10 +14,9 @@ export class ApiError extends Error {
   }
 }
 
-// O token fica em sessionStorage: some ao fechar a aba e não é compartilhado entre abas.
 export function lerToken() {
   try {
-    return sessionStorage.getItem(CHAVE_TOKEN) || "";
+    return sessionStorage.getItem(CHAVE_TOKEN) || localStorage.getItem(CHAVE_TOKEN) || "";
   } catch {
     return "";
   }
@@ -24,30 +24,43 @@ export function lerToken() {
 
 export function lerExpiracaoToken() {
   try {
-    const valor = Number(sessionStorage.getItem(CHAVE_TOKEN_EXP));
+    const bruto = sessionStorage.getItem(CHAVE_TOKEN_EXP) || localStorage.getItem(CHAVE_TOKEN_EXP);
+    const valor = Number(bruto);
     return Number.isFinite(valor) && valor > 0 ? valor : 0;
   } catch {
     return 0;
   }
 }
 
-export function salvarToken(token, expiresInSegundos = 0) {
+export function salvarToken(token, expiresInSegundos = 0, persistir = null) {
   try {
     if (token) {
-      sessionStorage.setItem(CHAVE_TOKEN, token);
+      const usarLocal =
+        persistir !== null ? Boolean(persistir) : localStorage.getItem(CHAVE_PERSISTIR) === "1";
+      const alvo = usarLocal ? localStorage : sessionStorage;
+      const outro = usarLocal ? sessionStorage : localStorage;
+
+      outro.removeItem(CHAVE_TOKEN);
+      outro.removeItem(CHAVE_TOKEN_EXP);
+      if (usarLocal) localStorage.setItem(CHAVE_PERSISTIR, "1");
+      else localStorage.removeItem(CHAVE_PERSISTIR);
+
+      alvo.setItem(CHAVE_TOKEN, token);
       if (expiresInSegundos > 0) {
-        sessionStorage.setItem(CHAVE_TOKEN_EXP, String(Date.now() + expiresInSegundos * 1000));
+        alvo.setItem(CHAVE_TOKEN_EXP, String(Date.now() + expiresInSegundos * 1000));
       }
     } else {
       sessionStorage.removeItem(CHAVE_TOKEN);
       sessionStorage.removeItem(CHAVE_TOKEN_EXP);
+      localStorage.removeItem(CHAVE_TOKEN);
+      localStorage.removeItem(CHAVE_TOKEN_EXP);
+      localStorage.removeItem(CHAVE_PERSISTIR);
     }
   } catch {
     // Armazenamento bloqueado: o login vale só até recarregar a página.
   }
 }
 
-// Chamado quando uma rota protegida responde 401 (token expirado ou inválido).
 export function definirAoExpirar(fn) {
   aoExpirar = fn;
 }
