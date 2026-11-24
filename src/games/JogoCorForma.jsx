@@ -141,6 +141,14 @@ export default function JogoCorForma(p) {
     }
   };
 
+  const falaVisual = dica ? (
+    dica
+  ) : (
+    <>
+      Toque {r.f.art === "o" ? "no" : "na"} <strong>{r.f.n}</strong> <strong>{corAlvo}</strong>
+    </>
+  );
+
   return (
     <Casca
       {...p}
@@ -148,6 +156,7 @@ export default function JogoCorForma(p) {
       estrelas={e}
       estatisticas={{ acertos, erros }}
       fala={dica || frase}
+      falaVisual={falaVisual}
     >
       <div className={`grade2 ${r.ops.length > 4 ? "grade3" : ""}`}>
         {r.ops.map((o) => {

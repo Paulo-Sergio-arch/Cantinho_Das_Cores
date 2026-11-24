@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { enviarRelatorio, gerarRelatorio, listarRelatorios } from "../services/relatorios";
+import { IconCopiar, IconEnviar, IconImprimir } from "../components/IconesUI";
 
 function hoje(deslocamentoDias = 0) {
   const d = new Date(Date.now() + deslocamentoDias * 86400000);
@@ -57,7 +58,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
       const novo = await gerarRelatorio(criancaId, inicio, fim);
       setLista((l) => [novo, ...l]);
       setAberto(novo.id);
-      setMsg("Relatório gerado.");
+      setMsg("Relatório gerado com sucesso.");
     } catch (e) {
       setErro(e.message);
     } finally {
@@ -95,91 +96,154 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
   const copiar = async (texto) => {
     try {
       await navigator.clipboard.writeText(texto);
-      setMsg("Texto copiado.");
+      setMsg("Texto do relatório copiado.");
     } catch {
       setErro("Não foi possível copiar. Selecione o texto e copie manualmente.");
     }
   };
 
+  const imprimir = () => {
+    window.print();
+  };
+
   return (
-    <div className="pais-bloco" aria-label="Relatórios pedagógicos">
+    <div className="pais-bloco rel-bloco-secao" aria-label="Relatórios pedagógicos">
       <div className="pais-bloco-topo">
-        <h3>Relatórios de {nomeCrianca}</h3>
+        <h2>Relatórios pedagógicos de {nomeCrianca}</h2>
         <span className="pais-legenda">{lista.length} gerado(s)</span>
       </div>
 
-      <form className="pais-filtros" onSubmit={gerar} noValidate>
-        <label className="pais-filtro-campo" htmlFor="rel-inicio">
-          <span>De</span>
-          <input id="rel-inicio" type="date" value={inicio} max={fim} onChange={(e) => setInicio(e.target.value)} />
-        </label>
-        <label className="pais-filtro-campo" htmlFor="rel-fim">
-          <span>Até</span>
-          <input id="rel-fim" type="date" value={fim} min={inicio} onChange={(e) => setFim(e.target.value)} />
-        </label>
-        <label className="pais-filtro-campo" htmlFor="rel-dest">
-          <span>E-mail para envio (opcional)</span>
+      <form className="rel-form no-print" onSubmit={gerar} noValidate>
+        <div className="campo-grupo">
+          <label className="campo-rotulo" htmlFor="rel-inicio">
+            De
+          </label>
+          <input
+            id="rel-inicio"
+            className="campo-input"
+            type="date"
+            value={inicio}
+            max={fim}
+            onChange={(e) => setInicio(e.target.value)}
+          />
+        </div>
+        <div className="campo-grupo">
+          <label className="campo-rotulo" htmlFor="rel-fim">
+            Até
+          </label>
+          <input
+            id="rel-fim"
+            className="campo-input"
+            type="date"
+            value={fim}
+            min={inicio}
+            onChange={(e) => setFim(e.target.value)}
+          />
+        </div>
+        <div className="campo-grupo rel-campo-email">
+          <label className="campo-rotulo" htmlFor="rel-dest">
+            E-mail para envio (opcional)
+          </label>
           <input
             id="rel-dest"
+            className="campo-input"
             type="email"
-            placeholder="padrão: seu e-mail"
+            placeholder="padrão: e-mail da sua conta"
             value={destinatario}
             onChange={(e) => setDestinatario(e.target.value)}
           />
-        </label>
-        <button type="submit" className="btn peq" disabled={gerando}>
+        </div>
+        <button type="submit" className="btn peq rel-btn-gerar" disabled={gerando} aria-busy={gerando}>
           {gerando ? "Gerando…" : "Gerar relatório"}
         </button>
       </form>
 
       {erro && (
-        <p className="erro" role="alert">
+        <p className="erro no-print" role="alert">
           {erro}
         </p>
       )}
       {msg && (
-        <p className="aviso-api ok" role="status">
-          {msg}
+        <div className="aviso-api ok no-print" role="status">
+          <span>{msg}</span>
+        </div>
+      )}
+      {carregando && (
+        <p className="no-print" role="status">
+          Carregando relatórios…
         </p>
       )}
-      {carregando && <p role="status">Carregando relatórios…</p>}
-      {!carregando && !erro && lista.length === 0 && <p>Nenhum relatório gerado ainda. Escolha o período e gere o primeiro.</p>}
+      {!carregando && !erro && lista.length === 0 && (
+        <p className="pais-subtitulo no-print">
+          Nenhum relatório gerado ainda. Escolha o período e clique em “Gerar relatório”.
+        </p>
+      )}
 
       <ul className="perfis-lista">
         {lista.map((r) => (
-          <li key={r.id} className="perfil-item">
-            <span className="perfil-nome">
+          <li key={r.id} className={`perfil-item ${aberto === r.id ? "rel-item-aberto" : "no-print"}`}>
+            <div className="perfil-nome no-print">
               <strong>
                 {soData(r.period_start)} a {soData(r.period_end)}
               </strong>
-              <br />
-              Gerado em {dataHora(r.generated_at)} ·{" "}
-              {r.sent ? `Enviado em ${dataHora(r.sent_at)}` : "Ainda não enviado"}
-            </span>
-            {!r.sent && (
+              <span className="perfil-meta">
+                Gerado em {dataHora(r.generated_at)} ·{" "}
+                <span className={`status-badge ${r.sent ? "concluida" : "pendente"}`}>
+                  {r.sent ? `Enviado em ${dataHora(r.sent_at)}` : "Ainda não enviado"}
+                </span>
+              </span>
+            </div>
+            <div className="perfil-acoes no-print">
+              {!r.sent && (
+                <button
+                  type="button"
+                  className="btn peq"
+                  disabled={enviandoId === r.id}
+                  aria-busy={enviandoId === r.id}
+                  onClick={() => enviar(r.id)}
+                >
+                  <IconEnviar size={15} />
+                  {enviandoId === r.id ? "Enviando…" : "Enviar relatório"}
+                </button>
+              )}
               <button
                 type="button"
-                className="btn peq"
-                disabled={enviandoId === r.id}
-                onClick={() => enviar(r.id)}
+                className="btn neutro peq"
+                aria-expanded={aberto === r.id}
+                onClick={() => setAberto(aberto === r.id ? null : r.id)}
               >
-                {enviandoId === r.id ? "Enviando…" : "Enviar relatório"}
+                {aberto === r.id ? "Ocultar" : "Ver relatório"}
               </button>
-            )}
-            <button
-              type="button"
-              className="btn sec peq"
-              aria-expanded={aberto === r.id}
-              onClick={() => setAberto(aberto === r.id ? null : r.id)}
-            >
-              {aberto === r.id ? "Ocultar" : "Ver relatório"}
-            </button>
+            </div>
             {aberto === r.id && (
-              <div style={{ flexBasis: "100%" }}>
-                <pre className="rel-texto">{r.text}</pre>
-                <button type="button" className="btn sec peq" onClick={() => copiar(r.text)}>
-                  Copiar texto
-                </button>
+              <div className="rel-documento-wrap">
+                <article className="rel-documento">
+                  <header className="rel-doc-cabecalho">
+                    <div>
+                      <span className="rel-doc-marca">Cantinho das Cores · Relatório Pedagógico</span>
+                      <h3>{nomeCrianca}</h3>
+                    </div>
+                    <div className="rel-doc-meta">
+                      <span>
+                        <strong>Período:</strong> {soData(r.period_start)} a {soData(r.period_end)}
+                      </span>
+                      <span>
+                        <strong>Emitido em:</strong> {dataHora(r.generated_at)}
+                      </span>
+                    </div>
+                  </header>
+                  <pre className="rel-texto">{r.text}</pre>
+                </article>
+                <div className="perfil-acoes no-print">
+                  <button type="button" className="btn neutro peq" onClick={() => copiar(r.text)}>
+                    <IconCopiar size={15} />
+                    Copiar texto
+                  </button>
+                  <button type="button" className="btn peq" onClick={imprimir}>
+                    <IconImprimir size={15} />
+                    Imprimir / Salvar PDF
+                  </button>
+                </div>
               </div>
             )}
           </li>

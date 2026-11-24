@@ -2,17 +2,18 @@
 
 Aplicação web educativa completa (**React + Vite + CSS puro** no Front-End e **Python + FastAPI + SQLite** no Back-End), com foco em acessibilidade, síntese de voz em português (`SpeechSynthesis`), interações táteis e acompanhamento pedagógico para pais e professores.
 
-**Demo publicada (GitHub Pages):** https://ca10v1ana.github.io/Cantinho_Das_Cores/
+**Demo publicada (Vercel):** https://cantinho-das-cores.vercel.app/  
+**Mirror (GitHub Pages):** https://ca10v1ana.github.io/Cantinho_Das_Cores/
 
 ---
 
 ## Jogos disponíveis
 
-1. **Acerte a cor** — Associe e arraste a bolinha até a cor correspondente.
+1. **Acerte a cor** — Associe e arraste a bolinha até a cor correspondente (com indicação visual de direção e rótulos de cor para acessibilidade).
 2. **Encaixe as formas** — Arraste ou selecione cada forma geométrica até seu encaixe.
-3. **Ligue ao nome** — Relacione cada figura à palavra escrita.
-4. **Cor e forma** — Identifique a combinação de cor e forma solicitada pela Nuvi.
-5. **Vamos falar** — Treino de fala por sílabas com leitura em voz suave e sílabas clicáveis.
+3. **Ligue ao nome** — Relacione cada figura (pictogramas SVG consistentes) à palavra escrita, com marcação numerada de pares concluídos.
+4. **Cor e forma** — Identifique a combinação de cor e forma solicitada pela Nuvi com destaque nos termos-chave.
+5. **Vamos falar** — Treino de fala por sílabas com leitura em voz suave, pictogramas SVG e sílabas clicáveis com indicação sonora.
 6. **Bloquinho de Frutas (Estilo Dots)** — Ligue duas ou mais frutinhas iguais vizinhas (ou feche um quadrado mágico) para colher as metas antes de acabar as jogadas.
 
 ---
@@ -20,10 +21,12 @@ Aplicação web educativa completa (**React + Vite + CSS puro** no Front-End e *
 ## Arquitetura Completa (Front-End + Back-End)
 
 - **Front-End (`src/`):**
-  - Níveis por faixa etária (`8 anos · Fácil`, `9 anos · Médio`, `10 anos · Avançado`).
-  - Aba `🧩 Bloquinhos` com `ShapePhysics` (Canvas2D nas cores clássicas do autismo).
-  - Aba `📊 Pais e Professores` com gráficos de evolução, matriz por jogo e idade, exportação CSV, **envio real de relatórios pedagógicos** (`📧 Enviar relatório`) e **acionamento de backup online do banco** (`💾 Backup BD`).
-  - Integração em [`src/services/api.js`](src/services/api.js) e [`src/services/partidas.js`](src/services/partidas.js) com fallback offline transparente em `localStorage`.
+  - Roteamento por URL via History API (`/login`, `/jogos`, `/bloquinhos`, `/criancas`, `/painel`, `/jogo/:id`), preservando navegação por Voltar/Avançar e F5.
+  - Separação visual entre o **Modo Criança** (Jogos e Bloquinhos) e a **Área Institucional** (Perfis das Crianças e Painel de Pais e Professores) com modo **Alto Contraste WCAG AAA** completo.
+  - Níveis por faixa etária (`8 anos · Fácil`, `9 anos · Médio`, `10 anos · Avançado`) e controle rápido de voz/mudo + confirmação suave de saída dentro de cada partida.
+  - Aba **Bloquinhos** com `ShapePhysics` (Canvas2D nas cores clássicas do autismo) e aviso integrado no Modo Calmo.
+  - Aba **Pais e Professores** com KPIs, gráfico de evolução responsivo, desempenho por jogo, histórico em cards responsivos no mobile, **exportação CSV**, **relatório pedagógico imprimível/PDF** e **envio real por e-mail**.
+  - Integração em [`src/services/api.js`](src/services/api.js) e [`src/services/partidas.js`](src/services/partidas.js) com fila offline transparente em `localStorage`.
 - **Back-End (`backend/`):**
   - **Regra definitiva de pontuação do Bloquinho de Frutas (`frutas`):** normaliza os acertos de `0` a `5` (compatível com as constraints do `schema.sql`), pondera precisão das conexões (70%) + progresso de metas (30%) e soma bônus por **Quadrados Mágicos** fechados (+5 pts cada, até +15) e **jogadas restantes** ao concluir (+2 pts cada, até +10), limitado a `0..100`.
   - **Canal real de envio dos relatórios (`backend/app/modules/reports/delivery.py`):** suporta envio via **SMTP / E-mail**, **Webhook HTTP** ou **Caixa de saída auditável** (`POST /api/reports/{id}/send` e `POST /api/reports/{id}/sent`).

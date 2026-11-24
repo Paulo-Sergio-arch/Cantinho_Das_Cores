@@ -5,6 +5,7 @@ import { falar } from "../utils/voz";
 import { tocarAcerto, tocarErro } from "../utils/sons";
 import Casca from "../components/Casca";
 import Arrasta from "../components/Arrasta";
+import { IconSetaDireita } from "../components/IconesUI";
 
 function gerarRodada(idade) {
   const nivel = String(idade);
@@ -40,6 +41,7 @@ function gerarRodada(idade) {
 export default function JogoCores(p) {
   const total = p.total ?? 5;
   const idade = p.idade ?? "8";
+  const mostrarNomes = Boolean(p.altoContraste);
   const [e, setE] = useState(0);
   const [r, setR] = useState(() => gerarRodada(idade));
   const [ok, setOk] = useState(null);
@@ -96,6 +98,11 @@ export default function JogoCores(p) {
       estrelas={e}
       estatisticas={{ acertos, erros }}
       fala={`Arraste a bolinha até o ${r.alvo.n}.`}
+      falaVisual={
+        <>
+          Arraste a bolinha até o <strong>{r.alvo.n}</strong>.
+        </>
+      }
     >
       <div className={`cores ${r.ops.length >= 4 ? "cores-muitas" : ""}`}>
         <div className="alvo">
@@ -110,6 +117,10 @@ export default function JogoCores(p) {
               <i className="bola" style={{ background: r.alvo.h }} />
             </Arrasta>
           </span>
+          {mostrarNomes && <span className="bola-nome">{r.alvo.n}</span>}
+          <span className="cores-seta" aria-hidden="true">
+            <IconSetaDireita size={24} />
+          </span>
         </div>
         <div className="opcoes">
           {r.ops.map((c) => {
@@ -120,7 +131,7 @@ export default function JogoCores(p) {
                 key={c.n}
                 data-alvo={c.n}
                 aria-label={c.n}
-                className={`ficha ${acertou ? "certo" : ""} ${
+                className={`ficha ficha-cor ${acertou ? "certo" : ""} ${
                   tente === c.n ? "tente" : ""
                 } ${sobre === c.n ? "sobre" : ""}`}
                 onClick={() => escolher(c)}
@@ -132,6 +143,9 @@ export default function JogoCores(p) {
                     </span>
                   )}
                 </i>
+                {(acertou || mostrarNomes) && (
+                  <span className="bola-nome">{c.n}</span>
+                )}
               </button>
             );
           })}

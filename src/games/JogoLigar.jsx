@@ -5,6 +5,7 @@ import { falar } from "../utils/voz";
 import { tocarAcerto, tocarErro, tocarSelecao } from "../utils/sons";
 import Casca from "../components/Casca";
 import Arrasta from "../components/Arrasta";
+import Pictograma from "../components/Pictograma";
 
 function gerarParesPorIdade(total, idade) {
   const nivel = String(idade);
@@ -93,11 +94,12 @@ export default function JogoLigar(p) {
       <div className="ligar">
         <div className="col">
           {it.esq.map((x) => {
-            const pareado = feito.includes(x.id);
+            const indicePar = feito.indexOf(x.id);
+            const pareado = indicePar !== -1;
             return (
               <Arrasta
                 key={x.id}
-                label={`desenho ${x.id}`}
+                label={pareado ? `desenho ${x.id}, par ${indicePar + 1} concluído` : `desenho ${x.id}`}
                 disabled={pareado}
                 onSobre={setSobre}
                 className={`${sel === x.id ? "sel" : ""} ${pareado ? "par" : ""}`}
@@ -109,21 +111,27 @@ export default function JogoLigar(p) {
                 }}
                 onSolta={(a) => ligar(x.id, a)}
               >
-                <span className="emo">{x.e}</span>
+                <Pictograma id={x.id} tam={50} />
+                {pareado && (
+                  <span className="par-selo" aria-hidden="true">
+                    ✓ {indicePar + 1}
+                  </span>
+                )}
               </Arrasta>
             );
           })}
         </div>
         <div className={`col ${sel ? "alvos-ativos" : ""}`}>
           {it.dir.map((x) => {
-            const pareado = feito.includes(x.id);
+            const indicePar = feito.indexOf(x.id);
+            const pareado = indicePar !== -1;
             return (
               <button
                 type="button"
                 key={x.id}
                 data-alvo={x.id}
                 disabled={pareado}
-                aria-label={pareado ? `${x.id}, pareado` : `ouvir ou ligar ${x.id}`}
+                aria-label={pareado ? `${x.id}, par ${indicePar + 1} concluído` : `ouvir ou ligar ${x.id}`}
                 className={`ficha ${sobre === x.id ? "sobre" : ""} ${
                   tente === x.id ? "tente" : ""
                 } ${lida === x.id ? "sel" : ""} ${pareado ? "par" : ""}`}
@@ -131,6 +139,11 @@ export default function JogoLigar(p) {
                 onClick={() => ligar(sel, x.id)}
               >
                 <span className="pal">{x.id}</span>
+                {pareado && (
+                  <span className="par-selo" aria-hidden="true">
+                    ✓ {indicePar + 1}
+                  </span>
+                )}
               </button>
             );
           })}

@@ -1,13 +1,14 @@
 import { falar } from "../utils/voz";
+import { IconVozOn } from "./IconesUI";
 
-export default function Nuvi({ fala, ouvivel = false }) {
+export default function Nuvi({ fala, falaVisual, ouvivel = false, compacta = false }) {
   return (
-    <div className="nuvi">
+    <div className={`nuvi ${compacta ? "nuvi-compacta" : ""}`.trim()}>
       <svg
         className="nuvi-arte"
         viewBox="0 0 120 84"
-        width="96"
-        height="67"
+        width={compacta ? "74" : "92"}
+        height={compacta ? "52" : "64"}
         aria-hidden="true"
       >
         <g fill="#fff" stroke="#8FC4EA" strokeWidth="3">
@@ -30,7 +31,7 @@ export default function Nuvi({ fala, ouvivel = false }) {
       </svg>
       <div className="balao">
         <p className="balao-texto" aria-live="polite">
-          {fala}
+          {falaVisual || fala}
         </p>
         {ouvivel && (
           <button
@@ -40,7 +41,7 @@ export default function Nuvi({ fala, ouvivel = false }) {
             aria-label="Ouvir instrução da Nuvi novamente"
             title="Ouvir novamente"
           >
-            🔊
+            <IconVozOn size={20} />
           </button>
         )}
       </div>

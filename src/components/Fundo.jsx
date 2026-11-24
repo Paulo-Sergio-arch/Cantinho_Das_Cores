@@ -6,45 +6,54 @@ export default function Fundo() {
         viewBox="0 0 800 500"
         preserveAspectRatio="xMidYMin slice"
       >
-        <circle cx="670" cy="84" r="64" fill="#FFD95A" opacity=".32" />
-        <circle cx="670" cy="84" r="44" fill="#FFD95A" />
-        <g fill="#fff" opacity=".92">
-          <ellipse cx="120" cy="115" rx="54" ry="22" />
-          <ellipse cx="152" cy="96" rx="34" ry="24" />
-          <ellipse cx="92" cy="102" rx="28" ry="18" />
+        <defs>
+          <radialGradient id="halo-sol-suave" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFF7CC" stopOpacity="0.95" />
+            <stop offset="52%" stopColor="#FFE484" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+          </radialGradient>
+        </defs>
 
-          <ellipse cx="480" cy="175" rx="46" ry="19" />
-          <ellipse cx="508" cy="159" rx="30" ry="20" />
+        <circle cx="678" cy="82" r="78" fill="url(#halo-sol-suave)" />
+        <circle cx="678" cy="82" r="42" fill="#FFD95A" />
 
-          <ellipse cx="185" cy="315" rx="44" ry="16" />
-          <ellipse cx="210" cy="301" rx="26" ry="18" />
+        <g fill="#fff" opacity=".88">
+          <ellipse cx="118" cy="118" rx="54" ry="21" />
+          <ellipse cx="150" cy="100" rx="34" ry="23" />
+          <ellipse cx="90" cy="106" rx="28" ry="17" />
 
-          <ellipse cx="670" cy="290" rx="48" ry="18" />
-          <ellipse cx="644" cy="276" rx="28" ry="19" />
+          <ellipse cx="486" cy="182" rx="46" ry="18" />
+          <ellipse cx="514" cy="166" rx="30" ry="19" />
+
+          <ellipse cx="176" cy="322" rx="44" ry="16" />
+          <ellipse cx="202" cy="308" rx="26" ry="17" />
+
+          <ellipse cx="672" cy="296" rx="48" ry="17" />
+          <ellipse cx="646" cy="282" rx="28" ry="18" />
         </g>
       </svg>
 
       <svg
         className="fundo-grama"
-        viewBox="0 0 800 180"
+        viewBox="0 0 800 200"
         preserveAspectRatio="xMidYMax slice"
       >
         <path
-          d="M0 72 Q180 12 400 62 T800 36 V180 H0Z"
+          d="M0 78 Q180 18 400 68 T800 42 V200 H0Z"
           fill="#A6E3A1"
         />
         <path
-          d="M0 116 Q220 64 460 110 T800 88 V180 H0Z"
+          d="M0 122 Q220 72 460 116 T800 94 V200 H0Z"
           fill="#6FD08A"
         />
         <g>
           {[
-            [64, 148, "#FF6FB1"],
-            [176, 130, "#FFC93C"],
-            [310, 152, "#F25C54"],
-            [455, 134, "#fff"],
-            [590, 154, "#8E6CEF"],
-            [725, 136, "#FF9A2E"],
+            [64, 158, "#FF6FB1"],
+            [176, 140, "#FFC93C"],
+            [310, 162, "#F25C54"],
+            [455, 144, "#fff"],
+            [590, 164, "#8E6CEF"],
+            [725, 146, "#FF9A2E"],
           ].map(([x, y, c], i) => (
             <g key={i}>
               <circle cx={x} cy={y} r="7.5" fill={c} />
