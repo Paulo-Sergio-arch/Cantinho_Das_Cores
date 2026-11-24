@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { FAIXAS_ETARIAS } from "../data/jogosData";
 import {
   IconCheck,
   IconEditar,
@@ -8,7 +7,21 @@ import {
   IconUsuario,
 } from "../components/IconesUI";
 
-const VAZIO = { id: null, nome: "", idade: "8" };
+const IDADES_PERFIL = [
+  { valor: "4", rotulo: "4 anos · Nível Fácil" },
+  { valor: "5", rotulo: "5 anos · Nível Fácil" },
+  { valor: "6", rotulo: "6 anos · Nível Fácil" },
+  { valor: "7", rotulo: "7 anos · Nível Fácil" },
+  { valor: "8", rotulo: "8 anos · Nível Fácil" },
+  { valor: "9", rotulo: "9 anos · Nível Médio" },
+  { valor: "10", rotulo: "10 anos · Nível Avançado" },
+  { valor: "11", rotulo: "11 anos · Nível Avançado" },
+  { valor: "12", rotulo: "12 anos · Nível Avançado" },
+  { valor: "13", rotulo: "13 anos · Nível Avançado" },
+  { valor: "14", rotulo: "14 anos · Nível Avançado" },
+];
+
+const VAZIO = { id: null, nome: "", idade: "8", vozAtiva: true };
 const CORES_AVATAR = ["#2D7FF9", "#24A159", "#8E6CEF", "#E66A2B", "#D6428A", "#179A8D"];
 
 function corAvatar(nome = "") {
@@ -110,7 +123,7 @@ export default function PerfisCriancas({
         <div>
           <h1 className="pais-titulo">Perfis das crianças</h1>
           <p className="pais-subtitulo">
-            Escolha quem vai brincar. As partidas, a faixa etária e os relatórios ficam ligados ao perfil selecionado.
+            Escolha quem vai brincar. As partidas, a preferência de voz e os relatórios ficam ligados ao perfil selecionado.
           </p>
         </div>
       </div>
@@ -157,7 +170,8 @@ export default function PerfisCriancas({
                     <div className="perfil-nome">
                       <strong>{c.name}</strong>
                       <span className="perfil-meta">
-                        {c.age} anos · {ativo ? "Perfil ativo nos jogos" : "Disponível para selecionar"}
+                        {c.age} anos · {c.voice_enabled === false ? "Mudo por padrão" : "Voz ativa"} ·{" "}
+                        {ativo ? "Perfil ativo nos jogos" : "Disponível para selecionar"}
                       </span>
                     </div>
                   </div>
@@ -176,7 +190,12 @@ export default function PerfisCriancas({
                       type="button"
                       className="btn neutro peq"
                       onClick={() => {
-                        setForm({ id: c.id, nome: c.name, idade: String(c.age) });
+                        setForm({
+                          id: c.id,
+                          nome: c.name,
+                          idade: String(c.age),
+                          vozAtiva: c.voice_enabled !== false,
+                        });
                         setConfirmarId(null);
                         setErro("");
                         setMsg("");
@@ -248,14 +267,24 @@ export default function PerfisCriancas({
                 value={form.idade}
                 onChange={(e) => setForm({ ...form, idade: e.target.value })}
               >
-                {FAIXAS_ETARIAS.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.titulo}
+                {IDADES_PERFIL.map((item) => (
+                  <option key={item.valor} value={item.valor}>
+                    {item.rotulo}
                   </option>
                 ))}
               </select>
             </div>
           </div>
+
+          <label className="check" htmlFor="pf-voz">
+            <input
+              id="pf-voz"
+              type="checkbox"
+              checked={form.vozAtiva}
+              onChange={(e) => setForm({ ...form, vozAtiva: e.target.checked })}
+            />
+            <span className="check-texto">Iniciar jogos com narração de voz ativa</span>
+          </label>
 
           {erro && (
             <p className="erro" role="alert">

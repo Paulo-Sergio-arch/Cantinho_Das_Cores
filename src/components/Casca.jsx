@@ -79,13 +79,18 @@ export default function Casca({
     onFim?.(montarResumo(true));
   };
 
-  // Partida abandonada: registrada uma única vez, mesmo sem nenhuma resposta (0 acertos e 0 erros).
+  // Partida abandonada: ignora entradas acidentais sem nenhuma interação (< 10s e 0 tentativas).
   const registrarAbandono = (aoFechar = false) => {
     if (registradoRef.current) return;
+    const resumo = montarResumo(Boolean(fim));
+    if (!fim && resumo.acertos === 0 && resumo.erros === 0 && resumo.duracaoSeg < 10) {
+      registradoRef.current = true;
+      return;
+    }
     registradoRef.current = true;
     // Se as 5 estrelas já foram conquistadas (animação de vitória), a partida conta como concluída.
-    if (fim) onFim?.(montarResumo(true), { aoFechar });
-    else onParcial?.(montarResumo(false), { aoFechar });
+    if (fim) onFim?.(resumo, { aoFechar });
+    else onParcial?.(resumo, { aoFechar });
   };
 
   const abandonoRef = useRef(registrarAbandono);

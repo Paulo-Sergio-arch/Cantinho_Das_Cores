@@ -46,12 +46,28 @@ def init_db():
         conn.execute("PRAGMA journal_mode = WAL")
         conn.execute("PRAGMA synchronous = NORMAL")
         conn.executescript(schema)
+
+        # Migração idempotente: adiciona coluna 'nome' em responsaveis preservando o schema.sql original
+        colunas_resp = {r["name"] for r in conn.execute("PRAGMA table_info(responsaveis)").fetchall()}
+        if "nome" not in colunas_resp:
+            conn.execute("ALTER TABLE responsaveis ADD COLUMN nome TEXT")
+
         # Tabela auxiliar de segurança para revogação de tokens JWT no logout
         conn.execute(
             """CREATE TABLE IF NOT EXISTS tokens_revogados (
                 jti         TEXT PRIMARY KEY,
                 revogado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 expira_em   DATETIME
+            )"""
+        )
+        # Tabela auxiliar para recuperação de senha com códigos hash de uso único e expiração curta
+        conn.execute(
+            """CREATE TABLE IF NOT EXISTS tokens_recuperacao_senha (
+                token_hash     TEXT PRIMARY KEY,
+                id_responsavel INTEGER NOT NULL,
+                expira_em      REAL NOT NULL,
+                usado          INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY (id_responsavel) REFERENCES responsaveis(id_responsavel) ON DELETE CASCADE
             )"""
         )
         # Tabela auxiliar para persistência do rate limiting entre reinícios e workers
