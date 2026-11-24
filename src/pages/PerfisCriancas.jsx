@@ -40,11 +40,11 @@ function nivelDaIdade(idade) {
 }
 
 const VAZIO = { id: null, nome: "", idade: "8", vozAtiva: true };
-const CORES_AVATAR = ["#1F6E63", "#D67456", "#7E64C4", "#3E6FB0", "#C88E26", "#B86077"];
+const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
 
 function corAvatar(nome = "") {
   const limpo = nome.trim();
-  if (!limpo) return "#1F6E63";
+  if (!limpo) return "#5B82BA";
   let soma = 0;
   for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
   return CORES_AVATAR[soma % CORES_AVATAR.length];
@@ -290,8 +290,8 @@ export default function PerfisCriancas({
                         className={cn(
                           "min-h-9 h-9 min-w-[108px] rounded-xl px-3.5 text-xs font-bold shadow-2xs",
                           ativo
-                            ? "bg-pais hover:bg-pais-deep text-white"
-                            : "bg-[#2C4369] hover:bg-[#223554] text-white"
+                            ? "bg-success hover:bg-success-deep text-white"
+                            : "bg-pais hover:bg-pais-deep text-white"
                         )}
                       >
                         {ativo && <Check size={14} strokeWidth={2.6} />}

@@ -22,11 +22,11 @@ import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Select 
 import { cn } from "../lib/cn";
 import Relatorios from "./Relatorios";
 
-const CORES_AVATAR = ["#1F6E63", "#D67456", "#7E64C4", "#3E6FB0", "#C88E26", "#B86077"];
+const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
 
 function corAvatar(nome = "") {
   const limpo = nome.trim();
-  if (!limpo) return "#1F6E63";
+  if (!limpo) return "#5B82BA";
   let soma = 0;
   for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
   return CORES_AVATAR[soma % CORES_AVATAR.length];
@@ -163,8 +163,8 @@ function GraficoEvolucao({ serie }) {
         <AreaChart data={serie} margin={{ top: 14, right: 16, left: -14, bottom: 4 }}>
           <defs>
             <linearGradient id="areaPontuacao" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1F6E63" stopOpacity={0.32} />
-              <stop offset="95%" stopColor="#1F6E63" stopOpacity={0.03} />
+              <stop offset="0%" stopColor="#5B82BA" stopOpacity={0.34} />
+              <stop offset="95%" stopColor="#5B82BA" stopOpacity={0.03} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 4" stroke="#E4DDD0" />
@@ -187,11 +187,11 @@ function GraficoEvolucao({ serie }) {
           <Area
             type="monotone"
             dataKey="taxa"
-            stroke="#1F6E63"
+            stroke="#5B82BA"
             strokeWidth={3}
             fill="url(#areaPontuacao)"
-            dot={{ r: 4, fill: "#1F6E63", stroke: "#FDFCFA", strokeWidth: 2 }}
-            activeDot={{ r: 6.5, fill: "#17574E", stroke: "#FDFCFA", strokeWidth: 2.5 }}
+            dot={{ r: 4, fill: "#5B82BA", stroke: "#FDFCFA", strokeWidth: 2 }}
+            activeDot={{ r: 6.5, fill: "#44689E", stroke: "#FDFCFA", strokeWidth: 2.5 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -507,7 +507,7 @@ export default function PainelPais({
               value={formatarTempo(res.average_duration_seconds)}
               icon={Clock}
               iconTone="bg-pais-soft text-pais"
-              topAccent="#3B9B7E"
+              topAccent="#5B82BA"
             />
             <KpiCard
               label="Taxa de Conclusão"
@@ -558,7 +558,7 @@ export default function PainelPais({
                 <CardContent className="space-y-3.5">
                   {dados.jogos.map((j) => {
                     const pct = j.average_score === null ? 0 : Math.round(j.average_score);
-                    const cor = COR_BARRA_JOGO[j.game_id] || "#3B9B7E";
+                    const cor = COR_BARRA_JOGO[j.game_id] || "#5B82BA";
                     return (
                       <div
                         key={j.game_id}
