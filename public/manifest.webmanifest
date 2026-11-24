@@ -1,0 +1,18 @@
+{
+  "name": "Cantinho das Cores — Jogos Educativos",
+  "short_name": "Cantinho das Cores",
+  "description": "Jogos educativos acessíveis para aprender cores, formas, palavras e fala com acompanhamento pedagógico.",
+  "lang": "pt-BR",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#CFEFFF",
+  "theme_color": "#2D7FF9",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
