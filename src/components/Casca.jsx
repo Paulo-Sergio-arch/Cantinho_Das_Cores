@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, LogOut, Play, Volume2, VolumeX } from "lucide-react";
 import { cancelarFala, falar } from "../utils/voz";
 import { tocarVitoria } from "../utils/sons";
 import Estrelas from "./Estrelas";
-import Nuvi from "./Nuvi";
+import Nuvi, { NuviMascote } from "./Nuvi";
 import Vitoria from "./Vitoria";
 import Fim from "./Fim";
-import { Alert, Button } from "./ui";
+import { Button, Dialog } from "./ui";
 import { cn } from "../lib/cn";
 
 function SwitchPill({ checked, onClick, label }) {
@@ -173,6 +173,7 @@ export default function Casca({
             type="button"
             onClick={solicitarSaida}
             aria-label="Voltar ao menu"
+            aria-haspopup={!fim ? "dialog" : undefined}
             aria-expanded={!fim ? confirmandoSaida : undefined}
             className="inline-flex min-h-10 items-center gap-1 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-[#EAE3D5]"
           >
@@ -211,23 +212,45 @@ export default function Casca({
         </div>
       </header>
 
-      {confirmandoSaida && !fim && (
-        <div className="w-full max-w-2xl">
-          <Alert variant="warning" role="alertdialog" aria-labelledby="confirmar-saida-titulo">
-            <span id="confirmar-saida-titulo">
-              Quer mesmo sair desta partida? O progresso atual será encerrado.
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="playful" size="sm" onClick={() => setConfirmandoSaida(false)}>
-                Continuar jogando
-              </Button>
-              <Button variant="outline" size="sm" onClick={sairConfirmado}>
-                Sair para o menu
-              </Button>
-            </div>
-          </Alert>
+      <Dialog
+        open={confirmandoSaida && !fim}
+        onClose={() => setConfirmandoSaida(false)}
+        title="Sair desta partida?"
+        titleId="confirmar-saida-titulo"
+        className="max-w-sm"
+        footerClassName="justify-stretch sm:justify-end"
+        footer={
+          <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+            <Button
+              variant="outlineInst"
+              size="sm"
+              onClick={sairConfirmado}
+              className="w-full sm:w-auto"
+            >
+              <LogOut size={15} />
+              Sair para o menu
+            </Button>
+            <Button
+              variant="playful"
+              size="sm"
+              onClick={() => setConfirmandoSaida(false)}
+              className="w-full sm:w-auto"
+            >
+              <Play size={15} />
+              Continuar jogando
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col items-center gap-3 py-1 text-center">
+          <div className="flex h-18 w-22 items-center justify-center rounded-2xl bg-[#EFECE3]">
+            <NuviMascote size="sm" calmo={calmo} />
+          </div>
+          <p className="m-0 text-sm text-ink leading-relaxed">
+            Se você voltar para o menu agora, o progresso desta partida será encerrado.
+          </p>
         </div>
-      )}
+      </Dialog>
 
       {vitoria && <Vitoria calmo={calmo} />}
 
