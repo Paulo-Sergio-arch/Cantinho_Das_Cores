@@ -1,3 +1,41 @@
+/* Palcos e peças dos 6 jogos — Estética Sensorial Calma (TEA)
+ * Superfícies neutras em marfim (#FCFBF8) para que a cor exista apenas
+ * onde ela é estímulo pedagógico da atividade. */
+
+.cru {
+  position: relative;
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: grab;
+  transition: transform 0.16s ease;
+}
+
+.ficha.feito {
+  opacity: 0.28;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.ficha.par {
+  pointer-events: none;
+}
+
+.arrastando {
+  transition: none !important;
+  cursor: grabbing;
+  filter: drop-shadow(0 12px 10px rgba(31, 45, 77, 0.22));
+}
+
+.acoes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 18px;
+}
+
 /* Jogo 1: Acerte a cor */
 .bola {
   position: relative;
@@ -6,31 +44,31 @@
   width: 84px;
   height: 84px;
   border-radius: 50%;
-  border: 6px solid #fff;
-  box-shadow: 0 5px 0 rgba(43, 58, 103, 0.2), inset 0 -8px 0 rgba(0, 0, 0, 0.1);
+  border: 5px solid #FFFFFF;
+  box-shadow: 0 5px 0 rgba(31, 45, 77, 0.16), inset 0 -7px 0 rgba(0, 0, 0, 0.1);
 }
 
 .bola-ok {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   color: var(--verde);
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 6px rgba(43, 58, 103, 0.25);
+  box-shadow: 0 2px 6px rgba(31, 45, 77, 0.2);
 }
 
 .cores {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: linear-gradient(160deg, #D2EEFF, #9AD6FF);
-  border: 5px solid #fff;
-  border-radius: 32px;
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 28px;
   min-height: 360px;
-  box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
+  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
 }
 
 .alvo {
@@ -39,24 +77,24 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 10px;
+  padding: 16px;
 }
 
 .cores-seta {
   position: absolute;
-  right: -15px;
+  right: -16px;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #FFFFFF;
-  color: #3E8EF0;
-  border: 2px solid #8FD0FF;
+  background: #FCFBF8;
+  color: var(--azul);
+  border: 2px solid #D5CEBE;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 6px rgba(43, 58, 103, 0.14);
+  box-shadow: 0 2px 6px rgba(31, 45, 77, 0.08);
   pointer-events: none;
   z-index: 2;
 }
@@ -67,7 +105,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px;
+  padding: 10px;
 }
 
 .bola-nome {
@@ -76,25 +114,25 @@
   font-weight: 600;
   text-transform: capitalize;
   color: var(--tinta);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 2px 10px;
+  background: #EFECE3;
+  padding: 2px 11px;
   border-radius: 999px;
 }
 
 .anel {
   display: grid;
   place-items: center;
-  width: clamp(112px, 34vw, 160px);
-  height: clamp(112px, 34vw, 160px);
+  width: clamp(114px, 32vw, 160px);
+  height: clamp(114px, 32vw, 160px);
   border-radius: 50%;
-  border: 4px dashed #5BA8E0;
-  background: rgba(255, 255, 255, 0.4);
+  border: 3px dashed #BFCAD9;
+  background: #F6F4EE;
 }
 
 .anel .bola {
-  width: clamp(76px, 24vw, 112px);
-  height: clamp(76px, 24vw, 112px);
-  border-width: 8px;
+  width: clamp(78px, 24vw, 112px);
+  height: clamp(78px, 24vw, 112px);
+  border-width: 7px;
 }
 
 .opcoes {
@@ -103,8 +141,8 @@
   align-items: center;
   justify-content: space-around;
   gap: 12px;
-  border-left: 4px dashed #5BA8E0;
-  padding: 14px 8px;
+  border-left: 2px dashed #DDD6C6;
+  padding: 16px 12px;
 }
 
 .cores.cores-muitas .opcoes {
@@ -112,12 +150,12 @@
   flex-wrap: wrap;
   justify-content: center;
   align-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .cores.cores-muitas .opcoes .ficha {
-  min-width: 78px;
-  min-height: 78px;
+  min-width: 82px;
+  min-height: 82px;
 }
 
 .cores.cores-muitas .opcoes .bola {
@@ -131,16 +169,17 @@
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
-  background: linear-gradient(160deg, #D8F8DF, #9BE8B2);
-  border: 5px solid #fff;
-  border-radius: 30px;
-  padding: 14px;
-  box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 26px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(31, 45, 77, 0.04), 0 3px 0 #E5DFD2;
 }
 
 .linha.chao {
-  background: linear-gradient(160deg, #D2EEFF, #9AD6FF);
-  margin-top: 14px;
+  background: #F3EFE6;
+  border-color: #DDD6C6;
+  margin-top: 12px;
 }
 
 .encaixe-pecas .ficha {
@@ -148,34 +187,33 @@
 }
 
 .buraco {
-  background: rgba(255, 255, 255, 0.52);
-  border: 4px dashed #5BA8E0;
-  box-shadow: inset 0 4px 10px rgba(43, 58, 103, 0.12);
+  background: #FCFBF8;
+  border: 3px dashed #C7BFAE;
+  box-shadow: inset 0 3px 8px rgba(31, 45, 77, 0.06);
 }
 
 .buraco.certo {
-  background: #E6F8EC;
+  background: #E9F6EE;
   border-style: solid;
   border-color: var(--verde);
-  box-shadow: 0 5px 0 rgba(43, 58, 103, 0.15);
+  box-shadow: 0 4px 0 #B5DFC6;
 }
 
-/* Destaque suave de alvos quando há peça selecionada */
 .alvos-ativos .ficha:not(:disabled) {
   border-color: var(--azul);
-  animation: pulso-alvo 1.5s ease-in-out infinite;
+  animation: pulso-alvo 1.8s ease-in-out infinite;
 }
 
 /* Jogo 3: Ligue ao nome */
 .ligar {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  background: linear-gradient(160deg, #FFF3C4, #FFDC7A);
-  border: 5px solid #fff;
-  border-radius: 32px;
+  gap: 16px;
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 28px;
   padding: 16px;
-  box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
+  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
 }
 
 .col {
@@ -185,9 +223,9 @@
 }
 
 .col .ficha {
-  min-height: 70px;
+  min-height: 74px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 8px 12px;
 }
 
 .pictograma-svg {
@@ -201,17 +239,19 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--verde);
   color: #FFFFFF;
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .pal {
-  font-size: clamp(1.25rem, 4.5vw, 1.55rem);
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.2rem, 4.2vw, 1.5rem);
+  font-weight: 600;
 }
 
 /* Jogo 4: Cor e forma */
@@ -219,11 +259,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  background: linear-gradient(160deg, #EEE4FF, #C9B3FF);
-  border: 5px solid #fff;
-  border-radius: 32px;
-  padding: 16px;
-  box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 28px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
 }
 
 .grade2.grade3 {
@@ -242,49 +282,47 @@
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--verde);
-  color: #fff;
-  font-size: 1.1rem;
+  color: #FFFFFF;
+  font-size: 1rem;
   font-weight: 700;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 4px rgba(43, 58, 103, 0.25);
 }
 
 /* Jogo 5: Vamos falar */
 .fala-card {
-  background: linear-gradient(160deg, #FFE5D6, #FFB898);
-  border: 5px solid #fff;
-  border-radius: 32px;
-  padding: 20px 16px;
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 28px;
+  padding: 24px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 8px 0 rgba(43, 58, 103, 0.14);
+  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
 }
 
 .fala-ilustracao {
   display: grid;
   place-items: center;
-  width: 104px;
-  height: 104px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 3px solid #FFFFFF;
-  margin-bottom: 6px;
-  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.1);
+  width: 108px;
+  height: 108px;
+  border-radius: 26px;
+  background: #F6F4EE;
+  border: 2px solid #E5DFD2;
+  margin-bottom: 10px;
 }
 
 .palavra {
-  font-size: clamp(2.1rem, 9.5vw, 3.2rem);
-  line-height: 1.1;
-  margin-top: 4px;
-  -webkit-text-stroke: 5px #fff;
-  paint-order: stroke fill;
-  text-shadow: 0 4px 0 rgba(43, 58, 103, 0.15);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: clamp(2rem, 8.5vw, 3rem);
+  line-height: 1.15;
+  color: var(--tinta);
+  margin-top: 2px;
   text-align: center;
 }
 
@@ -293,8 +331,10 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin-top: 12px;
-  font-size: 1.7rem;
+  margin-top: 14px;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 1.55rem;
 }
 
 .silabas span.silaba-texto,
@@ -303,21 +343,23 @@
   align-items: center;
   gap: 6px;
   min-height: 46px;
-  border: 2px solid rgba(43, 58, 103, 0.12);
-  padding: 5px 14px;
-  border-radius: 18px;
-  background: var(--creme);
-  box-shadow: 0 4px 0 rgba(43, 58, 103, 0.14);
-  transition: background 0.2s, transform 0.2s;
+  border: 2px solid #E5DFD2;
+  padding: 6px 16px;
+  border-radius: 16px;
+  background: #F6F4EE;
+  color: var(--tinta);
+  box-shadow: 0 3px 0 #DDD6C6;
+  transition: background-color 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
 }
 
 .silaba-ico {
-  opacity: 0.55;
+  opacity: 0.6;
   flex-shrink: 0;
 }
 
 .silaba-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  border-color: #B8CEEF;
 }
 
 .silaba-btn:hover .silaba-ico,
@@ -326,39 +368,208 @@
 }
 
 .silabas .ativa {
-  background: #FFD35A;
-  transform: scale(1.1);
+  background: #FDF6DF;
+  border-color: var(--amarelo);
+  transform: scale(1.06);
 }
 
 .frase {
-  margin: 14px 0 0;
-  font-size: 1.2rem;
+  margin: 16px 0 0;
+  font-size: 1.12rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.82);
-  border-radius: 18px;
-  padding: 8px 18px;
+  background: #F6F4EE;
+  border: 1px solid #E5DFD2;
+  border-radius: 16px;
+  padding: 10px 18px;
   text-align: center;
+  color: var(--tinta);
 }
 
 .guia-pulsar {
-  animation: pulso-alvo 1.6s ease-in-out infinite;
+  animation: pulso-alvo 1.8s ease-in-out infinite;
 }
 
 .dica-fala {
   margin: 12px 0 0;
-  font-size: 0.94rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   text-align: center;
-  color: var(--tinta);
+  color: var(--tinta-suave);
+}
+
+/* Jogo 6: Bloquinho de Frutas (estilo Two Dots) */
+.frutas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.frutas-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 22px;
+  padding: 10px 14px;
+  box-shadow: 0 3px 0 #E5DFD2;
+}
+
+.frutas-metas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fruta-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F6F4EE;
+  border: 2px solid #DDD6C6;
+  border-radius: 14px;
+  padding: 4px 10px 4px 6px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.fruta-meta.ok {
+  background: #E9F6EE;
+  border-color: #9BD4B1;
+}
+
+.fruta-meta-ico {
+  display: grid;
+  place-items: center;
+}
+
+.frutas-jogadas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 76px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: #EAF2FF;
+  border: 2px solid #C2D8F7;
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+
+.frutas-jogadas.alerta {
+  background: #FDECEC;
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.jogadas-rotulo {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.jogadas-valor {
+  font-family: var(--fonte-titulo);
+  font-size: 1.4rem;
+}
+
+.frutas-tabuleiro {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  aspect-ratio: 1;
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  background: #FCFBF8;
+  border: 2px solid #E5DFD2;
+  border-radius: 28px;
+  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.06), 0 4px 0 #E5DFD2;
+  touch-action: none;
+  user-select: none;
+}
+
+.frutas-linhas {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.fruta-peca {
+  position: relative;
+  z-index: 3;
+  width: 88%;
+  height: 88%;
+  margin: auto;
+  border: 3px solid #FFFFFF;
+  border-radius: 50%;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.fruta-peca:hover {
+  transform: scale(1.04);
+}
+
+.fruta-peca.sel {
+  transform: scale(1.1);
+  z-index: 4;
+}
+
+.fruta-peca.quadrado-hit {
+  transform: scale(1.07);
+  z-index: 4;
+}
+
+.fruta-peca.caindo {
+  animation: fruta-cai 0.26s cubic-bezier(0.22, 1.2, 0.4, 1);
+}
+
+.fruta-peca.tente {
+  animation: balanca 0.42s ease;
+}
+
+.fruta-svg {
+  display: block;
+  pointer-events: none;
+}
+
+.frutas-controles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+}
+
+@keyframes fruta-cai {
+  from {
+    opacity: 0.45;
+    transform: translateY(-20px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes pulso-alvo {
   0%,
   100% {
-    box-shadow: 0 6px 0 rgba(43, 58, 103, 0.18), 0 0 0 0 rgba(45, 127, 249, 0.38);
+    box-shadow: 0 4px 0 #DDD6C6, 0 0 0 0 rgba(47, 111, 214, 0.34);
   }
   50% {
-    box-shadow: 0 6px 0 rgba(43, 58, 103, 0.18), 0 0 0 7px rgba(45, 127, 249, 0);
+    box-shadow: 0 4px 0 #DDD6C6, 0 0 0 6px rgba(47, 111, 214, 0);
   }
 }
 
@@ -369,8 +580,8 @@
   }
 
   .cores.cores-muitas .opcoes .ficha {
-    min-width: 64px;
-    min-height: 64px;
+    min-width: 66px;
+    min-height: 66px;
   }
 
   .cores.cores-muitas .opcoes .bola {
@@ -388,15 +599,14 @@
   }
 
   .linha .ficha {
-    min-width: 70px;
-    min-height: 70px;
-    border-width: 4px;
-    border-radius: 22px;
+    min-width: 72px;
+    min-height: 72px;
+    border-radius: 20px;
   }
 
   .linha .ficha svg {
-    width: 52px;
-    height: 52px;
+    width: 50px;
+    height: 50px;
   }
 
   .ligar {
@@ -405,6 +615,6 @@
   }
 
   .silabas {
-    font-size: 1.6rem;
+    font-size: 1.45rem;
   }
 }

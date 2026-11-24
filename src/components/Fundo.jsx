@@ -1,23 +1,44 @@
-export default function Fundo() {
+import { cn } from "../lib/cn";
+
+/**
+ * Cenário ilustrado da marca (céu, sol suave, nuvens e colinas verdes).
+ * - variant="suave": usado no Menu Infantil com saturação calma para não gerar sobrecarga sensorial.
+ * - variant="login": usado no painel esquerdo do Login (posicionado localmente dentro do container).
+ * - variant="vitoria": usado como recompensa visual gentil no cartão de conclusão de partida.
+ */
+export default function Fundo({ variant = "suave", className = "" }) {
+  const local = variant === "login" || variant === "vitoria";
+  const opacidadeCeu = variant === "suave" ? 0.62 : variant === "vitoria" ? 0.72 : 0.92;
+  const opacidadeGrama = variant === "suave" ? 0.58 : variant === "vitoria" ? 0.72 : 0.92;
+
   return (
-    <div className="fundo" aria-hidden="true">
+    <div
+      className={cn(
+        "fundo",
+        local && "fundo-local",
+        "alto-contraste:opacity-0",
+        className
+      )}
+      aria-hidden="true"
+    >
       <svg
         className="fundo-ceu"
         viewBox="0 0 800 500"
         preserveAspectRatio="xMidYMin slice"
+        style={{ opacity: opacidadeCeu }}
       >
         <defs>
-          <radialGradient id="halo-sol-suave" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFF7CC" stopOpacity="0.95" />
-            <stop offset="52%" stopColor="#FFE484" stopOpacity="0.45" />
+          <radialGradient id={`halo-sol-${variant}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#FFF7D6" stopOpacity="0.92" />
+            <stop offset="55%" stopColor="#FCE39C" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        <circle cx="678" cy="82" r="78" fill="url(#halo-sol-suave)" />
-        <circle cx="678" cy="82" r="42" fill="#FFD95A" />
+        <circle cx="678" cy="86" r="76" fill={`url(#halo-sol-${variant})`} />
+        <circle cx="678" cy="86" r="40" fill="#F8D878" />
 
-        <g fill="#fff" opacity=".88">
+        <g fill="#FFFFFF" opacity="0.86">
           <ellipse cx="118" cy="118" rx="54" ry="21" />
           <ellipse cx="150" cy="100" rx="34" ry="23" />
           <ellipse cx="90" cy="106" rx="28" ry="17" />
@@ -37,27 +58,22 @@ export default function Fundo() {
         className="fundo-grama"
         viewBox="0 0 800 200"
         preserveAspectRatio="xMidYMax slice"
+        style={{ opacity: opacidadeGrama }}
       >
-        <path
-          d="M0 78 Q180 18 400 68 T800 42 V200 H0Z"
-          fill="#A6E3A1"
-        />
-        <path
-          d="M0 122 Q220 72 460 116 T800 94 V200 H0Z"
-          fill="#6FD08A"
-        />
-        <g>
+        <path d="M0 78 Q180 18 400 68 T800 42 V200 H0Z" fill="#B6E1B4" />
+        <path d="M0 122 Q220 72 460 116 T800 94 V200 H0Z" fill="#8CD29B" />
+        <g opacity="0.75">
           {[
-            [64, 158, "#FF6FB1"],
-            [176, 140, "#FFC93C"],
-            [310, 162, "#F25C54"],
-            [455, 144, "#fff"],
-            [590, 164, "#8E6CEF"],
-            [725, 146, "#FF9A2E"],
+            [64, 158, "#E899B8"],
+            [176, 140, "#F2CF6B"],
+            [310, 162, "#E38B85"],
+            [455, 144, "#FFFFFF"],
+            [590, 164, "#AE9CE6"],
+            [725, 146, "#EDAF74"],
           ].map(([x, y, c], i) => (
             <g key={i}>
-              <circle cx={x} cy={y} r="7.5" fill={c} />
-              <circle cx={x} cy={y} r="2.8" fill="#FFF3B0" />
+              <circle cx={x} cy={y} r="6.5" fill={c} />
+              <circle cx={x} cy={y} r="2.4" fill="#FFF6CC" />
             </g>
           ))}
         </g>

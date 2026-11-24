@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
+import { Copy, FileText, Printer, Send, Trash2 } from "lucide-react";
 import { enviarRelatorio, excluirRelatorio, gerarRelatorio, listarRelatorios } from "../services/relatorios";
-import { IconCopiar, IconEnviar, IconImprimir, IconLixeira } from "../components/IconesUI";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+} from "../components/ui";
+import { cn } from "../lib/cn";
 
 function hoje(deslocamentoDias = 0) {
   const d = new Date(Date.now() + deslocamentoDias * 86400000);
@@ -124,156 +136,180 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
   };
 
   return (
-    <div className="pais-bloco rel-bloco-secao" aria-label="Relatórios pedagógicos">
-      <div className="pais-bloco-topo">
-        <h2>Relatórios pedagógicos de {nomeCrianca}</h2>
-        <span className="pais-legenda">{lista.length} gerado(s)</span>
-      </div>
+    <Card tone="institutional" aria-label="Relatórios pedagógicos">
+      <CardHeader className="no-print">
+        <CardTitle>Relatórios pedagógicos de {nomeCrianca}</CardTitle>
+        <Badge variant="muted">{lista.length} gerado(s)</Badge>
+      </CardHeader>
 
-      <form className="rel-form no-print" onSubmit={gerar} noValidate>
-        <div className="campo-grupo">
-          <label className="campo-rotulo" htmlFor="rel-inicio">
-            De
-          </label>
-          <input
-            id="rel-inicio"
-            className="campo-input"
-            type="date"
-            value={inicio}
-            max={fim}
-            onChange={(e) => setInicio(e.target.value)}
-          />
-        </div>
-        <div className="campo-grupo">
-          <label className="campo-rotulo" htmlFor="rel-fim">
-            Até
-          </label>
-          <input
-            id="rel-fim"
-            className="campo-input"
-            type="date"
-            value={fim}
-            min={inicio}
-            onChange={(e) => setFim(e.target.value)}
-          />
-        </div>
-        <div className="campo-grupo rel-campo-email">
-          <label className="campo-rotulo" htmlFor="rel-dest">
-            E-mail para envio (opcional)
-          </label>
-          <input
-            id="rel-dest"
-            className="campo-input"
-            type="email"
-            placeholder="padrão: e-mail da sua conta"
-            value={destinatario}
-            onChange={(e) => setDestinatario(e.target.value)}
-          />
-        </div>
-        <button type="submit" className="btn peq rel-btn-gerar" disabled={gerando} aria-busy={gerando}>
-          {gerando ? "Gerando…" : "Gerar relatório"}
-        </button>
-      </form>
+      <CardContent className="space-y-4">
+        <form
+          className="no-print grid grid-cols-1 items-end gap-3 rounded-2xl border border-inst-border bg-inst-subtle/40 p-4 sm:grid-cols-2 lg:grid-cols-12"
+          onSubmit={gerar}
+          noValidate
+        >
+          <div className="lg:col-span-3">
+            <Label htmlFor="rel-inicio">De</Label>
+            <Input
+              id="rel-inicio"
+              type="date"
+              value={inicio}
+              max={fim}
+              onChange={(e) => setInicio(e.target.value)}
+            />
+          </div>
+          <div className="lg:col-span-3">
+            <Label htmlFor="rel-fim">Até</Label>
+            <Input
+              id="rel-fim"
+              type="date"
+              value={fim}
+              min={inicio}
+              onChange={(e) => setFim(e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-4">
+            <Label htmlFor="rel-dest">E-mail para envio (opcional)</Label>
+            <Input
+              id="rel-dest"
+              type="email"
+              placeholder="padrão: e-mail da sua conta"
+              value={destinatario}
+              onChange={(e) => setDestinatario(e.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-2">
+            <Button
+              type="submit"
+              variant="institutional"
+              size="md"
+              className="w-full"
+              disabled={gerando}
+              aria-busy={gerando}
+            >
+              <FileText size={16} />
+              {gerando ? "Gerando…" : "Gerar"}
+            </Button>
+          </div>
+        </form>
 
-      {erro && (
-        <p className="erro no-print" role="alert">
-          {erro}
-        </p>
-      )}
-      {msg && (
-        <div className="aviso-api ok no-print" role="status">
-          <span>{msg}</span>
-        </div>
-      )}
-      {carregando && (
-        <p className="no-print" role="status">
-          Carregando relatórios…
-        </p>
-      )}
-      {!carregando && !erro && lista.length === 0 && (
-        <p className="pais-subtitulo no-print">
-          Nenhum relatório gerado ainda. Escolha o período e clique em “Gerar relatório”.
-        </p>
-      )}
+        {erro && (
+          <Alert variant="error" className="no-print">
+            {erro}
+          </Alert>
+        )}
+        {msg && (
+          <Alert variant="success" className="no-print">
+            {msg}
+          </Alert>
+        )}
+        {carregando && (
+          <p className="no-print m-0 text-sm font-semibold text-ink-muted" role="status">
+            Carregando relatórios…
+          </p>
+        )}
+        {!carregando && !erro && lista.length === 0 && (
+          <p className="no-print m-0 text-sm text-ink-muted">
+            Nenhum relatório gerado ainda. Escolha o período e clique em “Gerar”.
+          </p>
+        )}
 
-      <ul className="perfis-lista">
-        {lista.map((r) => (
-          <li key={r.id} className={`perfil-item ${aberto === r.id ? "rel-item-aberto" : "no-print"}`}>
-            <div className="perfil-nome no-print">
-              <strong>
-                {soData(r.period_start)} a {soData(r.period_end)}
-              </strong>
-              <span className="perfil-meta">
-                Gerado em {dataHora(r.generated_at)} ·{" "}
-                <span className={`status-badge ${r.sent ? "concluida" : "pendente"}`}>
-                  {r.sent ? `Enviado em ${dataHora(r.sent_at)}` : "Ainda não enviado"}
-                </span>
-              </span>
-            </div>
-            <div className="perfil-acoes no-print">
-              <button
-                type="button"
-                className="btn peq"
-                disabled={enviandoId === r.id}
-                aria-busy={enviandoId === r.id}
-                onClick={() => enviar(r)}
-              >
-                <IconEnviar size={15} />
-                {enviandoId === r.id ? "Enviando…" : r.sent ? "Reenviar" : "Enviar relatório"}
-              </button>
-              <button
-                type="button"
-                className="btn neutro peq"
-                aria-expanded={aberto === r.id}
-                onClick={() => setAberto(aberto === r.id ? null : r.id)}
-              >
-                {aberto === r.id ? "Ocultar" : "Ver relatório"}
-              </button>
-              <button
-                type="button"
-                className="btn neutro peq perigo"
-                disabled={excluindoId === r.id}
-                aria-busy={excluindoId === r.id}
-                onClick={() => excluir(r.id)}
-              >
-                <IconLixeira size={15} />
-                {excluindoId === r.id ? "Excluindo…" : "Excluir"}
-              </button>
-            </div>
-            {aberto === r.id && (
-              <div className="rel-documento-wrap">
-                <article className="rel-documento">
-                  <header className="rel-doc-cabecalho">
-                    <div>
-                      <span className="rel-doc-marca">Cantinho das Cores · Relatório Pedagógico</span>
-                      <h3>{nomeCrianca}</h3>
-                    </div>
-                    <div className="rel-doc-meta">
-                      <span>
-                        <strong>Período:</strong> {soData(r.period_start)} a {soData(r.period_end)}
-                      </span>
-                      <span>
-                        <strong>Emitido em:</strong> {dataHora(r.generated_at)}
-                      </span>
-                    </div>
-                  </header>
-                  <pre className="rel-texto">{r.text}</pre>
-                </article>
-                <div className="perfil-acoes no-print">
-                  <button type="button" className="btn neutro peq" onClick={() => copiar(r.text)}>
-                    <IconCopiar size={15} />
-                    Copiar texto
-                  </button>
-                  <button type="button" className="btn peq" onClick={imprimir}>
-                    <IconImprimir size={15} />
-                    Imprimir / Salvar PDF
-                  </button>
+        <ul className="m-0 list-none space-y-3 p-0">
+          {lista.map((r) => (
+            <li
+              key={r.id}
+              className={cn(
+                "rounded-2xl border border-inst-border bg-white p-4 alto-contraste:border-2 alto-contraste:border-slate-950",
+                aberto !== r.id && "no-print"
+              )}
+            >
+              <div className="no-print flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <strong className="block text-sm font-bold text-ink">
+                    {soData(r.period_start)} a {soData(r.period_end)}
+                  </strong>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+                    <span>Gerado em {dataHora(r.generated_at)}</span>
+                    <Badge variant={r.sent ? "success" : "muted"}>
+                      {r.sent ? `Enviado em ${dataHora(r.sent_at)}` : "Ainda não enviado"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="institutional"
+                    size="sm"
+                    disabled={enviandoId === r.id}
+                    aria-busy={enviandoId === r.id}
+                    onClick={() => enviar(r)}
+                  >
+                    <Send size={14} />
+                    {enviandoId === r.id ? "Enviando…" : r.sent ? "Reenviar" : "Enviar"}
+                  </Button>
+                  <Button
+                    variant="outlineInst"
+                    size="sm"
+                    aria-expanded={aberto === r.id}
+                    onClick={() => setAberto(aberto === r.id ? null : r.id)}
+                  >
+                    {aberto === r.id ? "Ocultar" : "Ver relatório"}
+                  </Button>
+                  <Button
+                    variant="dangerSoft"
+                    size="sm"
+                    disabled={excluindoId === r.id}
+                    aria-busy={excluindoId === r.id}
+                    onClick={() => excluir(r.id)}
+                  >
+                    <Trash2 size={14} />
+                    {excluindoId === r.id ? "Excluindo…" : "Excluir"}
+                  </Button>
                 </div>
               </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+
+              {aberto === r.id && (
+                <div className="mt-4 space-y-3 border-t border-inst-border pt-4">
+                  <article className="rel-documento rounded-2xl border border-inst-border bg-inst-subtle/40 p-5 sm:p-6">
+                    <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-inst-border pb-3">
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand">
+                          Cantinho das Cores · Relatório Pedagógico
+                        </span>
+                        <h3 className="font-display text-xl font-semibold text-ink mt-0.5 mb-0">
+                          {nomeCrianca}
+                        </h3>
+                      </div>
+                      <div className="flex flex-col text-xs text-ink-muted sm:text-right">
+                        <span>
+                          <strong>Período:</strong> {soData(r.period_start)} a {soData(r.period_end)}
+                        </span>
+                        <span>
+                          <strong>Emitido em:</strong> {dataHora(r.generated_at)}
+                        </span>
+                      </div>
+                    </header>
+                    <pre className="m-0 whitespace-pre-wrap font-sans text-sm leading-relaxed text-ink">
+                      {r.text}
+                    </pre>
+                  </article>
+
+                  <div className="no-print flex flex-wrap items-center justify-end gap-2">
+                    <Button variant="outlineInst" size="sm" onClick={() => copiar(r.text)}>
+                      <Copy size={14} />
+                      Copiar texto
+                    </Button>
+                    <Button variant="institutional" size="sm" onClick={imprimir}>
+                      <Printer size={14} />
+                      Imprimir / Salvar PDF
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
