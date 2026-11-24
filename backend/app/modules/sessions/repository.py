@@ -142,7 +142,8 @@ class SQLiteSessionRepository:
         incorrect = int(r["erros"])
         attempts = correct + incorrect
         accuracy = round(correct / attempts * 100) if attempts else 0
-        dt = datetime.fromisoformat(r["jogado_em"])
+        dt_raw = datetime.fromisoformat(r["jogado_em"])
+        dt = dt_raw if dt_raw.tzinfo else dt_raw.replace(tzinfo=timezone.utc)
         return SessionRecord(
             str(r["id_partida"]),
             str(r["id_responsavel"]),
