@@ -5,7 +5,8 @@ import Relatorios from "./Relatorios";
 
 function formatarDataCurta(iso) {
   try {
-    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const comFuso = /(Z|[+-]\d\d:\d\d)$/.test(String(iso)) ? iso : `${iso}Z`;
+    return new Date(comFuso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
   } catch {
     return "";
   }
@@ -240,7 +241,7 @@ export default function PainelPais({
         resumo(idCrianca, d),
         porJogo(idCrianca, d),
         evolucao(idCrianca, d, jogoFiltro || undefined),
-        historico(idCrianca, jogoFiltro || undefined, 15, 0),
+        historico(idCrianca, jogoFiltro || undefined, 15, 0, d),
       ]);
       setDados({ res, jogos, evo, hist });
     } catch (e) {
@@ -260,7 +261,7 @@ export default function PainelPais({
     if (mais.carregando || !dados) return;
     setMais({ carregando: true, erro: "" });
     try {
-      const pagina = await historico(idCrianca, jogoFiltro || undefined, 15, dados.hist.items.length);
+      const pagina = await historico(idCrianca, jogoFiltro || undefined, 15, dados.hist.items.length, dias || undefined);
       setDados((d) => ({ ...d, hist: { ...pagina, items: [...d.hist.items, ...pagina.items] } }));
       setMais({ carregando: false, erro: "" });
     } catch (e) {

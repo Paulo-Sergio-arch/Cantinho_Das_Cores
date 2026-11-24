@@ -2,8 +2,7 @@
 
 Aplicação web educativa completa (**React + Vite + CSS puro** no Front-End e **Python + FastAPI + SQLite** no Back-End), com foco em acessibilidade, síntese de voz em português (`SpeechSynthesis`), interações táteis e acompanhamento pedagógico para pais e professores.
 
-**Demo publicada (Vercel):** https://cantinho-das-cores.vercel.app/  
-**Mirror (GitHub Pages):** https://ca10v1ana.github.io/Cantinho_Das_Cores/
+**Aplicação publicada (Vercel):** https://cantinho-das-cores.vercel.app/
 
 ---
 

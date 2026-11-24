@@ -16,21 +16,27 @@ services:
       - key: JWT_EXPIRE_MINUTES
         value: "60"
       - key: CORS_ORIGINS
-        value: https://cantinho-das-cores.vercel.app,https://ca10v1ana.github.io
+        value: https://cantinho-das-cores.vercel.app
       - key: DATABASE_PATH
         value: /var/data/cantinho_das_cores.sqlite3
       - key: BACKUP_DIR
         value: /var/data/backups
       - key: REPORT_DELIVERY_MODE
-        value: smtp
+        value: email
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        value: Cantinho das Cores <onboarding@resend.dev>
+      - key: BREVO_API_KEY
+        sync: false
       - key: SMTP_HOST
-        value: smtp.resend.com
+        sync: false
       - key: SMTP_PORT
         value: "587"
       - key: SMTP_USE_TLS
         value: "true"
       - key: SMTP_USER
-        value: resend
+        sync: false
       - key: SMTP_PASSWORD
         sync: false
       - key: SMTP_FROM
