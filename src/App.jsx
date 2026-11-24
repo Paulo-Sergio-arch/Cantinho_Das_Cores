@@ -10,6 +10,7 @@ import {
   obterNomeVoz,
 } from "./utils/voz";
 import { definirEfeitosAtivos } from "./utils/sons";
+import { lerRotaAtual, sincronizarUrl, tituloParaEstado } from "./utils/rotas";
 import { definirAoExpirar, lerExpiracaoToken, lerToken, salvarToken } from "./services/api";
 import * as authApi from "./services/auth";
 import * as criancasApi from "./services/criancas";
@@ -64,6 +65,8 @@ function gravarStorage(chave, valor) {
 }
 
 export default function App() {
+  const rotaInicialRef = useRef(lerRotaAtual());
+  const abandonarJogoRef = useRef(null);
   const [usuario, setUsuario] = useState(null);
   const [tela, setTela] = useState(() => (lerToken() ? "carregando" : "login"));
   const [avisoLogin, setAvisoLogin] = useState("");
@@ -74,7 +77,7 @@ export default function App() {
   const [ativaId, setAtivaId] = useState(() => lerStorage("cc_crianca", ""));
   const enviadasRef = useRef(new Set());
   const enviandoFilaRef = useRef(false);
-  const [abaMenu, setAbaMenu] = useState("jogos");
+  const [abaMenu, setAbaMenu] = useState(() => lerRotaAtual().aba || "jogos");
   const [som, setSom] = useState(() => lerStorage("cc_som", true));
   const [efeitos, setEfeitos] = useState(() => lerStorage("cc_efeitos", true));
   const [velocidade, setVelocidade] = useState(() => lerStorage("cc_vel", "calma"));
@@ -140,6 +143,7 @@ export default function App() {
     setCriancas([]);
     setAvisoLogin(aviso);
     setTela("login");
+    sincronizarUrl("login", "jogos", { replace: true });
   }, []);
 
   useEffect(() => {
@@ -147,27 +151,61 @@ export default function App() {
     return () => definirAoExpirar(null);
   }, [limparSessao]);
 
-  // Restaura a sessão a partir do token da aba, confirmando com GET /api/auth/me.
+  // Restaura a sessão a partir do token da aba, confirmando com GET /api/auth/me e preservando a rota (F5).
   useEffect(() => {
-    if (!lerToken()) return;
+    if (!lerToken()) {
+      sincronizarUrl("login", "jogos", { replace: true });
+      return;
+    }
     let ativo = true;
     authApi
       .usuarioAtual()
       .then((u) => {
         if (!ativo) return;
         setUsuario(u);
-        setTela("menu");
+        const inicial = rotaInicialRef.current;
+        const telaDestino = inicial.tela && inicial.tela !== "login" ? inicial.tela : "menu";
+        const abaDestino = inicial.aba || "jogos";
+        setAbaMenu(abaDestino);
+        setTela(telaDestino);
+        sincronizarUrl(telaDestino, abaDestino, { replace: true });
       })
       .catch((e) => {
         if (!ativo) return;
         if (e.status === 401) return; // aoExpirar já cuidou do aviso
         setAvisoLogin(e.message);
         setTela("login");
+        sincronizarUrl("login", "jogos", { replace: true });
       });
     return () => {
       ativo = false;
     };
   }, []);
+
+  // Suporte aos botões Voltar / Avançar do navegador (History API).
+  useEffect(() => {
+    const aoPopState = () => {
+      if (!usuario) {
+        setTela("login");
+        sincronizarUrl("login", "jogos", { replace: true });
+        return;
+      }
+      const destino = lerRotaAtual();
+      const proxTela = destino.tela === "login" ? "menu" : destino.tela;
+      const proxAba = destino.aba || "jogos";
+      if (tela !== "menu" && tela !== "login" && tela !== "carregando" && proxTela !== tela) {
+        abandonarJogoRef.current?.();
+      }
+      cancelarFala();
+      setAbaMenu(proxAba);
+      setTela(proxTela);
+      if (destino.tela === "login") {
+        sincronizarUrl("menu", "jogos", { replace: true });
+      }
+    };
+    window.addEventListener("popstate", aoPopState);
+    return () => window.removeEventListener("popstate", aoPopState);
+  }, [usuario, tela]);
 
   // Renova automaticamente a sessão (POST /api/auth/refresh) antes do vencimento do JWT.
   useEffect(() => {
@@ -318,6 +356,7 @@ export default function App() {
     setAvisoApi(null);
     setAbaMenu("jogos");
     setTela("menu");
+    sincronizarUrl("menu", "jogos");
   };
 
   const fazerLogin = async (dados) => aoAutenticar(await authApi.entrar(dados));
@@ -336,10 +375,24 @@ export default function App() {
     limparSessao();
   };
 
+  const alterarAba = (novaAba) => {
+    cancelarFala();
+    setAbaMenu(novaAba);
+    setTela("menu");
+    sincronizarUrl("menu", novaAba);
+  };
+
   const selecionarJogo = (id) => {
     cancelarFala();
     setChave((c) => c + 1);
     setTela(id);
+    sincronizarUrl(id, abaMenu);
+  };
+
+  const voltarParaMenu = () => {
+    cancelarFala();
+    setTela("menu");
+    sincronizarUrl("menu", abaMenu);
   };
 
   const gravarSessao = async (id, resumo, incrementarConcluidos, opcoes = {}) => {
@@ -412,6 +465,11 @@ export default function App() {
 
   const jogo = jogos.find((j) => j.id === tela);
   const JogoAtivo = jogo?.C;
+  const nomeJogoAtual = jogo?.nome;
+
+  useEffect(() => {
+    document.title = tituloParaEstado(tela, abaMenu, nomeJogoAtual);
+  }, [tela, abaMenu, nomeJogoAtual]);
 
   const ehAreaInstitucional = tela === "menu" && (abaMenu === "perfis" || abaMenu === "pais");
 
@@ -430,7 +488,7 @@ export default function App() {
       {!ehAreaInstitucional && <Fundo />}
 
       {avisoApi && (
-        <div className="aviso-global-wrap">
+        <div className="aviso-global-wrap no-print">
           <div
             className={`aviso-api ${avisoApi.tipo === "ok" ? "ok" : "erro"}`}
             role={avisoApi.tipo === "ok" ? "status" : "alert"}
@@ -489,10 +547,7 @@ export default function App() {
           idade={idadeEfetiva}
           onAlterarIdade={(novaIdade) => setIdade(novaIdade)}
           aba={abaMenu}
-          onAlterarAba={(novaAba) => {
-            cancelarFala();
-            setAbaMenu(novaAba);
-          }}
+          onAlterarAba={alterarAba}
           depthFisica={depthFisica}
           onToggleDepthFisica={() =>
             setDepthFisica((d) => (d === "3d" ? "2d" : "3d"))
@@ -516,10 +571,11 @@ export default function App() {
               total={rodadasEfetivas}
               idade={idadeEfetiva}
               calmo={calmo}
-              onSair={() => {
-                cancelarFala();
-                setTela("menu");
-              }}
+              som={som}
+              altoContraste={altoContraste}
+              onToggleSom={() => setSom((s) => !s)}
+              onRegistrarAbandonoRef={abandonarJogoRef}
+              onSair={voltarParaMenu}
               onNovo={() => {
                 cancelarFala();
                 setChave((c) => c + 1);

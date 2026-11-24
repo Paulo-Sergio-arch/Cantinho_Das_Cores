@@ -11,6 +11,7 @@ import {
 } from "../utils/sons";
 import Casca from "../components/Casca";
 import BloquinhoFruta from "../components/BloquinhoFruta";
+import { IconCheck } from "../components/IconesUI";
 
 function obterConfigFrutas(idade, total) {
   const nivel = String(idade);
@@ -580,7 +581,8 @@ export default function JogoFrutas(p) {
               className="btn ok peq-acao"
               onClick={() => aplicarColheita(cadeiaRef.current, quadradoRef.current)}
             >
-              ✓ Juntar ({cadeia.length})
+              <IconCheck size={17} />
+              Juntar ({cadeia.length})
             </button>
           )}
           {cadeia.length > 0 && !semJogadas && (

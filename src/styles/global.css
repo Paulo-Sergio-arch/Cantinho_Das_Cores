@@ -150,11 +150,19 @@
 
 .cc.alto-contraste .tab-btn.ativa,
 .cc.alto-contraste .chip.on,
+.cc.alto-contraste .chip.on:hover:not(:disabled),
 .cc.alto-contraste .nivel-chip.ativo {
   background: #0F172A;
   border-color: #0F172A;
   color: #FFFFFF;
   box-shadow: none;
+}
+
+.cc.alto-contraste .nivel-chip:disabled:not(.ativo) {
+  opacity: 0.8;
+  background: #F1F5F9;
+  border: 2px dashed #334155;
+  color: #1E293B;
 }
 
 .cc.alto-contraste .chip,

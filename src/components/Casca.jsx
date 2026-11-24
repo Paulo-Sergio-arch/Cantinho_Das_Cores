@@ -6,6 +6,7 @@ import Estrelas from "./Estrelas";
 import Nuvi from "./Nuvi";
 import Vitoria from "./Vitoria";
 import Fim from "./Fim";
+import { IconCasa, IconVozOff, IconVozOn } from "./IconesUI";
 
 export default function Casca({
   titulo,
@@ -13,9 +14,13 @@ export default function Casca({
   total = 5,
   idade = "8",
   calmo = false,
+  som = true,
+  onToggleSom,
   fala,
+  falaVisual,
   atrasoVitoria = 0,
   estatisticas,
+  onRegistrarAbandonoRef,
   onSair,
   onNovo,
   onFim,
@@ -25,6 +30,7 @@ export default function Casca({
   const fim = estrelas >= total;
   const [vitoria, setVitoria] = useState(false);
   const [final, setFinal] = useState(false);
+  const [confirmandoSaida, setConfirmandoSaida] = useState(false);
   const inicioRef = useRef(null);
   const registradoRef = useRef(false);
 
@@ -36,6 +42,7 @@ export default function Casca({
     if (!fim) return;
     let tFinal;
     const tInicio = setTimeout(() => {
+      setConfirmandoSaida(false);
       setVitoria(true);
       tocarVitoria();
       falar("Parabéns!");
@@ -84,6 +91,14 @@ export default function Casca({
   const abandonoRef = useRef(registrarAbandono);
   useEffect(() => {
     abandonoRef.current = registrarAbandono;
+    if (onRegistrarAbandonoRef) {
+      onRegistrarAbandonoRef.current = () => abandonoRef.current(false);
+    }
+    return () => {
+      if (onRegistrarAbandonoRef) {
+        onRegistrarAbandonoRef.current = null;
+      }
+    };
   });
 
   // Fechar a aba ou navegar para outra página também abandona a partida em andamento.
@@ -93,10 +108,18 @@ export default function Casca({
     return () => window.removeEventListener("pagehide", aoFechar);
   }, []);
 
-  const sair = () => {
+  const sairConfirmado = () => {
     cancelarFala();
     registrarAbandono();
     onSair();
+  };
+
+  const solicitarSaida = () => {
+    if (fim) {
+      sairConfirmado();
+      return;
+    }
+    setConfirmandoSaida((v) => !v);
   };
 
   return (
@@ -105,17 +128,60 @@ export default function Casca({
         <button
           type="button"
           className="redondo"
-          onClick={sair}
+          onClick={solicitarSaida}
           aria-label="Voltar ao menu"
+          aria-expanded={!fim ? confirmandoSaida : undefined}
+          title="Voltar ao menu"
         >
-          🏠
+          <IconCasa size={22} />
         </button>
         <Titulo t={titulo} tag="h1" className="titulo-jogo" />
+        {onToggleSom && (
+          <button
+            type="button"
+            className={`redondo redondo-neutro ${som ? "" : "mudo"}`}
+            onClick={onToggleSom}
+            aria-pressed={som}
+            aria-label={som ? "Silenciar voz durante o jogo" : "Ativar voz durante o jogo"}
+            title={som ? "Silenciar voz" : "Ativar voz"}
+          >
+            {som ? <IconVozOn size={20} /> : <IconVozOff size={20} />}
+          </button>
+        )}
         <span className="nivel-badge" aria-label={`Nível ${idade} anos`}>
           {idade} anos
         </span>
         <Estrelas n={estrelas} total={total} />
       </header>
+
+      {confirmandoSaida && !fim && (
+        <div
+          className="aviso-api confirmar-saida"
+          role="alertdialog"
+          aria-labelledby="confirmar-saida-titulo"
+        >
+          <span id="confirmar-saida-titulo">
+            Quer mesmo sair desta partida? O progresso atual será encerrado.
+          </span>
+          <div className="perfil-acoes">
+            <button
+              type="button"
+              className="btn peq"
+              onClick={() => setConfirmandoSaida(false)}
+            >
+              Continuar jogando
+            </button>
+            <button
+              type="button"
+              className="btn neutro peq"
+              onClick={sairConfirmado}
+            >
+              Sair para o menu
+            </button>
+          </div>
+        </div>
+      )}
+
       {vitoria && <Vitoria calmo={calmo} />}
       {fim ? (
         final && (
@@ -124,13 +190,13 @@ export default function Casca({
             idade={idade}
             estatisticas={estatisticas}
             onNovo={onNovo}
-            onSair={sair}
+            onSair={sairConfirmado}
             onFim={finalizar}
           />
         )
       ) : (
         <>
-          <Nuvi fala={fala} ouvivel />
+          <Nuvi fala={fala} falaVisual={falaVisual} ouvivel />
           {children}
         </>
       )}

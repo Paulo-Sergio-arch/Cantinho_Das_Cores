@@ -882,6 +882,17 @@
     min-height: var(--alvo-min);
   }
 
+  .perfil-acoes {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .perfil-acoes .btn.peq {
+    flex: 1 1 auto;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
   .tab-btn {
     font-size: 0.88rem;
     padding: 8px 6px;

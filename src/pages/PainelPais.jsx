@@ -89,11 +89,11 @@ function baixarCsv({ nomeCrianca, idadeCrianca, res, jogos, itens }) {
 function GraficoEvolucao({ serie }) {
   if (!serie.length) return null;
 
-  const largura = 560;
-  const altura = 220;
-  const padEsq = 48;
-  const padDir = 28;
-  const padTopo = 30;
+  const largura = 520;
+  const altura = 225;
+  const padEsq = 50;
+  const padDir = 36;
+  const padTopo = 32;
   const padBase = 38;
   const utilW = largura - padEsq - padDir;
   const utilH = altura - padTopo - padBase;
@@ -139,9 +139,9 @@ function GraficoEvolucao({ serie }) {
               />
               <text
                 x={padEsq - 10}
-                y={y + 4}
+                y={y + 5}
                 textAnchor="end"
-                fontSize="13"
+                fontSize="14"
                 fontWeight="700"
                 fill="#475569"
               >
@@ -183,7 +183,7 @@ function GraficoEvolucao({ serie }) {
                 x={pt.x}
                 y={pt.y - 12}
                 textAnchor="middle"
-                fontSize="13"
+                fontSize="14"
                 fontWeight="700"
                 fill="#1E293B"
               >
@@ -194,7 +194,7 @@ function GraficoEvolucao({ serie }) {
                   x={pt.x}
                   y={altura - 10}
                   textAnchor="middle"
-                  fontSize="12.5"
+                  fontSize="13.5"
                   fontWeight="600"
                   fill="#475569"
                 >
