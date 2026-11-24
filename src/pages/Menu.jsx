@@ -5,19 +5,20 @@ import {
   Bell,
   BellOff,
   Box,
+  ChevronRight,
   Cloud,
   Contrast,
   Gauge,
   Lock,
   LogOut,
   MessageCircle,
-  Moon,
   Palette,
   Plus,
   Puzzle,
   RefreshCw,
   RotateCcw,
   Shapes,
+  ShieldCheck,
   SlidersHorizontal,
   Square,
   Star,
@@ -34,7 +35,7 @@ import {
 } from "../data/jogosData";
 import Nuvi from "../components/Nuvi";
 import { ShapePhysics } from "../components/shape-physics";
-import { Alert, Button, Card, Input, Select } from "../components/ui";
+import { Alert, Button, Card, Dialog, Input, Select } from "../components/ui";
 import { cn } from "../lib/cn";
 import PerfisCriancas from "./PerfisCriancas";
 
@@ -42,14 +43,14 @@ const PainelPais = lazy(() => import("./PainelPais"));
 
 function MarcaCompacta() {
   return (
-    <span className="inline-flex items-center gap-2.5 shrink-0" aria-label="Cantinho das Cores">
-      <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
+    <span className="inline-flex items-center gap-2 shrink-0" aria-label="Cantinho das Cores">
+      <svg viewBox="0 0 28 28" width="24" height="24" aria-hidden="true" className="shrink-0">
         <circle cx="8" cy="8" r="5" fill="#7D9CC7" />
         <circle cx="20" cy="8" r="5" fill="#DCA76A" />
         <circle cx="8" cy="20" r="5" fill="#8BB79B" />
         <circle cx="20" cy="20" r="5" fill="#D58E88" />
       </svg>
-      <span className="font-display text-lg font-semibold tracking-tight text-ink">
+      <span className="font-display text-base sm:text-lg font-semibold tracking-tight text-ink whitespace-nowrap">
         Cantinho das Cores
       </span>
     </span>
@@ -57,10 +58,10 @@ function MarcaCompacta() {
 }
 
 const ABAS = [
-  { id: "jogos", rotulo: "Jogos" },
-  { id: "bloquinhos", rotulo: "Bloquinhos" },
-  { id: "perfis", rotulo: "Crianças" },
-  { id: "pais", rotulo: "Pais e Professores" },
+  { id: "jogos", rotulo: "Jogos", rotuloCurto: "Jogos" },
+  { id: "bloquinhos", rotulo: "Bloquinhos", rotuloCurto: "Blocos" },
+  { id: "perfis", rotulo: "Crianças", rotuloCurto: "Crianças" },
+  { id: "pais", rotulo: "Pais e Professores", rotuloCurto: "Pais" },
 ];
 
 // Paleta calma e dessaturada + ícone limpo de linha para os 6 cards do Menu (TEA)
@@ -109,23 +110,59 @@ const ESTILO_CARD_JOGO = {
   },
 };
 
-function ChipToggle({ active, onClick, disabled, title, children }) {
+function ToggleCard({ active, onClick, icon: Icon, title, description }) {
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={active}
       onClick={onClick}
-      disabled={disabled}
-      title={title}
-      aria-pressed={active}
       className={cn(
-        "inline-flex min-h-9 items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors",
+        "flex w-full items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-all",
         active
-          ? "border-[#5B82BA] bg-[#5B82BA] text-white alto-contraste:bg-slate-950 alto-contraste:border-slate-950"
-          : "border-[#DDD6C7] bg-[#FCFBF8] text-ink hover:bg-[#F3EFE6] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950",
-        disabled && "opacity-55 cursor-not-allowed"
+          ? "border-brand/45 bg-brand-soft/60 alto-contraste:bg-slate-950 alto-contraste:text-white alto-contraste:border-slate-950"
+          : "border-inst-border bg-white hover:bg-inst-subtle/60 alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
       )}
     >
-      {children}
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
+            active
+              ? "bg-brand text-white alto-contraste:bg-white alto-contraste:text-slate-950"
+              : "bg-inst-subtle text-ink-muted alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950 alto-contraste:text-slate-950"
+          )}
+          aria-hidden="true"
+        >
+          <Icon size={17} />
+        </span>
+        <div className="min-w-0">
+          <span className="block text-sm font-bold leading-tight">{title}</span>
+          <span
+            className={cn(
+              "mt-0.5 block text-xs leading-snug",
+              active ? "text-ink/80 alto-contraste:text-white/85" : "text-ink-muted"
+            )}
+          >
+            {description}
+          </span>
+        </div>
+      </div>
+
+      <span
+        aria-hidden="true"
+        className={cn(
+          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors",
+          active ? "bg-brand" : "bg-slate-300"
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block h-5 w-5 rounded-full bg-white shadow-xs transition-transform",
+            active ? "translate-x-5" : "translate-x-0"
+          )}
+        />
+      </span>
     </button>
   );
 }
@@ -183,6 +220,7 @@ export default function Menu({
   const shapeRef = useRef(null);
   const faixaAtual = obterFaixaEtaria(idade);
   const ehInstitucional = aba === "perfis" || aba === "pais";
+  const temModoAtivo = calmo || altoContraste || fonteMaior || !som;
 
   const aoTeclarAba = (ev, idx) => {
     if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft" && ev.key !== "Home" && ev.key !== "End") return;
@@ -231,14 +269,14 @@ export default function Menu({
   };
 
   return (
-    <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-8 px-4 pt-4 pb-14 sm:px-6">
-      {/* BARRA SUPERIOR DE LINHA ÚNICA — limpa e fiel ao protótipo aprovado */}
+    <main className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-6 px-3.5 pt-3.5 pb-14 sm:gap-8 sm:px-6 sm:pt-4">
+      {/* NAVBAR MINIMALISTA — limpa no desktop e no celular */}
       <header className="no-print w-full">
         <div
           className={cn(
-            "flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-2.5",
+            "flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border px-3.5 py-2.5 sm:px-4",
             ehInstitucional
-              ? "border-inst-border bg-inst-surface shadow-[0_1px_3px_rgba(15,23,42,0.05)]"
+              ? "border-inst-border bg-inst-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
               : "border-[#DDD6C7] bg-[#FCFBF8] shadow-[0_2px_10px_rgba(31,45,77,0.04)]",
             "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-none"
           )}
@@ -246,10 +284,10 @@ export default function Menu({
           {/* Esquerda: Marca */}
           <MarcaCompacta />
 
-          {/* Centro: Pílula única com as 4 abas limpas (sem ícones poluindo) */}
+          {/* Centro (desktop) / Linha 2 limpa (mobile): 4 abas sem quebra de linha */}
           <nav
             className={cn(
-              "order-3 flex w-full items-center justify-center gap-1 rounded-full p-1 lg:order-2 lg:w-auto",
+              "order-3 grid w-full grid-cols-4 gap-1 rounded-full p-1 lg:order-2 lg:flex lg:w-auto lg:items-center",
               ehInstitucional ? "bg-inst-subtle" : "bg-[#EFECE3]",
               "alto-contraste:bg-white alto-contraste:border alto-contraste:border-slate-950"
             )}
@@ -267,49 +305,68 @@ export default function Menu({
                   aria-selected={ativa}
                   aria-controls={`painel-${item.id}`}
                   className={cn(
-                    "min-h-9 flex-1 rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-all lg:flex-initial",
+                    "min-h-9 rounded-full px-2 py-1.5 text-center text-xs font-semibold whitespace-nowrap transition-all sm:px-3.5 sm:text-sm",
                     ativa
-                      ? "bg-[#5B82BA] text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
-                      : "text-ink hover:bg-black/5 alto-contraste:text-slate-950"
+                      ? ehInstitucional
+                        ? "bg-brand text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
+                        : "bg-[#5B82BA] text-white shadow-2xs alto-contraste:bg-slate-950 alto-contraste:text-white"
+                      : "text-ink-muted hover:text-ink alto-contraste:text-slate-950"
                   )}
                   onClick={() => onAlterarAba(item.id)}
                   onKeyDown={(ev) => aoTeclarAba(ev, idx)}
                 >
-                  {item.rotulo}
+                  <span className="sm:hidden">{item.rotuloCurto}</span>
+                  <span className="hidden sm:inline">{item.rotulo}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Direita: Pílula da criança + 3 atalhos sensoriais compactos + ajustes */}
+          {/* Direita: apenas Perfil + Botão único de Ajustes (abre Modal) */}
           <div className="order-2 flex items-center gap-2 lg:order-3">
             {visitante ? (
               <button
                 type="button"
                 onClick={onSair}
-                title="Visitante — toque para entrar com sua conta"
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                title="Modo visitante — toque para entrar ou criar conta"
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
+                  ehInstitucional
+                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
+                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]",
+                  "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                )}
               >
                 <span>Visitante</span>
-                <span className="text-xs font-bold text-[#4F75AE] underline">Entrar</span>
+                <span className="hidden sm:inline text-xs font-bold text-brand">· Entrar</span>
               </button>
             ) : criancaAtiva ? (
               <button
                 type="button"
                 onClick={() => onAlterarAba("perfis")}
-                title={`Trocar perfil · Responsável: ${resp}`}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5] alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                title={`Trocar criança · Responsável: ${resp}`}
+                className={cn(
+                  "inline-flex min-h-9 max-w-[140px] sm:max-w-none items-center gap-1.5 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
+                  ehInstitucional
+                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
+                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]",
+                  "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
+                )}
               >
-                <span>
-                  {criancaAtiva.name} · {criancaAtiva.age} anos
-                </span>
+                <span className="truncate">{criancaAtiva.name}</span>
+                <span className="hidden sm:inline text-ink-muted">· {criancaAtiva.age} anos</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => onAlterarAba("perfis")}
                 title={resp}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] px-3.5 py-1.5 text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5]"
+                className={cn(
+                  "inline-flex min-h-9 items-center gap-1 rounded-full border px-3 py-1 text-xs sm:text-sm font-semibold text-ink transition-colors",
+                  ehInstitucional
+                    ? "border-inst-border bg-inst-subtle hover:bg-slate-200/70"
+                    : "border-[#DDD6C7] bg-[#F3EFE6] hover:bg-[#EAE3D5]"
+                )}
               >
                 <span>+ Criança</span>
               </button>
@@ -317,229 +374,256 @@ export default function Menu({
 
             <button
               type="button"
-              onClick={onToggleSom}
-              aria-pressed={som}
-              aria-label={som ? "Silenciar voz" : "Ativar voz"}
-              title={som ? "Voz ativa" : "Voz desativada"}
+              onClick={() => setAbrirPrefs(true)}
+              aria-haspopup="dialog"
+              aria-expanded={abrirPrefs}
+              aria-label="Abrir ajustes de acessibilidade e conta"
+              title="Ajustes e acessibilidade"
               className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[#DDD6C7] bg-[#F6F4EE] text-ink transition-colors hover:bg-[#EAE3D5]",
-                !som && "opacity-60",
+                "relative inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
+                ehInstitucional
+                  ? "border-inst-border bg-white text-ink hover:bg-inst-subtle"
+                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]",
                 "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950"
               )}
             >
-              {som ? <Volume2 size={17} /> : <VolumeX size={17} />}
-            </button>
-
-            <button
-              type="button"
-              onClick={onToggleCalmo}
-              aria-pressed={calmo}
-              aria-label={calmo ? "Desativar modo calmo" : "Ativar modo calmo"}
-              title={calmo ? "Modo calmo ativo" : "Ativar modo calmo"}
-              className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
-                calmo
-                  ? "border-[#5B82BA] bg-[#5B82BA] text-white"
-                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]",
-                "alto-contraste:border-2 alto-contraste:border-slate-950"
+              <SlidersHorizontal size={17} aria-hidden="true" />
+              {temModoAtivo && (
+                <span
+                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand ring-2 ring-white"
+                  aria-hidden="true"
+                />
               )}
-            >
-              <Moon size={17} />
-            </button>
-
-            <button
-              type="button"
-              onClick={onToggleAltoContraste}
-              aria-pressed={altoContraste}
-              aria-label={altoContraste ? "Desativar alto contraste" : "Ativar alto contraste"}
-              title={altoContraste ? "Alto contraste ativo" : "Ativar alto contraste"}
-              className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
-                altoContraste
-                  ? "border-slate-950 bg-slate-950 text-white"
-                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]"
-              )}
-            >
-              <Contrast size={17} />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setAbrirPrefs((v) => !v)}
-              aria-expanded={abrirPrefs}
-              aria-controls="painel-acessibilidade"
-              aria-label="Mais ajustes e conta"
-              title="Mais ajustes e sair"
-              className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
-                abrirPrefs
-                  ? "border-[#5B82BA] bg-[#5B82BA] text-white"
-                  : "border-[#DDD6C7] bg-[#F6F4EE] text-ink hover:bg-[#EAE3D5]",
-                "alto-contraste:border-2 alto-contraste:border-slate-950"
-              )}
-            >
-              <SlidersHorizontal size={17} />
             </button>
           </div>
         </div>
-
-        {/* Gaveta limpa de ajustes extras, acessibilidade e conta */}
-        {abrirPrefs && (
-          <Card
-            tone={ehInstitucional ? "institutional" : "calm"}
-            id="painel-acessibilidade"
-            className="mt-3 p-4 space-y-3"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap gap-2">
-                <ChipToggle active={fonteMaior} onClick={onToggleFonteMaior}>
-                  <Type size={15} />
-                  Fonte A+
-                </ChipToggle>
-                <ChipToggle active={altoContraste} onClick={onToggleAltoContraste}>
-                  <Contrast size={15} />
-                  Alto contraste
-                </ChipToggle>
-                <ChipToggle active={calmo} onClick={onToggleCalmo}>
-                  <Cloud size={15} />
-                  Modo calmo
-                </ChipToggle>
-                <ChipToggle active={efeitos} onClick={onToggleEfeitos}>
-                  {efeitos ? <Bell size={15} /> : <BellOff size={15} />}
-                  {efeitos ? "Efeitos ON" : "Efeitos OFF"}
-                </ChipToggle>
-                <ChipToggle active={velocidade === "calma"} onClick={onToggleVelocidade}>
-                  <Gauge size={15} />
-                  {velocidade === "calma" ? "Fala calma" : "Fala normal"}
-                </ChipToggle>
-                <ChipToggle
-                  active={false}
-                  disabled={rodadasTravadas}
-                  title={
-                    rodadasTravadas
-                      ? "Com um perfil de criança, as partidas têm sempre 5 rodadas"
-                      : undefined
-                  }
-                  onClick={() => onAlterarTotal(totalRodadas === 5 ? 3 : 5)}
-                >
-                  <Star size={15} />
-                  {totalRodadas} rodadas
-                </ChipToggle>
-              </div>
-
-              <Button variant="outline" size="sm" onClick={onSair}>
-                <LogOut size={15} />
-                {visitante ? "Voltar ao login" : "Sair da conta"}
-              </Button>
-            </div>
-
-            {vozes.length > 1 && (
-              <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                <label className="text-xs font-bold text-ink" htmlFor="sel-voz">
-                  Voz:
-                </label>
-                <Select
-                  id="sel-voz"
-                  value={vozSel}
-                  onChange={(e) => onTrocarVoz(e.target.value)}
-                  className="min-h-9 max-w-xs py-1 text-sm"
-                >
-                  {vozes.map((v) => (
-                    <option key={v.name} value={v.name}>
-                      {v.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-
-            {!visitante && (onAlterarSenha || onExcluirConta) && (
-              <div className="border-t border-dashed border-[#DDD6C7] pt-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  aria-expanded={abrirConta}
-                  onClick={() => {
-                    setAbrirConta((v) => !v);
-                    setErroConta("");
-                    setMsgConta("");
-                  }}
-                >
-                  {abrirConta ? "Ocultar dados da conta" : "Minha conta e privacidade (LGPD)"}
-                </Button>
-
-                {abrirConta && (
-                  <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <form
-                      onSubmit={salvarNovaSenha}
-                      className="space-y-2.5 rounded-2xl border border-inst-border bg-white p-4"
-                    >
-                      <strong className="block text-sm text-ink">Alterar senha</strong>
-                      <Input
-                        type="password"
-                        placeholder="Senha atual"
-                        value={senhaAtual}
-                        onChange={(e) => setSenhaAtual(e.target.value)}
-                      />
-                      <Input
-                        type="password"
-                        placeholder="Nova senha (mín. 8 caracteres)"
-                        value={novaSenha}
-                        onChange={(e) => setNovaSenha(e.target.value)}
-                      />
-                      <Button
-                        type="submit"
-                        variant="institutional"
-                        size="sm"
-                        disabled={ocupadoConta}
-                        aria-busy={ocupadoConta}
-                      >
-                        Salvar nova senha
-                      </Button>
-                    </form>
-
-                    <form
-                      onSubmit={confirmarExclusaoConta}
-                      className="space-y-2.5 rounded-2xl border border-red-200 bg-danger-soft/40 p-4"
-                    >
-                      <strong className="block text-sm text-danger">Excluir minha conta (LGPD)</strong>
-                      <p className="m-0 text-xs text-ink-muted">
-                        Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.
-                      </p>
-                      <Input
-                        type="password"
-                        placeholder="Confirme sua senha para excluir"
-                        value={senhaExclusao}
-                        onChange={(e) => setSenhaExclusao(e.target.value)}
-                      />
-                      <Button
-                        type="submit"
-                        variant="danger"
-                        size="sm"
-                        disabled={ocupadoConta}
-                        aria-busy={ocupadoConta}
-                      >
-                        Excluir conta e todos os dados
-                      </Button>
-                    </form>
-
-                    {erroConta && (
-                      <div className="md:col-span-2">
-                        <Alert variant="error">{erroConta}</Alert>
-                      </div>
-                    )}
-                    {msgConta && (
-                      <div className="md:col-span-2">
-                        <Alert variant="success">{msgConta}</Alert>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </Card>
-        )}
       </header>
+
+      {/* MODAL DE AJUSTES (acessibilidade, som, rodadas e conta LGPD) */}
+      <Dialog
+        open={abrirPrefs}
+        onClose={() => setAbrirPrefs(false)}
+        title="Ajustes e Acessibilidade"
+        subtitle="Personalize conforto sensorial, áudio e preferências da conta."
+        titleId="modal-ajustes-titulo"
+        footerClassName="justify-between"
+        footer={
+          <>
+            <Button
+              variant="outlineInst"
+              size="sm"
+              onClick={() => {
+                setAbrirPrefs(false);
+                onSair();
+              }}
+            >
+              <LogOut size={15} />
+              {visitante ? "Voltar ao login" : "Sair da conta"}
+            </Button>
+            <Button variant="institutional" size="sm" onClick={() => setAbrirPrefs(false)}>
+              Concluir
+            </Button>
+          </>
+        }
+      >
+        {/* Seção 1: Conforto Sensorial e Áudio */}
+        <div className="space-y-2.5">
+          <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
+            Conforto sensorial e áudio
+          </h3>
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <ToggleCard
+              active={som}
+              onClick={onToggleSom}
+              icon={som ? Volume2 : VolumeX}
+              title="Narração de voz"
+              description={som ? "Nuvi lê as instruções" : "Áudio silenciado"}
+            />
+            <ToggleCard
+              active={calmo}
+              onClick={onToggleCalmo}
+              icon={Cloud}
+              title="Modo calmo"
+              description="Reduz animações e estímulos"
+            />
+            <ToggleCard
+              active={altoContraste}
+              onClick={onToggleAltoContraste}
+              icon={Contrast}
+              title="Alto contraste"
+              description="Leitura reforçada (WCAG AAA)"
+            />
+            <ToggleCard
+              active={fonteMaior}
+              onClick={onToggleFonteMaior}
+              icon={Type}
+              title="Fonte ampliada (A+)"
+              description="Aumenta tamanho dos textos"
+            />
+            <ToggleCard
+              active={efeitos}
+              onClick={onToggleEfeitos}
+              icon={efeitos ? Bell : BellOff}
+              title="Efeitos sonoros"
+              description={efeitos ? "Sons suaves de acerto" : "Efeitos desligados"}
+            />
+            <ToggleCard
+              active={velocidade === "calma"}
+              onClick={onToggleVelocidade}
+              icon={Gauge}
+              title="Fala calma"
+              description={velocidade === "calma" ? "Ritmo pausado" : "Ritmo normal"}
+            />
+          </div>
+        </div>
+
+        {/* Seção 2: Rodadas e Voz do Dispositivo */}
+        <div className="space-y-3 border-t border-inst-border pt-4">
+          <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-ink-muted">
+            Preferências dos jogos
+          </h3>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3">
+            <div>
+              <span className="flex items-center gap-1.5 text-sm font-bold text-ink">
+                <Star size={15} className="text-warn" aria-hidden="true" />
+                Rodadas por partida
+              </span>
+              <span className="block text-xs text-ink-muted">
+                {rodadasTravadas
+                  ? "Com perfil cadastrado, cada partida tem sempre 5 rodadas."
+                  : "Escolha entre partidas curtas (3) ou padrão (5)."}
+              </span>
+            </div>
+            <div className="inline-flex rounded-xl border border-inst-border bg-white p-1">
+              {[3, 5].map((qtd) => (
+                <button
+                  key={qtd}
+                  type="button"
+                  disabled={rodadasTravadas}
+                  onClick={() => onAlterarTotal(qtd)}
+                  aria-pressed={totalRodadas === qtd}
+                  className={cn(
+                    "min-h-8 rounded-lg px-3 py-1 text-xs font-bold transition-colors",
+                    totalRodadas === qtd
+                      ? "bg-brand text-white"
+                      : "text-ink-muted hover:text-ink",
+                    rodadasTravadas && "opacity-55 cursor-not-allowed"
+                  )}
+                >
+                  {qtd} rodadas
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {vozes.length > 1 && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-ink" htmlFor="sel-voz">
+                Voz do dispositivo
+              </label>
+              <Select
+                id="sel-voz"
+                value={vozSel}
+                onChange={(e) => onTrocarVoz(e.target.value)}
+                className="min-h-10 text-sm"
+              >
+                {vozes.map((v) => (
+                  <option key={v.name} value={v.name}>
+                    {v.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {/* Seção 3: Conta e Privacidade (LGPD) */}
+        {!visitante && (onAlterarSenha || onExcluirConta) && (
+          <div className="space-y-3 border-t border-inst-border pt-4">
+            <button
+              type="button"
+              aria-expanded={abrirConta}
+              onClick={() => {
+                setAbrirConta((v) => !v);
+                setErroConta("");
+                setMsgConta("");
+              }}
+              className="flex w-full items-center justify-between rounded-2xl border border-inst-border bg-inst-subtle/40 px-4 py-3 text-left transition-colors hover:bg-inst-subtle"
+            >
+              <span className="flex items-center gap-2.5 text-sm font-bold text-ink">
+                <ShieldCheck size={18} className="text-brand" aria-hidden="true" />
+                Minha conta e privacidade (LGPD)
+              </span>
+              <ChevronRight
+                size={17}
+                className={cn("text-ink-muted transition-transform", abrirConta && "rotate-90")}
+                aria-hidden="true"
+              />
+            </button>
+
+            {abrirConta && (
+              <div className="space-y-3 pt-1">
+                <form
+                  onSubmit={salvarNovaSenha}
+                  className="space-y-2.5 rounded-2xl border border-inst-border bg-white p-4"
+                >
+                  <strong className="block text-sm text-ink">Alterar senha</strong>
+                  <Input
+                    type="password"
+                    placeholder="Senha atual"
+                    value={senhaAtual}
+                    onChange={(e) => setSenhaAtual(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Nova senha (mín. 8 caracteres)"
+                    value={novaSenha}
+                    onChange={(e) => setNovaSenha(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    variant="institutional"
+                    size="sm"
+                    disabled={ocupadoConta}
+                    aria-busy={ocupadoConta}
+                  >
+                    Salvar nova senha
+                  </Button>
+                </form>
+
+                <form
+                  onSubmit={confirmarExclusaoConta}
+                  className="space-y-2.5 rounded-2xl border border-red-200 bg-danger-soft/40 p-4"
+                >
+                  <strong className="block text-sm text-danger">Excluir minha conta (LGPD)</strong>
+                  <p className="m-0 text-xs text-ink-muted">
+                    Remove permanentemente sua conta, perfis das crianças, partidas e relatórios.
+                  </p>
+                  <Input
+                    type="password"
+                    placeholder="Confirme sua senha para excluir"
+                    value={senhaExclusao}
+                    onChange={(e) => setSenhaExclusao(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    variant="danger"
+                    size="sm"
+                    disabled={ocupadoConta}
+                    aria-busy={ocupadoConta}
+                  >
+                    Excluir conta e todos os dados
+                  </Button>
+                </form>
+
+                {erroConta && <Alert variant="error">{erroConta}</Alert>}
+                {msgConta && <Alert variant="success">{msgConta}</Alert>}
+              </div>
+            )}
+          </div>
+        )}
+      </Dialog>
 
       {/* ABA 1: JOGOS — aberto, respirável e fiel à imagem aprovada */}
       {aba === "jogos" && (
@@ -547,11 +631,10 @@ export default function Menu({
           id="painel-jogos"
           role="tabpanel"
           aria-labelledby="tab-jogos"
-          className="flex w-full max-w-4xl flex-col items-center gap-8"
+          className="flex w-full max-w-4xl flex-col items-center gap-7 sm:gap-8"
         >
           <h1 className="sr-only">Cantinho das Cores — Jogos Educativos</h1>
 
-          {/* Nuvi flutuando limpa no fundo + pílulas de Nível logo abaixo */}
           <section className="w-full pt-1" aria-label="Boas-vindas e nível de dificuldade">
             <Nuvi
               variant="menu"
@@ -630,7 +713,7 @@ export default function Menu({
           )}
 
           {/* Grid 3x2 limpo de cards uniformes em marfim */}
-          <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
             {jogos.map((j) => {
               const estilo = ESTILO_CARD_JOGO[j.id] || ESTILO_CARD_JOGO.cores;
               const IconeCard = estilo.Icon;
@@ -651,7 +734,6 @@ export default function Menu({
                     "alto-contraste:bg-white alto-contraste:border-2 alto-contraste:border-slate-950 alto-contraste:shadow-[0_4px_0_#0F172A]"
                   )}
                 >
-                  {/* Filete sutil de cor no topo */}
                   <span
                     className="block h-1.5 w-full alto-contraste:bg-slate-950"
                     style={{ backgroundColor: estilo.faixa }}
@@ -672,7 +754,6 @@ export default function Menu({
                       </span>
                     </div>
 
-                    {/* Progresso minimalista (estrela + trilha fina, sem caixinha extra) */}
                     <div
                       className="flex items-center gap-2.5"
                       aria-label={`${concluidas} partidas concluídas`}
