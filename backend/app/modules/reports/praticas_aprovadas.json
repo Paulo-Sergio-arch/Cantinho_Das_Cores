@@ -1,0 +1,320 @@
+{
+  "aviso": "Catálogo revisado pela equipe do projeto. Só entram itens com status 'aprovado', revisado_por e revisado_em. Nunca copie rascunhos sem revisão humana.",
+  "versao": 16,
+  "itens": [
+    {
+      "id": "convivencia-10-01",
+      "status": "aprovado",
+      "origem": "manual",
+      "tema": "convivencia",
+      "nivel": "10",
+      "titulo": "Conversa com calma",
+      "jogos": [
+        "falar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Vamos falar.",
+        "No jantar, se você quiser, conte uma coisa boa do seu dia."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25"
+    },
+    {
+      "id": "convivencia-9-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:51+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-51.json",
+      "tema": "convivencia",
+      "nivel": "9",
+      "titulo": "Uma palavra especial",
+      "jogos": [
+        "falar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Vamos falar.",
+        "Escolha uma palavra de que você gosta e faça uma frase curta com ela.",
+        "Conte para alguém da sua casa por que gosta dessa palavra."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-51.json)."
+    },
+    {
+      "id": "cores-10-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:59+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-59.json",
+      "tema": "cores",
+      "nivel": "10",
+      "titulo": "Cores do dia a dia",
+      "jogos": [
+        "cores"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Acerte a cor no seu ritmo.",
+        "Depois, lembre três coisas que você viu hoje e diga a cor de cada uma."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-59.json)."
+    },
+    {
+      "id": "cores-8-01",
+      "status": "aprovado",
+      "origem": "manual",
+      "tema": "cores",
+      "nivel": "8",
+      "titulo": "Caça às cores em casa",
+      "jogos": [
+        "cores",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Acerte a cor no seu ritmo.",
+        "Depois, procure em casa uma coisa azul e mostre para alguém.",
+        "Cada tentativa vale, sem pressa."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25"
+    },
+    {
+      "id": "cores-9-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:15+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-15.json",
+      "tema": "cores",
+      "nivel": "9",
+      "titulo": "Cores pela casa",
+      "jogos": [
+        "cores",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Acerte a cor no seu ritmo.",
+        "Depois, procure três coisas da mesma cor pela casa e mostre para alguém."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-15.json)."
+    },
+    {
+      "id": "formas-10-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:59+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-59.json",
+      "tema": "formas",
+      "nivel": "10",
+      "titulo": "Formas e cores",
+      "jogos": [
+        "encaixe",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Encaixe as formas ou de Cor e forma.",
+        "Depois, procure em casa objetos com formas diferentes e conte quantos achou."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-59.json)."
+    },
+    {
+      "id": "formas-8-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T03:23:38+00:00",
+      "rascunho_arquivo": "2026-11-25T03-23-38.json",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq editado na revisão para falar com a criança (instruções 1 a 3).",
+      "tema": "formas",
+      "nivel": "8",
+      "titulo": "Atividades de formas ao redor",
+      "jogos": [
+        "encaixe",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Observe as formas que aparecem no jogo e encaixe cada uma no seu lugar.",
+        "Depois, procure em casa uma coisa com uma forma que você viu no jogo.",
+        "Se quiser, jogue de novo em outra hora do dia."
+      ]
+    },
+    {
+      "id": "formas-9-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:51+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-51.json",
+      "tema": "formas",
+      "nivel": "9",
+      "titulo": "Formas ao redor",
+      "jogos": [
+        "encaixe",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Encaixe as formas.",
+        "Depois, procure em casa um objeto redondo e um objeto com cantos.",
+        "Desenhe a forma de que você mais gostou."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-51.json)."
+    },
+    {
+      "id": "frutas-10-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:59+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-59.json",
+      "tema": "frutas",
+      "nivel": "10",
+      "titulo": "Frutas e memória",
+      "jogos": [
+        "frutas"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Bloquinho de Frutas.",
+        "Depois, tente lembrar o nome de cinco frutas e diga em voz alta.",
+        "Se tiver uma fruta em casa, mostre para alguém."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-59.json)."
+    },
+    {
+      "id": "frutas-8-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:09+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-09.json",
+      "tema": "frutas",
+      "nivel": "8",
+      "titulo": "Frutas de verdade",
+      "jogos": [
+        "frutas"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Bloquinho de Frutas no seu ritmo.",
+        "Depois, procure uma fruta na cozinha e diga o nome dela em voz alta."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-09.json)."
+    },
+    {
+      "id": "frutas-9-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:51+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-51.json",
+      "tema": "frutas",
+      "nivel": "9",
+      "titulo": "Frutas da cozinha",
+      "jogos": [
+        "frutas"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Bloquinho de Frutas com calma.",
+        "Depois, olhe as frutas da sua cozinha e diga a cor de cada uma."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-51.json)."
+    },
+    {
+      "id": "palavras-10-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:59+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-59.json",
+      "tema": "palavras",
+      "nivel": "10",
+      "titulo": "Palavras e desenhos",
+      "jogos": [
+        "ligar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Ligue ao nome com calma.",
+        "Depois, escolha uma palavra de que você gosta e faça um desenho dela."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-59.json)."
+    },
+    {
+      "id": "palavras-8-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:09+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-09.json",
+      "tema": "palavras",
+      "nivel": "8",
+      "titulo": "Palavras da casa",
+      "jogos": [
+        "ligar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Ligue ao nome com calma.",
+        "Depois, aponte três coisas da sua casa e diga o nome de cada uma."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-09.json)."
+    },
+    {
+      "id": "palavras-9-01",
+      "status": "aprovado",
+      "origem": "manual",
+      "tema": "palavras",
+      "nivel": "9",
+      "titulo": "Palavras do dia",
+      "jogos": [
+        "ligar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Ligue ao nome no seu ritmo.",
+        "Depois, escolha um objeto da sua casa e fale o nome dele em voz alta."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25"
+    },
+    {
+      "id": "pedir-8-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:06:09+00:00",
+      "rascunho_arquivo": "2026-11-25T13-06-09.json",
+      "tema": "pedir",
+      "nivel": "8",
+      "titulo": "Pedir e agradecer",
+      "jogos": [
+        "falar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Vamos falar.",
+        "Hoje, peça alguma coisa dizendo por favor e agradeça depois.",
+        "Quando alguém chegar em casa, diga oi com um sorriso."
+      ],
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-06-09.json)."
+    }
+  ]
+}

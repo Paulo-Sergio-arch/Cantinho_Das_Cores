@@ -43,6 +43,11 @@ services:
         sync: false
       - key: SMTP_FROM
         value: onboarding@resend.dev
+      # IA no relatório (Groq). Sem chave, o relatório usa só os textos aprovados. Ver docs/groq-na-hospedagem.md
+      - key: GROQ_API_KEY
+        sync: false
+      - key: IA_AO_VIVO
+        value: "true"
     disk:
       name: cantinho-sqlite-disk
       mountPath: /var/data

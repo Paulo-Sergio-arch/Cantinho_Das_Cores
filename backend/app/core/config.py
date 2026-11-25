@@ -45,6 +45,12 @@ class Settings(BaseSettings):
     brevo_from_name: str = "Cantinho das Cores"
     report_webhook_url: str = ""
 
+    # IA ao vivo no relatório (Groq). Sem chave ou desligada → só textos aprovados do catálogo.
+    groq_api_key: str = ""
+    ia_ao_vivo: bool = True
+    ia_timeout_segundos: float = 6.0
+    ia_teto_diario: int = 300
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore", hide_input_in_errors=True)
 
     @property

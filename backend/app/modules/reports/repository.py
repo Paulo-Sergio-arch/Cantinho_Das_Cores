@@ -1,4 +1,20 @@
+import json
 from app.core.database import as_date, as_datetime, as_float, connect, sql_date, to_id
+
+
+def _ler_destaques(r):
+    """JSON gravado → dict; relatório antigo, coluna ausente ou inválida → None."""
+    try:
+        bruto = r["destaques"]
+    except (KeyError, IndexError):
+        return None
+    if not bruto:
+        return None
+    try:
+        dados = json.loads(bruto)
+    except (TypeError, ValueError):
+        return None
+    return dados if isinstance(dados, dict) else None
 
 
 def _rec(r):
@@ -10,6 +26,7 @@ def _rec(r):
         "period_start": as_date(r["periodo_inicio"]),
         "period_end": as_date(r["periodo_fim"]),
         "text": r["texto"],
+        "destaques": _ler_destaques(r),
         "generated_at": as_datetime(r["gerado_em"]),
         "sent_at": sent,
         "sent": sent is not None,
@@ -36,7 +53,8 @@ def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
         ).fetchone()
         rows = db.execute(
             f"""SELECT j.id_jogo, j.nome, j.habilidade, COUNT(p.id_partida) total, COALESCE(SUM(p.concluida),0) done,
-            AVG(CASE WHEN p.concluida=1 THEN pontuacao END) score, AVG(CASE WHEN p.concluida=1 THEN duracao_seg END) dur FROM jogos j
+            AVG(CASE WHEN p.concluida=1 THEN pontuacao END) score, AVG(CASE WHEN p.concluida=1 THEN duracao_seg END) dur,
+            COALESCE(SUM(CASE WHEN p.concluida=1 THEN p.erros END),0) err FROM jogos j
             LEFT JOIN partidas p ON p.id_jogo=j.id_jogo AND p.id_crianca=? AND {d_join} BETWEEN ? AND ?
             GROUP BY j.id_jogo, j.nome, j.habilidade ORDER BY j.id_jogo""",
             args_games,
@@ -62,17 +80,26 @@ def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
             "completed_matches": int(g["done"]),
             "average_score": as_float(g["score"]),
             "average_duration_seconds": as_float(g["dur"]),
+            "total_errors": int(g["err"]),
         }
         for g in rows
     ]
     return summary, games
 
 
-def create(child_id, start, end, text):
+def count_by_child(child_id):
+    """Quantos relatórios a criança já tem (usado só para o rodízio das práticas)."""
+    with connect() as db:
+        return db.execute("SELECT COUNT(*) n FROM relatorios WHERE id_crianca=?", (int(child_id),)).fetchone()["n"]
+
+
+def create(child_id, start, end, text, destaques=None):
+    bruto = json.dumps(destaques, ensure_ascii=False) if destaques else None
     with connect() as db:
         inserted = db.execute(
-            "INSERT INTO relatorios(id_crianca, periodo_inicio, periodo_fim, texto) VALUES (?,?,?,?) RETURNING id_relatorio",
-            (int(child_id), start.isoformat(), end.isoformat(), text),
+            "INSERT INTO relatorios(id_crianca, periodo_inicio, periodo_fim, texto, destaques) VALUES (?,?,?,?,?) "
+            "RETURNING id_relatorio",
+            (int(child_id), start.isoformat(), end.isoformat(), text, bruto),
         ).fetchone()
         return _rec(db.execute(BASE + " WHERE r.id_relatorio=?", (inserted["id_relatorio"],)).fetchone())
 
@@ -88,6 +115,17 @@ def list_by_owner(owner_id, child_id=None, sent=None):
     sql += " ORDER BY r.gerado_em DESC, r.id_relatorio DESC"
     with connect() as db:
         return [_rec(r) for r in db.execute(sql, args).fetchall()]
+
+
+def ultimo_com_destaques(child_id, owner_id):
+    """Relatório mais recente da criança que tenha destaques (para o recado na área da criança)."""
+    cid, oid = to_id(child_id), to_id(owner_id)
+    if cid is None or oid is None:
+        return None
+    with connect() as db:
+        r = db.execute(BASE + " WHERE r.id_crianca=? AND c.id_responsavel=? AND r.destaques IS NOT NULL "
+                       "ORDER BY r.gerado_em DESC, r.id_relatorio DESC LIMIT 1", (cid, oid)).fetchone()
+    return _rec(r) if r else None
 
 
 def get_owned(report_id, owner_id):

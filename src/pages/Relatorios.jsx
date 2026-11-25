@@ -13,6 +13,7 @@ import {
   Label,
 } from "../components/ui";
 import { cn } from "../lib/cn";
+import CartoesIA from "../components/CartoesIA";
 
 function hoje(deslocamentoDias = 0) {
   const d = new Date(Date.now() + deslocamentoDias * 86400000);
@@ -270,6 +271,7 @@ export default function Relatorios({ criancaId, nomeCrianca }) {
 
               {aberto === r.id && (
                 <div className="mt-4 space-y-3 border-t border-inst-border pt-4">
+                  <CartoesIA destaques={r.destaques} nomeCrianca={nomeCrianca} />
                   <article className="rel-documento rounded-2xl border border-inst-border bg-inst-subtle/40 p-5 sm:p-6">
                     <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-inst-border pb-3">
                       <div>

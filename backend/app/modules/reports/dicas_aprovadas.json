@@ -1,0 +1,90 @@
+{
+  "aviso": "Catálogo revisado pela equipe do projeto. Só entram itens com status 'aprovado', revisado_por e revisado_em. Nunca copie rascunhos sem revisão humana; use python -m scripts.aprovar_rascunho.",
+  "versao": 7,
+  "itens": [
+    {
+      "id": "dica-cores-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:08:28+00:00",
+      "rascunho_arquivo": "2026-11-25T13-08-28.json",
+      "jogo": "cores",
+      "situacao": "dificil",
+      "texto": "Antes de jogar, procurem juntos objetos coloridos em casa e digam o nome de cada cor, sem pressa.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-08-28.json)."
+    },
+    {
+      "id": "dica-corforma-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:09:06+00:00",
+      "rascunho_arquivo": "2026-11-25T13-09-06.json",
+      "jogo": "corforma",
+      "situacao": "dificil",
+      "texto": "Procurem juntos em casa objetos de cores e formatos diferentes e falem a cor e o formato de cada um.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-09-06.json)."
+    },
+    {
+      "id": "dica-encaixe-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:09:06+00:00",
+      "rascunho_arquivo": "2026-11-25T13-09-06.json",
+      "jogo": "encaixe",
+      "situacao": "dificil",
+      "texto": "Mostre objetos de formatos diferentes, como um prato e uma caixa, e conversem sobre o formato de cada um antes de jogar.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-09-06.json)."
+    },
+    {
+      "id": "dica-falar-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:09:06+00:00",
+      "rascunho_arquivo": "2026-11-25T13-09-06.json",
+      "jogo": "falar",
+      "situacao": "dificil",
+      "texto": "Sente-se junto, conversem sobre o que vocês veem no quarto e repitam as palavras devagar, sem pressa de corrigir.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-09-06.json)."
+    },
+    {
+      "id": "dica-frutas-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:09:06+00:00",
+      "rascunho_arquivo": "2026-11-25T13-09-06.json",
+      "jogo": "frutas",
+      "situacao": "dificil",
+      "texto": "Na hora do lanche, mostre as frutas da casa e digam juntos o nome de cada uma. Depois joguem com calma e comemorem cada acerto.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-09-06.json)."
+    },
+    {
+      "id": "dica-ligar-01",
+      "status": "aprovado",
+      "origem": "groq",
+      "modelo": "openai/gpt-oss-20b",
+      "gerado_em": "2026-11-25T13:09:06+00:00",
+      "rascunho_arquivo": "2026-11-25T13-09-06.json",
+      "jogo": "ligar",
+      "situacao": "dificil",
+      "texto": "Olhem juntos objetos da casa e digam o nome de cada um em voz alta. Depois joguem com calma, sem pressa.",
+      "revisado_por": "AK",
+      "revisado_em": "2026-11-25",
+      "observacao_revisao": "Texto da Groq corrigido na revisão (rascunho original: 2026-11-25T13-09-06.json)."
+    }
+  ]
+}

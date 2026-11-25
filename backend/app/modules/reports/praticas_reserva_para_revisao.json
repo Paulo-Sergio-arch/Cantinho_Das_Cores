@@ -1,0 +1,52 @@
+{
+  "aviso": "RESERVA EM RASCUNHO, escrita à mão. NÃO é lida pelo relatório. A equipe do projeto revisa, troca status para 'aprovado', preenche revisado_por e revisado_em e copia o item para praticas_aprovadas.json.",
+  "itens": [
+    {
+      "id": "cores-8-01",
+      "status": "rascunho",
+      "origem": "manual",
+      "tema": "cores",
+      "nivel": "8",
+      "titulo": "Caça às cores em casa",
+      "jogos": [
+        "cores",
+        "corforma"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Acerte a cor no seu ritmo.",
+        "Depois, procure em casa uma coisa azul e mostre para alguém.",
+        "Cada tentativa vale, sem pressa."
+      ]
+    },
+    {
+      "id": "palavras-9-01",
+      "status": "rascunho",
+      "origem": "manual",
+      "tema": "palavras",
+      "nivel": "9",
+      "titulo": "Palavras do dia",
+      "jogos": [
+        "ligar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Ligue ao nome no seu ritmo.",
+        "Depois, escolha um objeto da sua casa e fale o nome dele em voz alta."
+      ]
+    },
+    {
+      "id": "convivencia-10-01",
+      "status": "rascunho",
+      "origem": "manual",
+      "tema": "convivencia",
+      "nivel": "10",
+      "titulo": "Conversa com calma",
+      "jogos": [
+        "falar"
+      ],
+      "instrucoes": [
+        "Jogue uma partida de Vamos falar.",
+        "No jantar, se você quiser, conte uma coisa boa do seu dia."
+      ]
+    }
+  ]
+}
