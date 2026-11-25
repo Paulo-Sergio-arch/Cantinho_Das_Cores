@@ -60,3 +60,60 @@ class RecadoDaSemana(BaseModel):
     recado: TextoComOrigem | None = None
     desafio: Desafio | None = None
     gerado_em: datetime | None = None
+
+
+class ReportSummaryMetrics(BaseModel):
+    total_matches: int
+    completed_matches: int
+    abandoned_matches: int
+    completion_rate: int
+    average_score: float | None
+    average_duration_seconds: float | None
+    total_correct: int
+    total_errors: int
+
+
+class ReportGameMetrics(BaseModel):
+    game_id: str
+    name: str
+    skill: str
+    total_matches: int
+    completed_matches: int
+    abandoned_matches: int
+    average_score: float | None
+    average_duration_seconds: float | None
+    total_errors: int
+
+
+class ReportEvolutionPoint(BaseModel):
+    date: str
+    matches: int
+    completed_matches: int
+    abandoned_matches: int
+    average_score: float | None
+    average_duration_seconds: float | None
+
+
+class ReportMatchItem(BaseModel):
+    id: str
+    game_id: str
+    game_name: str
+    correct_answers: int
+    incorrect_answers: int
+    score: int
+    duration_seconds: int
+    completed: bool
+    played_at: datetime
+
+
+class ReportMetrics(BaseModel):
+    report_id: str
+    child_id: str
+    child_name: str
+    child_age: int
+    period_start: date
+    period_end: date
+    summary: ReportSummaryMetrics
+    games: list[ReportGameMetrics]
+    evolution: list[ReportEvolutionPoint]
+    recent_matches: list[ReportMatchItem]

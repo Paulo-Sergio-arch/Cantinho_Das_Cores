@@ -23,6 +23,7 @@ def _rec(r):
         "id": str(r["id_relatorio"]),
         "child_id": str(r["id_crianca"]),
         "child_name": r["apelido"],
+        "child_age": int(r["idade"]),
         "period_start": as_date(r["periodo_inicio"]),
         "period_end": as_date(r["periodo_fim"]),
         "text": r["texto"],
@@ -33,7 +34,7 @@ def _rec(r):
     }
 
 
-BASE = "SELECT r.*, c.apelido FROM relatorios r JOIN criancas c ON c.id_crianca=r.id_crianca"
+BASE = "SELECT r.*, c.apelido, c.idade FROM relatorios r JOIN criancas c ON c.id_crianca=r.id_crianca"
 
 
 def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
@@ -78,6 +79,7 @@ def stats(owner_id, child_id, start, end, tz_offset_minutes: int = 0):
             "skill": g["habilidade"],
             "total_matches": int(g["total"]),
             "completed_matches": int(g["done"]),
+            "abandoned_matches": int(g["total"]) - int(g["done"]),
             "average_score": as_float(g["score"]),
             "average_duration_seconds": as_float(g["dur"]),
             "total_errors": int(g["err"]),
@@ -91,6 +93,58 @@ def count_by_child(child_id):
     """Quantos relatórios a criança já tem (usado só para o rodízio das práticas)."""
     with connect() as db:
         return db.execute("SELECT COUNT(*) n FROM relatorios WHERE id_crianca=?", (int(child_id),)).fetchone()["n"]
+
+
+def period_details(owner_id, child_id, start, end, tz_offset_minutes: int = 0, history_limit: int = 15):
+    """Retorna métricas completas do período (resumo, por jogo, evolução diária e partidas recentes) para visualização e PDF."""
+    summary, games = stats(owner_id, child_id, start, end, tz_offset_minutes=tz_offset_minutes)
+    d_sel, tz_sel = sql_date("p.jogado_em", tz_offset_minutes)
+    d_where, tz_where = sql_date("p.jogado_em", tz_offset_minutes)
+    start_iso, end_iso = start.isoformat(), end.isoformat()
+    with connect() as db:
+        evo_rows = db.execute(
+            f"""SELECT {d_sel} d, COUNT(*) n, COALESCE(SUM(p.concluida),0) done,
+            ROUND(AVG(CASE WHEN p.concluida=1 THEN p.pontuacao END),1) score,
+            ROUND(AVG(CASE WHEN p.concluida=1 THEN p.duracao_seg END),1) dur
+            FROM partidas p
+            WHERE p.id_crianca=? AND {d_where} BETWEEN ? AND ?
+            GROUP BY d ORDER BY d""",
+            [*tz_sel, int(child_id), *tz_where, start_iso, end_iso],
+        ).fetchall()
+        hist_rows = db.execute(
+            f"""SELECT p.*, j.nome jogo FROM partidas p
+            JOIN jogos j ON j.id_jogo=p.id_jogo
+            WHERE p.id_crianca=? AND {d_where} BETWEEN ? AND ?
+            ORDER BY p.jogado_em DESC, p.id_partida DESC LIMIT ?""",
+            [int(child_id), *tz_where, start_iso, end_iso, int(history_limit)],
+        ).fetchall()
+
+    evolution = [
+        {
+            "date": str(r["d"]),
+            "matches": int(r["n"]),
+            "completed_matches": int(r["done"]),
+            "abandoned_matches": int(r["n"]) - int(r["done"]),
+            "average_score": as_float(r["score"]),
+            "average_duration_seconds": as_float(r["dur"]),
+        }
+        for r in evo_rows
+    ]
+    recent_matches = [
+        {
+            "id": str(r["id_partida"]),
+            "game_id": r["id_jogo"],
+            "game_name": r["jogo"],
+            "correct_answers": int(r["acertos"]),
+            "incorrect_answers": int(r["erros"]),
+            "score": int(r["pontuacao"]),
+            "duration_seconds": int(r["duracao_seg"] or 0),
+            "completed": bool(r["concluida"]),
+            "played_at": as_datetime(r["jogado_em"]),
+        }
+        for r in hist_rows
+    ]
+    return summary, games, evolution, recent_matches
 
 
 def create(child_id, start, end, text, destaques=None):

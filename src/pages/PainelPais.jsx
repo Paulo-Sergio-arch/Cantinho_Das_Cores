@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock,
-  Download,
+  FileDown,
   Trophy,
   User,
   Users,
@@ -20,6 +20,7 @@ import {
 import { evolucao, historico, porJogo, resumo } from "../services/dashboard";
 import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Select } from "../components/ui";
 import { cn } from "../lib/cn";
+import { construirDadosPainel } from "../utils/relatorioDados";
 import Relatorios from "./Relatorios";
 
 const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
@@ -74,66 +75,6 @@ const COR_BARRA_JOGO = {
   falar: "#DE8668",
   frutas: "#D47B8B",
 };
-
-function escaparCsv(valor) {
-  const txt = String(valor ?? "");
-  return /[";\n\r]/.test(txt) ? `"${txt.replace(/"/g, '""')}"` : txt;
-}
-
-function baixarCsv({ nomeCrianca, idadeCrianca, res, jogos, itens }) {
-  const linhas = [
-    ["Cantinho das Cores - Relatório de Desempenho"],
-    ["Criança", nomeCrianca, "Idade", `${idadeCrianca} anos`],
-    [
-      "Partidas totais",
-      res?.total_matches ?? 0,
-      "Concluídas",
-      res?.completed_matches ?? 0,
-      "Abandonadas",
-      res?.abandoned_matches ?? 0,
-      "Pontuação média (%)",
-      res?.average_score !== null && res?.average_score !== undefined ? Math.round(res.average_score) : "",
-    ],
-    [],
-    ["Desempenho por jogo"],
-    ["Jogo", "Concluídas", "Total", "Abandonadas", "Pontuação média (%)", "Erros", "Tempo médio (s)"],
-    ...(jogos || []).map((j) => [
-      j.name,
-      j.completed_matches,
-      j.total_matches,
-      j.abandoned_matches,
-      j.average_score !== null && j.average_score !== undefined ? Math.round(j.average_score) : "",
-      j.total_errors,
-      j.average_duration_seconds !== null && j.average_duration_seconds !== undefined
-        ? Math.round(j.average_duration_seconds)
-        : "",
-    ]),
-    [],
-    ["Histórico de atividades"],
-    ["Jogo", "Situação", "Acertos", "Erros", "Pontuação (%)", "Tempo (s)", "Data"],
-    ...(itens || []).map((r) => [
-      r.game_name,
-      r.completed ? "Concluída" : "Abandonada",
-      r.correct_answers,
-      r.incorrect_answers,
-      r.completed ? r.score : "",
-      r.duration_seconds ?? "",
-      formatarDataCompleta(r.played_at),
-    ]),
-  ];
-
-  const conteudo = "\uFEFF" + linhas.map((l) => l.map(escaparCsv).join(";")).join("\r\n");
-  const blob = new Blob([conteudo], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const nomeArquivo = `desempenho-${(nomeCrianca || "crianca").toLowerCase().replace(/[^a-z0-9]+/gi, "-")}.csv`;
-  a.href = url;
-  a.download = nomeArquivo;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 
 function TooltipEvolucao({ active, payload }) {
   if (!active || !payload?.length) return null;
@@ -239,6 +180,7 @@ export default function PainelPais({
   visitante,
   criancas,
   criancaId,
+  calmo = false,
   onSelecionarCrianca,
   onIrPerfis,
   onEntrarConta,
@@ -248,6 +190,8 @@ export default function PainelPais({
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
+  const [exportandoPdf, setExportandoPdf] = useState(false);
+  const [erroPdf, setErroPdf] = useState("");
   const [mais, setMais] = useState({ carregando: false, erro: "" });
 
   const crianca = criancas.find((c) => String(c.id) === String(criancaId)) || null;
@@ -279,8 +223,52 @@ export default function PainelPais({
   useEffect(() => {
     // oxlint-disable-next-line react/set-state-in-effect -- busca de dados ao montar/trocar filtro; o loading faz parte do fluxo
     setDados(null);
+    setErroPdf("");
     carregar();
   }, [carregar]);
+
+  const exportarPdf = async () => {
+    if (exportandoPdf || !dados?.res) return;
+    setErroPdf("");
+    setExportandoPdf(true);
+    try {
+      let evoCompleto = dados.evo;
+      let histCompleto = dados.hist.items;
+      if (jogoFiltro) {
+        const d = dias || undefined;
+        const [evoGeral, histGeral] = await Promise.all([
+          evolucao(idCrianca, d),
+          historico(idCrianca, undefined, 12, 0, d),
+        ]);
+        evoCompleto = evoGeral;
+        histCompleto = histGeral.items;
+      }
+      const dadosPdf = construirDadosPainel({
+        nomeCrianca,
+        idadeCrianca,
+        dias,
+        res: dados.res,
+        jogos: dados.jogos,
+        evo: evoCompleto,
+        itens: histCompleto,
+      });
+      const { exportarRelatorioPdf } = await import("../utils/pdfRelatorio");
+      const slug = (nomeCrianca || "crianca")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      const sufixoPeriodo = dias ? `${dias}d` : "completo";
+      await exportarRelatorioPdf(dadosPdf, {
+        nomeArquivo: `desempenho-${slug || "crianca"}-${sufixoPeriodo}.pdf`,
+      });
+    } catch {
+      setErroPdf("Não foi possível gerar o PDF agora. Tente novamente em instantes.");
+    } finally {
+      setExportandoPdf(false);
+    }
+  };
 
   const verMais = async () => {
     if (mais.carregando || !dados) return;
@@ -442,22 +430,22 @@ export default function PainelPais({
             <Button
               variant="institutional"
               size="sm"
-              onClick={() =>
-                baixarCsv({
-                  nomeCrianca,
-                  idadeCrianca,
-                  res,
-                  jogos: dados.jogos,
-                  itens: dados.hist.items,
-                })
-              }
+              disabled={exportandoPdf}
+              aria-busy={exportandoPdf}
+              onClick={exportarPdf}
             >
-              <Download size={15} />
-              Exportar CSV
+              <FileDown size={15} />
+              {exportandoPdf ? "Gerando PDF…" : "Exportar PDF"}
             </Button>
           )}
         </div>
       </div>
+
+      {erroPdf && (
+        <Alert variant="error" className="no-print">
+          <span>{erroPdf}</span>
+        </Alert>
+      )}
 
       {carregando && !dados && (
         <p className="no-print py-8 text-center text-sm font-semibold text-ink-muted" role="status">
@@ -659,7 +647,12 @@ export default function PainelPais({
         </>
       )}
 
-      <Relatorios criancaId={crianca.id} nomeCrianca={crianca.name} />
+      <Relatorios
+        criancaId={crianca.id}
+        nomeCrianca={crianca.name}
+        idadeCrianca={idadeCrianca}
+        calmo={calmo}
+      />
     </section>
   );
 }
