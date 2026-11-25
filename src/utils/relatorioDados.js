@@ -102,6 +102,50 @@ function parseTempoTexto(str = "") {
   return null;
 }
 
+const ROTULO_SITUACAO = {
+  facil: "fácil",
+  no_ponto: "no ponto",
+  dificil: "difícil",
+  nao_jogou: "sem jogar",
+};
+
+// Observações a partir dos destaques gravados pelo servidor (versão 1): acompanhamento, dicas e evolução por jogo.
+export function observacoesDosDestaques(destaques) {
+  if (!destaques || destaques.versao !== 1) return [];
+  const obs = [];
+  const acompanhamento = destaques.acompanhamento?.texto?.trim();
+  if (acompanhamento) obs.push(acompanhamento);
+  for (const d of Array.isArray(destaques.dicas) ? destaques.dicas : []) {
+    const texto = String(d?.texto || "").trim();
+    if (texto) obs.push(d?.nome ? `Como ajudar em ${d.nome}: ${texto}` : texto);
+  }
+  for (const j of Array.isArray(destaques.jogos) ? destaques.jogos : []) {
+    const antes = ROTULO_SITUACAO[j?.antes];
+    const agora = ROTULO_SITUACAO[j?.agora];
+    if (j?.nome && antes && agora) obs.push(`${j.nome}: estava ${antes} e agora está ${agora}.`);
+  }
+  return obs;
+}
+
+// Observações a partir do texto novo: linhas "- " das seções "Como {nome} evoluiu" e "Dica".
+export function observacoesDoTextoNovo(texto) {
+  const obs = [];
+  let dentro = false;
+  for (const bruta of String(texto || "").split(/\r?\n/)) {
+    const linha = bruta.trim();
+    if (!linha) {
+      dentro = false;
+      continue;
+    }
+    if (!linha.startsWith("- ")) {
+      dentro = /^Como .+ evoluiu$/i.test(linha) || /^Dicas?$/i.test(linha);
+      continue;
+    }
+    if (dentro) obs.push(linha.slice(2).trim());
+  }
+  return obs;
+}
+
 export function analisarTextoRelatorio(relatorio, fallbackNome = "", fallbackIdade = null) {
   const texto = String(relatorio?.text || "");
   const linhas = texto
@@ -243,6 +287,11 @@ export function analisarTextoRelatorio(relatorio, fallbackNome = "", fallbackIda
         total_errors: 0,
       });
     }
+  }
+
+  if (observations.length === 0) {
+    const novas = observacoesDosDestaques(relatorio?.destaques);
+    observations.push(...(novas.length > 0 ? novas : observacoesDoTextoNovo(texto)));
   }
 
   return {
