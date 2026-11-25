@@ -11,6 +11,8 @@ export const gerarRelatorio = (childId, inicio, fim) =>
   });
 export const listarRelatorios = (childId) => api.get("/api/reports", { child_id: childId });
 export const obterRelatorio = (id) => api.get(`/api/reports/${id}`);
+export const metricasRelatorio = (id) =>
+  api.get(`/api/reports/${id}/metrics`, { tz_offset_minutes: fusoMinutos() });
 export const statusRelatorio = (id) => api.get(`/api/reports/${id}/status`);
 export const excluirRelatorio = (id) => api.del(`/api/reports/${id}`);
 // Envia ou reenvia o relatório pelo canal configurado no backend (Resend, Brevo, SMTP, webhook ou caixa de saída).

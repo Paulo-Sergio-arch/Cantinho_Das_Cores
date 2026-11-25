@@ -8,7 +8,13 @@ from app.modules.children.repository import repository as children_repository
 from app.modules.reports import repository as repo
 from app.modules.reports.delivery import deliver_report
 from app.modules.reports.generator import build_text
-from app.modules.reports.schemas import ReportCreate, ReportPublic, ReportSendRequest, ReportStatus
+from app.modules.reports.schemas import (
+    ReportCreate,
+    ReportMetrics,
+    ReportPublic,
+    ReportSendRequest,
+    ReportStatus,
+)
 
 router = APIRouter(prefix="/api/reports", tags=["Relatórios pedagógicos"])
 
@@ -61,6 +67,34 @@ def list_reports(
 @router.get("/{report_id}", response_model=ReportPublic)
 def read_report(report_id: str, owner_id: str = Depends(responsible_id)):
     return owned_or_404(report_id, owner_id)
+
+
+@router.get("/{report_id}/metrics", response_model=ReportMetrics)
+def report_metrics(
+    report_id: str,
+    tz_offset_minutes: int = Query(default=0, ge=-840, le=840),
+    owner_id: str = Depends(responsible_id),
+):
+    report = owned_or_404(report_id, owner_id)
+    summary, games, evolution, recent_matches = repo.period_details(
+        owner_id,
+        report["child_id"],
+        report["period_start"],
+        report["period_end"],
+        tz_offset_minutes=tz_offset_minutes,
+    )
+    return {
+        "report_id": report["id"],
+        "child_id": report["child_id"],
+        "child_name": report["child_name"],
+        "child_age": report["child_age"],
+        "period_start": report["period_start"],
+        "period_end": report["period_end"],
+        "summary": summary,
+        "games": games,
+        "evolution": evolution,
+        "recent_matches": recent_matches,
+    }
 
 
 @router.get("/{report_id}/status", response_model=ReportStatus)
