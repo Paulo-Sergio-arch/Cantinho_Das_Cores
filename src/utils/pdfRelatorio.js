@@ -353,7 +353,8 @@ function renderBannerHeaderCanvas() {
   }
 
   // Formas lúdicas & estrelinhas pastel da marca (inspiradas na nuvi-login-hero)
-  desenharEstrelaCanvas(ctx, 566, 36, 10, 4.8, "#F7CF63");
+  // Fica à direita do selo de nível (que pode ir até ~632px), sem cobrir o texto dele.
+  desenharEstrelaCanvas(ctx, 652, 22, 9, 4.3, "#F7CF63");
   desenharBrilhoQuatroPontas(ctx, 704, 86, 8.5, "#F29999");
   desenharEstrelaCanvas(ctx, 540, 160, 8, 3.8, "#8AD4B7");
 
@@ -694,18 +695,26 @@ function renderTempoPorJogoCanvas(jogados, larguraPx = 360) {
     ctx.font = '700 9.5px "Atkinson Hyperlegible", system-ui, sans-serif';
     ctx.fillText(formatarTempoCurto(seg), x + barW / 2, y - 4);
 
-    // Rótulo curto embaixo (2 linhas se necessário)
-    const palavras = g.name.split(" ");
-    const linha1 = palavras.slice(0, 2).join(" ");
-    const linha2 = palavras.slice(2).join(" ");
-    const maxCh = W >= 500 ? 15 : 11;
+    // Rótulo embaixo: quebra por palavra na largura da coluna (até 2 linhas), sem cortar palavras ao meio.
     ctx.fillStyle = COR.muted;
     ctx.font = '700 8.8px "Atkinson Hyperlegible", system-ui, sans-serif';
     ctx.textBaseline = "top";
-    ctx.fillText(linha1.length > maxCh ? `${linha1.slice(0, maxCh - 1)}.` : linha1, x + barW / 2, padT + plotH + 7);
-    if (linha2) {
-      ctx.fillText(linha2.length > maxCh ? `${linha2.slice(0, maxCh - 1)}.` : linha2, x + barW / 2, padT + plotH + 18);
+    const larguraRotulo = Math.max(barW, slotW - 6);
+    const linhasRotulo = [];
+    for (const palavra of g.name.split(" ")) {
+      const atual = linhasRotulo[linhasRotulo.length - 1];
+      if (atual !== undefined && ctx.measureText(`${atual} ${palavra}`).width <= larguraRotulo) {
+        linhasRotulo[linhasRotulo.length - 1] = `${atual} ${palavra}`;
+      } else {
+        linhasRotulo.push(palavra);
+      }
     }
+    if (linhasRotulo.length > 2) linhasRotulo.splice(1, linhasRotulo.length, linhasRotulo.slice(1).join(" "));
+    linhasRotulo.forEach((texto, i) => {
+      let t = texto;
+      while (t.length > 3 && ctx.measureText(t).width > larguraRotulo) t = t.slice(0, -1);
+      ctx.fillText(t === texto ? t : `${t.slice(0, -1)}…`, x + barW / 2, padT + plotH + 7 + i * 11);
+    });
   });
 
   return canvas.toDataURL("image/png");
@@ -899,7 +908,7 @@ export async function exportarRelatorioPdf(dados, { nomeArquivo } = {}) {
   doc.setLineWidth(0.3);
   doc.setFont(fontes.sans, "bold");
   doc.setFontSize(7.6);
-  const seloTxt = limparTexto(narrativa.selo.titulo, fontes.utf8);
+  const seloTxt = truncarTexto(doc, limparTexto(narrativa.selo.titulo, fontes.utf8), 54 - 11);
   const seloW = Math.min(54, doc.getTextWidth(seloTxt) + 11);
   doc.roundedRect(MARGIN + 104, bannerY + 6.7, seloW, 6, 3, 3, "FD");
   desenharEstrelaVetor(doc, MARGIN + 107.6, bannerY + 9.7, 1.8, narrativa.selo.cor);
@@ -937,12 +946,21 @@ export async function exportarRelatorioPdf(dados, { nomeArquivo } = {}) {
   doc.text("Nuvi diz:", balaoX + 4, balaoY + 4.8);
 
   doc.setFont(fontes.sans, "normal");
-  doc.setFontSize(8);
   setTextCol(doc, COR.ink);
-  const linhasFala = doc
-    .splitTextToSize(limparTexto(narrativa.fala, fontes.utf8), balaoW - 19)
-    .slice(0, 2);
-  doc.text(linhasFala, balaoX + 16.5, balaoY + 4.8, { lineHeightFactor: 1.32 });
+  // Fala longa (nome ou jogo comprido): diminui a letra para caber em até 3 linhas, sem cortar no meio.
+  const falaLimpa = limparTexto(narrativa.fala, fontes.utf8);
+  let tamFala = 8;
+  doc.setFontSize(tamFala);
+  let linhasFala = doc.splitTextToSize(falaLimpa, balaoW - 19);
+  if (linhasFala.length > 2) {
+    tamFala = 7;
+    doc.setFontSize(tamFala);
+    linhasFala = doc.splitTextToSize(falaLimpa, balaoW - 19);
+  }
+  if (linhasFala.length > 3) {
+    linhasFala = [...linhasFala.slice(0, 2), truncarTexto(doc, `${linhasFala.slice(2).join(" ")}`, balaoW - 19)];
+  }
+  doc.text(linhasFala, balaoX + 16.5, balaoY + (linhasFala.length > 2 ? 4.3 : 4.8), { lineHeightFactor: tamFala < 8 ? 1.25 : 1.32 });
 
   let y = bannerY + bannerH + 5.5;
 
@@ -1301,6 +1319,9 @@ export async function exportarRelatorioPdf(dados, { nomeArquivo } = {}) {
   // 5. DESTAQUES PEDAGÓGICOS DA NUVI + OBSERVAÇÕES
   // -------------------------------------------------------------------
   const temDestaques = Boolean(narrativa.melhorJogo || narrativa.jogoAtencao);
+  // Quebra as linhas com a MESMA fonte usada ao desenhar; senão a linha passa da borda do cartão.
+  doc.setFont(fontes.sans, "normal");
+  doc.setFontSize(8.2);
   const obsLinhasPreparadas = narrativa.observacoes.map((o) =>
     doc.splitTextToSize(limparTexto(o, fontes.utf8), CONTENT_W - 16)
   );
