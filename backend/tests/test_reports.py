@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.modules.auth.repository import repository as users
@@ -35,13 +36,14 @@ def test_generate_stores_text_for_period_only():
     r = gen(h, cid); assert r.status_code == 201
     b = r.json()
     assert b['sent'] is False and b['sent_at'] is None and b['child_name'] == 'Ana'
-    assert 'Partidas jogadas: 2' in b['text'] and '01/11/2026 a 15/11/2026' in b['text']
-    assert 'Acerte a cor' in b['text'] and 'Ligue ao nome' in b['text']
+    assert 'Jogou 2 vezes e terminou 2 jogos.' in b['text'] and '01/11/2026 a 15/11/2026' in b['text']
+    assert 'Nível: Fácil (8 anos)' in b['text']
+    assert '- Acerte a cor: está fácil.' in b['text'] and '- Ligue ao nome: está difícil.' in b['text']
 
 def test_generate_without_matches():
     h = register(); cid = child(h)
     b = gen(h, cid).json()
-    assert 'Não houve partidas' in b['text']
+    assert 'Não houve jogos neste período.' in b['text']
 
 def test_list_filter_and_read():
     h = register(); cid = seed(h); other = child(h, 'Beto')
@@ -89,15 +91,53 @@ def test_report_ignores_abandoned_in_performance():
     play(h, cid, 'cores', 5, 0, True, 60, '2026-11-10T10:00:00+00:00')
     play(h, cid, 'ligar', 1, 4, False, 20, '2026-11-10T11:00:00+00:00')
     t = gen(h, cid).json()['text']
-    assert 'abandonadas: 1' in t and 'somente partidas concluídas' in t
-    assert 'Pontuação média: 100/100' in t
-    assert 'Sem partida concluída no período: Ligue ao nome' in t
+    assert 'Jogou 2 vezes e terminou 1 jogo.' in t
+    assert 'Nos jogos que terminou: 5 acertos e 0 erros.' in t
+    assert '- Ligue ao nome: está difícil. Começou 1 vez, mas ainda não terminou. Tudo bem!' in t
 
 def test_report_only_abandoned():
     h = register(); cid = child(h)
     play(h, cid, 'cores', 0, 0, False, 5, '2026-11-10T10:00:00+00:00')
     t = gen(h, cid).json()['text']
-    assert 'Nenhuma partida foi concluída' in t and 'Pontuação média' not in t
+    assert 'Ainda não terminou nenhum jogo neste período.' in t and 'acertos' not in t
+
+
+def test_report_linguagem_simples_sem_termos_tecnicos():
+    h = register(); cid = seed(h)
+    t = gen(h, cid).json()['text']
+    for termo in ('taxa de conclusão', 'partida(s)', 'concluída(s)', 'Discriminação', 'indicadores', 'Pontuação média'):
+        assert termo not in t, termo
+
+
+def test_report_dificuldade_por_jogo():
+    h = register(); cid = child(h)
+    play(h, cid, 'cores', 5, 0, True, 60, '2026-11-02T10:00:00+00:00')     # 0 erros  -> fácil
+    play(h, cid, 'encaixe', 5, 3, True, 60, '2026-11-03T10:00:00+00:00')   # 3 erros  -> no ponto
+    play(h, cid, 'ligar', 5, 6, True, 60, '2026-11-04T10:00:00+00:00')     # 6 erros  -> difícil
+    play(h, cid, 'falar', 5, 0, True, 60, '2026-11-05T10:00:00+00:00')     # terminou 1, largou 2 -> difícil
+    play(h, cid, 'falar', 1, 0, False, 10, '2026-11-05T11:00:00+00:00')
+    play(h, cid, 'falar', 2, 0, False, 10, '2026-11-05T12:00:00+00:00')
+    t = gen(h, cid).json()['text']
+    assert '- Acerte a cor: está fácil. Terminou 1 de 1, com poucos erros.' in t
+    assert '- Encaixe as formas: está no ponto. Terminou 1 de 1, com alguns erros.' in t
+    assert '- Ligue ao nome: está difícil. Terminou 1 de 1, com muitos erros.' in t
+    assert '- Vamos falar: está difícil. Terminou 1 de 3, e deixou outros pela metade.' in t
+    assert t.index('Acerte a cor: está fácil') < t.index('Encaixe as formas: está no ponto') < t.index('Ligue ao nome: está difícil')
+    assert 'Vale jogar Ligue ao nome e Vamos falar mais vezes' in t
+
+
+@pytest.mark.parametrize('idade,nivel', [(5, 'Fácil'), (9, 'Médio'), (12, 'Avançado')])
+def test_report_mostra_nivel_pela_idade(idade, nivel):
+    h = register(); cid = client.post('/api/children', json={'name': 'Bia', 'age': idade}, headers=h).json()['id']
+    t = gen(h, cid).json()['text']
+    assert f'Nível: {nivel} ({idade} anos)' in t
+
+
+def test_report_todos_faceis():
+    h = register(); cid = child(h)
+    play(h, cid, 'cores', 5, 1, True, 60, '2026-11-02T10:00:00+00:00')
+    t = gen(h, cid).json()['text']
+    assert 'Os jogos estão fáceis para Ana neste nível.' in t
 
 
 def test_report_metrics_returns_period_breakdown_and_respects_isolation():

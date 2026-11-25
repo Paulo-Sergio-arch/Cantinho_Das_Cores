@@ -18,3 +18,5 @@ export const excluirRelatorio = (id) => api.del(`/api/reports/${id}`);
 // Envia ou reenvia o relatório pelo canal configurado no backend (Resend, Brevo, SMTP, webhook ou caixa de saída).
 export const registrarEnvio = (id, opcoes) => api.post(`/api/reports/${id}/sent`, opcoes);
 export const enviarRelatorio = (id, opcoes) => api.post(`/api/reports/${id}/send`, opcoes);
+// Recado e desafio do último relatório, para a área da criança (só lê o que já foi gravado; não chama a IA).
+export const recadoDaSemana = (childId) => api.get("/api/reports/recado-da-semana", { child_id: childId });

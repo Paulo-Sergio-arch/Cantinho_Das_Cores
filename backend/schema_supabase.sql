@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS relatorios (
     CHECK (periodo_fim >= periodo_inicio),
     FOREIGN KEY (id_crianca) REFERENCES criancas(id_crianca) ON DELETE CASCADE
 );
+-- Destaques do relatório (JSON com os pedaços do texto e a origem de cada um); antigos ficam NULL
+ALTER TABLE relatorios ADD COLUMN IF NOT EXISTS destaques TEXT;
 
 -- Tabelas auxiliares de segurança da API FastAPI (revogação de JWT, recuperação de senha e rate limiting)
 CREATE TABLE IF NOT EXISTS tokens_revogados (

@@ -11,6 +11,11 @@ os.environ["DATABASE_PATH"] = os.path.join(_TMP_DIR, "testes.sqlite3")
 os.environ["APP_ENV"] = "development"
 os.environ.setdefault("JWT_SECRET", "segredo-somente-para-testes-0123456789abcdef")
 os.environ.setdefault("ADMIN_API_KEY", "chave-admin-somente-para-testes-0123456789")
+# Práticas em casa: testes nunca usam chave real da Groq nem o catálogo aprovado do repositório.
+os.environ["GROQ_API_KEY"] = ""
+os.environ["PRATICAS_APROVADAS_PATH"] = os.path.join(_TMP_DIR, "praticas_aprovadas_inexistente.json")
+os.environ["RECADOS_APROVADOS_PATH"] = os.path.join(_TMP_DIR, "recados_aprovados_inexistente.json")
+os.environ["DICAS_APROVADAS_PATH"] = os.path.join(_TMP_DIR, "dicas_aprovadas_inexistente.json")
 
 
 def pytest_sessionfinish(session, exitstatus):

@@ -21,6 +21,7 @@ import {
 import RelatorioVisual from "../components/RelatorioVisual";
 import { construirDadosRelatorio } from "../utils/relatorioDados";
 import { cn } from "../lib/cn";
+import CartoesIA from "../components/CartoesIA";
 
 function hoje(deslocamentoDias = 0) {
   const d = new Date(Date.now() + deslocamentoDias * 86400000);
@@ -363,6 +364,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
 
                 {estaAberto && dadosVisuais && (
                   <div className="mt-4 space-y-3 border-t border-inst-border pt-4">
+                    <CartoesIA destaques={r.destaques} nomeCrianca={nomeCrianca} />
                     <RelatorioVisual
                       dados={dadosVisuais}
                       calmo={calmo}

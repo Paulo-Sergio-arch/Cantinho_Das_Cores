@@ -30,6 +30,7 @@ class ReportPublic(BaseModel):
     period_start: date
     period_end: date
     text: str
+    destaques: dict | None = None
     generated_at: datetime
     sent_at: datetime | None
     sent: bool
@@ -42,6 +43,23 @@ class ReportStatus(BaseModel):
     sent: bool
     generated_at: datetime
     sent_at: datetime | None
+
+
+class TextoComOrigem(BaseModel):
+    texto: str
+    origem: str
+
+
+class Desafio(BaseModel):
+    jogo: str
+    nome: str
+
+
+class RecadoDaSemana(BaseModel):
+    """Só o que a criança vê no menu: o recado e o jogo da prática do último relatório."""
+    recado: TextoComOrigem | None = None
+    desafio: Desafio | None = None
+    gerado_em: datetime | None = None
 
 
 class ReportSummaryMetrics(BaseModel):

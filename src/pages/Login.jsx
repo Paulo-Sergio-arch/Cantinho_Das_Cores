@@ -523,6 +523,17 @@ export default function Login({ onLogin, onCadastro, onVisitante, aviso }) {
           Você pode editar ou excluir qualquer perfil de criança ou sua própria conta a qualquer momento; a exclusão
           remove imediatamente os perfis, partidas e relatórios associados.
         </p>
+        <h3 className="font-display text-base font-semibold text-ink pt-1">
+          4. Relatórios com apoio de inteligência artificial
+        </h3>
+        <p>
+          Ao gerar um relatório, enviamos a um serviço de inteligência artificial (Groq, com servidores fora do Brasil)
+          apenas um <strong>resumo anônimo</strong> do progresso: o nível do perfil e, para cada jogo, se está fácil,
+          no ponto ou difícil e se melhorou em relação ao período anterior. <strong>Nunca</strong> enviamos nome,
+          idade, e-mail ou qualquer dado que identifique a criança ou o responsável. Os textos sugeridos passam por
+          um filtro automático e o relatório indica quando a IA participou. Se o serviço estiver indisponível, o
+          relatório usa textos revisados pela equipe.
+        </p>
       </Dialog>
     </main>
   );

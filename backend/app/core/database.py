@@ -229,6 +229,11 @@ def init_db():
         if "nome" not in colunas_resp:
             conn.execute("ALTER TABLE responsaveis ADD COLUMN nome TEXT")
 
+        # Migração idempotente: destaques do relatório (JSON com os pedaços e a origem de cada um)
+        colunas_rel = {r["name"] for r in conn.execute("PRAGMA table_info(relatorios)").fetchall()}
+        if "destaques" not in colunas_rel:
+            conn.execute("ALTER TABLE relatorios ADD COLUMN destaques TEXT")
+
         # Tabela auxiliar de segurança para revogação de tokens JWT no logout
         conn.execute(
             """CREATE TABLE IF NOT EXISTS tokens_revogados (

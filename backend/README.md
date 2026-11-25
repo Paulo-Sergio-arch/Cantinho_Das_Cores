@@ -142,3 +142,36 @@ A suíte usa um **banco SQLite temporário** (`tests/conftest.py` define `DATABA
 - Preferência individual de voz por criança (`criancas.voz_ativa` ↔ `voice_enabled`), recuperação/alteração de senha e exclusão completa de conta conforme a LGPD (`DELETE /api/auth/me`).
 
 
+
+## Sugestão de prática em casa (IA revisada, só backend)
+- Os novos relatórios ganham, no fim do texto, a seção **"Sugestão de prática em casa"**, lida **somente** de `app/modules/reports/praticas_aprovadas.json` (catálogo local versionado). Sem item aprovado e válido para o nível da criança, o relatório sai igual ao de antes. Relatórios antigos não mudam.
+- Escolha: nível efetivo pela idade (≤ 8 → `8`, 9 → `9`, ≥ 10 → `10`). Dentro do nível, a prática aprovada que usa o jogo mais difícil da criança no período; se não houver, a primeira aprovada em ordem de `id`. Sem partidas no período, só um convite curto. Idade e desempenho são usados só no servidor.
+- Os relatórios também podem trazer **"Recado para {nome}"** (fala com a criança, de `recados_aprovados.json`) e **"Como ajudar em {jogo}"** na Dica para cada jogo difícil (fala com o adulto, de `dicas_aprovadas.json`). O nome entra só no servidor. Sem item aprovado, o texto fica igual.
+- O servidor chama a Groq **só ao gerar um relatório novo** (ver "IA ao vivo" abaixo). Nunca no login, nos jogos, ao abrir ou enviar relatórios.
+- Temas, IDs, nomes dos jogos e validação ficam em `app/praticas/` (sem banco e sem rede).
+
+### Gerar rascunhos (equipe do projeto)
+```bash
+cd backend
+python -m scripts.gerar_praticas --simular --lote 2          # sem rede; itens origem=simulacao
+python -m scripts.gerar_praticas --lote 3 --temas cores --niveis 8   # usa GROQ_API_KEY do backend/.env local
+python -m scripts.gerar_conteudo --tipo recado --lote 6 --niveis 8,9   # recados: situação × nível
+python -m scripts.gerar_conteudo --tipo dica --lote 6                  # dicas: uma por jogo
+```
+- Envia à Groq (`openai/gpt-oss-20b`) só os temas fixos, rótulos de situação/nível e o catálogo público de jogos. Não abre o banco.
+- Lote máximo de 6 combinações, uma chamada por combinação, **sem repetição automática**: para no primeiro erro.
+- Grava rascunhos em `data/praticas_rascunhos/`, `data/recados_rascunhos/` e `data/dicas_rascunhos/` (fora do Git). Itens inválidos ficam em `descartados` com o motivo.
+
+### Revisar e aprovar (obrigatório, sem tela)
+1. Leia o rascunho e corrija o texto se preciso. A validação automática é heurística e não substitui a revisão.
+2. Aprove com `python -m scripts.aprovar_rascunho --catalogo praticas|recados|dicas --rascunho data/<pasta>/<arquivo>.json --id <id> --revisor <iniciais> [--observacao "o que mudou"]`. O comando valida, grava `status`, `revisado_por`, `revisado_em`, aumenta `versao` e recusa id repetido.
+3. Itens `origem: "simulacao"` nunca são aceitos no catálogo aprovado.
+- `app/modules/reports/praticas_reserva_para_revisao.json` traz exemplos escritos à mão, ainda em rascunho, para a equipe revisar.
+
+
+## IA ao vivo no relatório (acompanhamento do progresso)
+- Ao gerar um relatório com partidas, o servidor compara o período com o anterior de mesmo tamanho (`reports/evolucao.py`) e escreve a seção **"Como {nome} evoluiu"** com regras fixas.
+- Com `GROQ_API_KEY` definida e `IA_AO_VIVO=true`, faz **uma** chamada à Groq (`app/ia/ao_vivo.py`) com um resumo **anônimo** (nível, situação de cada jogo agora e antes, tendência, faixas de partidas, jogos nunca tentados). Nunca nome, idade, e-mail, ids ou números.
+- A Groq devolve acompanhamento (para a família), recado (para a criança), dicas dos jogos difíceis e prática. Cada pedaço é validado; o que não passar é trocado pelo texto aprovado do catálogo. Quando a IA participa, o relatório termina com "Parte deste relatório foi escrita com ajuda de inteligência artificial."
+- Proteções (`app/ia/groq.py`): prazo de `IA_TIMEOUT_SEGUNDOS` (6 s), sem repetição, pausa de 10 min depois de falha (429, 401, 5xx, timeout), teto de `IA_TETO_DIARIO` chamadas por dia. Sem chave ou desligado → só catálogo.
+- Passo a passo para a hospedagem: `docs/groq-na-hospedagem.md`.

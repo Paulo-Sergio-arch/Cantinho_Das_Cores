@@ -35,6 +35,8 @@ import {
 } from "../data/jogosData";
 import { temPinPais } from "../utils/pinPais";
 import Nuvi from "../components/Nuvi";
+import RecadoDaSemana from "../components/RecadoDaSemana";
+import useRecadoDaSemana from "../hooks/useRecadoDaSemana";
 import PinPaisModal from "../components/PinPaisModal";
 import { ShapePhysics } from "../components/shape-physics";
 import { Alert, Button, Card, Dialog, Input, Select } from "../components/ui";
@@ -228,6 +230,8 @@ export default function Menu({
   const abasAtuais = ehAreaPais ? ABAS_PAIS : ABAS_INFANTIS;
   const temModoAtivo = calmo || fonteMaior || !som;
   const inicialCrianca = (criancaAtiva?.name || "?").trim().charAt(0).toUpperCase();
+  const recadoSemana = useRecadoDaSemana(criancaAtiva?.id, visitante);
+  const jogoDesafio = recadoSemana?.desafio?.jogo;
 
   const solicitarAcessoPais = (destino = "pais") => {
     setAvisoPin("");
@@ -876,6 +880,8 @@ export default function Menu({
             />
           </section>
 
+          <RecadoDaSemana dados={recadoSemana} calmo={calmo} onJogarDesafio={onSelecionarJogo} />
+
           {jogosCarregando && (
             <p className="text-center text-sm font-semibold text-ink-muted" role="status">
               Carregando jogos…
@@ -908,8 +914,18 @@ export default function Menu({
                   whileTap={calmo ? undefined : { scale: 0.985 }}
                   transition={{ type: "spring", stiffness: 420, damping: 28 }}
                   onClick={() => onSelecionarJogo(j.id)}
-                  className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] text-left shadow-[0_3px_0_#DDD6C7,0_6px_16px_rgba(31,45,77,0.04)] transition-shadow hover:border-[#BFC7D6] hover:shadow-[0_4px_0_#CFC7B6,0_10px_22px_rgba(31,45,77,0.06)]"
+                  aria-label={j.id === jogoDesafio ? `${j.nome} (desafio da semana)` : undefined}
+                  className={cn(
+                    "group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] text-left shadow-[0_3px_0_#DDD6C7,0_6px_16px_rgba(31,45,77,0.04)] transition-shadow hover:border-[#BFC7D6] hover:shadow-[0_4px_0_#CFC7B6,0_10px_22px_rgba(31,45,77,0.06)]",
+                    j.id === jogoDesafio && "border-[#E3BE7A] ring-2 ring-[#E3BE7A]/70"
+                  )}
                 >
+                  {j.id === jogoDesafio && (
+                    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#FFF6E3] px-2.5 py-0.5 text-xs font-bold text-[#7A5200]">
+                      <Star size={12} className="fill-[#E3BE7A] text-[#B89042]" aria-hidden="true" />
+                      Desafio da semana
+                    </span>
+                  )}
                   <span
                     className="block h-1.5 w-full"
                     style={{ backgroundColor: estilo.faixa }}

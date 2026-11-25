@@ -236,9 +236,9 @@ export default function RelatorioVisual({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="flex items-center gap-3 self-start lg:max-w-md lg:self-center"
+            className="flex w-full items-center gap-3 self-start lg:w-auto lg:max-w-md lg:self-center"
           >
-            <div className="relative rounded-2xl border border-[#CADDF2] bg-white/95 px-4 py-3 shadow-[0_3px_12px_rgba(47,111,214,0.08)]">
+            <div className="relative min-w-0 flex-1 rounded-2xl border border-[#CADDF2] bg-white/95 px-4 py-3 shadow-[0_3px_12px_rgba(47,111,214,0.08)]">
               <span
                 className="hidden sm:block absolute -right-[6px] top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 border-r border-t border-[#CADDF2] bg-white"
                 aria-hidden="true"
@@ -250,7 +250,8 @@ export default function RelatorioVisual({
                 {narrativa.fala}
               </p>
             </div>
-            <NuviMascote size="md" comPes calmo={calmo} className="shrink-0" />
+            <NuviMascote size="sm" comPes calmo={calmo} className="shrink-0 sm:hidden" />
+            <NuviMascote size="md" comPes calmo={calmo} className="hidden shrink-0 sm:block" />
           </motion.div>
         </div>
       </header>

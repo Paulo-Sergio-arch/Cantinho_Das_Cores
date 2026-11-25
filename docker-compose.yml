@@ -22,6 +22,9 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_FROM: ${SMTP_FROM:-no-reply@cantinhodascores.com.br}
       REPORT_WEBHOOK_URL: ${REPORT_WEBHOOK_URL:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      IA_AO_VIVO: ${IA_AO_VIVO:-true}
+      IA_TETO_DIARIO: ${IA_TETO_DIARIO:-300}
     volumes:
       - cantinho_sqlite_data:/srv/backend/data
     expose:
