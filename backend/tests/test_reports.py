@@ -98,3 +98,29 @@ def test_report_only_abandoned():
     play(h, cid, 'cores', 0, 0, False, 5, '2026-11-10T10:00:00+00:00')
     t = gen(h, cid).json()['text']
     assert 'Nenhuma partida foi concluída' in t and 'Pontuação média' not in t
+
+
+def test_report_metrics_returns_period_breakdown_and_respects_isolation():
+    h1 = register('metrics1@example.com'); cid = seed(h1)
+    rid = gen(h1, cid).json()['id']
+
+    resp = client.get(f'/api/reports/{rid}/metrics', headers=h1)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['report_id'] == rid
+    assert data['child_name'] == 'Ana' and data['child_age'] == 8
+    assert data['summary']['total_matches'] == 2
+    assert data['summary']['completed_matches'] == 2
+    assert data['summary']['abandoned_matches'] == 0
+    assert data['summary']['total_correct'] == 10
+    assert data['summary']['total_errors'] == 5
+    assert [e['date'] for e in data['evolution']] == ['2026-11-10', '2026-11-11']
+    assert len(data['recent_matches']) == 2
+    by_id = {g['game_id']: g for g in data['games']}
+    assert by_id['cores']['average_score'] == 100.0
+    assert by_id['ligar']['average_score'] == 50.0
+    assert by_id['ligar']['total_errors'] == 5
+
+    h2 = register('metrics2@example.com')
+    assert client.get(f'/api/reports/{rid}/metrics', headers=h2).status_code == 404
+    assert client.get(f'/api/reports/{rid}/metrics').status_code == 401

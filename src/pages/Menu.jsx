@@ -1121,6 +1121,7 @@ export default function Menu({
               visitante={visitante}
               criancas={perfis.criancas}
               criancaId={perfis.ativaId}
+              calmo={calmo}
               onSelecionarCrianca={perfis.onSelecionar}
               onIrPerfis={() => onAlterarAba("perfis")}
               onEntrarConta={onSair}

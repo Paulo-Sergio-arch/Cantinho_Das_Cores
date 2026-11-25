@@ -364,10 +364,15 @@
 }
 
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body,
   .cc {
     background: #FFFFFF !important;
-    color: #0F172A !important;
+    color: #1F2D4D !important;
   }
 
   .no-print {
@@ -375,8 +380,8 @@
   }
 
   .rel-documento {
-    border: none !important;
+    border: 1px solid #D8E5F3 !important;
     box-shadow: none !important;
-    padding: 0 !important;
+    break-inside: avoid;
   }
 }
