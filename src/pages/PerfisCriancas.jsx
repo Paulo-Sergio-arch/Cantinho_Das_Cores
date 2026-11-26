@@ -8,6 +8,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CloudConfirmDialog,
+  CloudToast,
   Dialog,
   Input,
   Label,
@@ -67,6 +69,7 @@ export default function PerfisCriancas({
   const [erroForm, setErroForm] = useState("");
   const [erroAcao, setErroAcao] = useState("");
   const [msg, setMsg] = useState("");
+  const [msgTipo, setMsgTipo] = useState("success");
   const [ocupado, setOcupado] = useState(false);
   const [confirmarId, setConfirmarId] = useState(null);
 
@@ -98,6 +101,7 @@ export default function PerfisCriancas({
   const editando = form.id !== null;
   const infoNivelPreview = nivelDaIdade(form.idade);
   const inicialPreview = (form.nome || "").trim().charAt(0).toUpperCase() || "?";
+  const criancaParaExcluir = criancas.find((c) => c.id === confirmarId) || null;
 
   const abrirNovo = () => {
     setForm(VAZIO);
@@ -138,6 +142,7 @@ export default function PerfisCriancas({
     setOcupado(true);
     try {
       await onSalvar(form);
+      setMsgTipo("success");
       setMsg(editando ? "Perfil atualizado com sucesso." : "Perfil criado com sucesso.");
       setForm(VAZIO);
       setModalAberto(false);
@@ -159,6 +164,7 @@ export default function PerfisCriancas({
     setMsg("");
     try {
       await onExcluir(id);
+      setMsgTipo("delete");
       setMsg("Perfil excluído, junto com as partidas e relatórios dele.");
     } catch (e) {
       setErroAcao(e.message);
@@ -170,6 +176,31 @@ export default function PerfisCriancas({
 
   return (
     <section className="flex w-full flex-col gap-5" aria-label="Perfis das crianças">
+      {/* POP-UP EM NUVEM DA NUVI (CRIAÇÃO / ATUALIZAÇÃO / EXCLUSÃO DE PERFIL) */}
+      <CloudToast
+        message={erroAcao || msg}
+        variant={erroAcao ? "error" : msgTipo}
+        onClose={() => {
+          setErroAcao("");
+          setMsg("");
+        }}
+      />
+
+      {/* MODAL EM NUVEM PARA CONFIRMAR EXCLUSÃO DO PERFIL DA CRIANÇA */}
+      <CloudConfirmDialog
+        open={Boolean(criancaParaExcluir)}
+        onClose={() => setConfirmarId(null)}
+        onConfirm={() => criancaParaExcluir && excluir(criancaParaExcluir.id)}
+        busy={ocupado}
+        title={
+          criancaParaExcluir
+            ? `Excluir o perfil de ${criancaParaExcluir.name}?`
+            : "Excluir perfil?"
+        }
+        description="O perfil, as partidas registradas e os relatórios pedagógicos desta criança serão removidos permanentemente."
+        confirmLabel="Confirmar?"
+      />
+
       {/* Subcabeçalho limpo direto no fundo (consistente com PainelPais) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -186,18 +217,6 @@ export default function PerfisCriancas({
           Nova criança
         </Button>
       </div>
-
-      {msg && (
-        <Alert variant="success">
-          <span>{msg}</span>
-        </Alert>
-      )}
-
-      {erroAcao && (
-        <Alert variant="error">
-          <span>{erroAcao}</span>
-        </Alert>
-      )}
 
       <Card tone="institutional">
         <CardHeader className="pb-3">

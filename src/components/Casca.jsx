@@ -256,10 +256,11 @@ export default function Casca({
 
       {fim ? (
         final && (
-          <div className="w-full max-w-2xl">
+          <div className="flex w-full max-w-5xl justify-center">
             <Fim
               total={total}
               idade={idade}
+              calmo={calmo}
               estatisticas={estatisticas}
               onNovo={onNovo}
               onSair={sairConfirmado}

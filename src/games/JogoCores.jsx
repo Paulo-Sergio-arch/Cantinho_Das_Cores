@@ -83,6 +83,7 @@ export default function JogoCores(p) {
   const [tente, setTente] = useState(null);
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
+  const [errosRodada, setErrosRodada] = useState(0);
   const timersRef = useRef([]);
 
   useEffect(() => {
@@ -107,6 +108,7 @@ export default function JogoCores(p) {
     if (ok || !c) return;
     if (c.n === r.alvo.n) {
       setOk(c.n);
+      setErrosRodada(0);
       setAcertos((a) => a + 1);
       tocarAcerto();
       falar(`Muito bem! ${c.n}`);
@@ -119,6 +121,7 @@ export default function JogoCores(p) {
     } else {
       setTente(c.n);
       setErros((x) => x + 1);
+      setErrosRodada((er) => er + 1);
       tocarErro();
       falar("Tente de novo");
       agendar(() => setTente(null), 650);
@@ -151,6 +154,7 @@ export default function JogoCores(p) {
           };
           const acertou = ok === c.n;
           const errou = tente === c.n;
+          const dicaAlvo = errosRodada >= 2 && c.n === r.alvo.n && !ok;
           const centralizarUltimo = r.ops.length === 5 && idx === 4;
 
           return (
@@ -168,9 +172,11 @@ export default function JogoCores(p) {
                 boxShadow: `0 6px 0 ${estilo.sombra}`,
               }}
               className={cn(
-                "relative flex min-h-[84px] sm:min-h-[112px] w-full items-center justify-center gap-2.5 sm:gap-4 rounded-[22px] sm:rounded-[28px] px-3 py-4 sm:px-6 sm:py-5 font-display text-lg sm:text-3xl font-semibold tracking-tight transition-[box-shadow,outline,transform]",
+                "relative flex min-h-[84px] sm:min-h-[112px] w-full items-center justify-center gap-2.5 sm:gap-4 rounded-[22px] sm:rounded-[28px] px-3 py-4 sm:px-6 sm:py-5 font-display text-lg sm:text-3xl font-semibold tracking-tight transition-[box-shadow,outline,transform,opacity]",
                 "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6E9CE2] focus-visible:ring-offset-3 focus-visible:ring-offset-[#F5F3EC]",
                 acertou && "ring-4 ring-[#6E9CE2] ring-offset-3 ring-offset-[#F5F3EC]",
+                dicaAlvo && "ring-4 ring-[#E8B638] ring-offset-3 ring-offset-[#F5F3EC]",
+                errosRodada >= 2 && c.n !== r.alvo.n && !ok && "opacity-75",
                 errou && !calmo && "animate-[balanca_0.42s_ease]",
                 centralizarUltimo && "col-span-2 mx-auto w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.625rem)]"
               )}

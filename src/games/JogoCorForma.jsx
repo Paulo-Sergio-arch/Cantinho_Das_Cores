@@ -87,6 +87,7 @@ export default function JogoCorForma(p) {
   const [dica, setDica] = useState("");
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
+  const [errosRodada, setErrosRodada] = useState(0);
   const timersRef = useRef([]);
 
   const corAlvo = r.f.art === "o" ? r.c.n : r.c.f;
@@ -116,6 +117,7 @@ export default function JogoCorForma(p) {
     if (o.f.n === r.f.n && o.c.n === r.c.n) {
       setOk(k);
       setDica("");
+      setErrosRodada(0);
       setAcertos((a) => a + 1);
       tocarAcerto();
       falar("Muito bem!");
@@ -128,6 +130,7 @@ export default function JogoCorForma(p) {
     } else {
       setTente(k);
       setErros((x) => x + 1);
+      setErrosRodada((er) => er + 1);
       tocarErro();
       let textoDica = `Quase! Procure ${r.f.art} ${r.f.n} ${corAlvo}.`;
       if (o.f.n === r.f.n) {
@@ -163,6 +166,8 @@ export default function JogoCorForma(p) {
           const k = `${o.f.n}-${o.c.n}`;
           const nomeCor = o.f.art === "o" ? o.c.n : o.c.f;
           const acertou = ok === k;
+          const ehAlvo = o.f.n === r.f.n && o.c.n === r.c.n;
+          const dicaAlvo = errosRodada >= 2 && ehAlvo && !ok;
           return (
             <button
               type="button"
@@ -170,6 +175,8 @@ export default function JogoCorForma(p) {
               aria-label={`${o.f.n} ${nomeCor}`}
               className={`ficha ${acertou ? "certo" : ""} ${
                 tente === k ? "tente" : ""
+              } ${dicaAlvo && !p.calmo ? "guia-pulsar" : ""} ${
+                errosRodada >= 2 && !ehAlvo && !ok ? "opacity-75" : ""
               }`}
               onClick={() => escolher(o)}
             >

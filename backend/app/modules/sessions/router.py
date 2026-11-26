@@ -43,8 +43,8 @@ def create_session(payload: SessionCreate, owner_id: str = Depends(responsible_i
             moves_remaining=payload.moves_remaining,
         )
     else:
-        if payload.completed and payload.correct_answers != 5:
-            raise HTTPException(status_code=422, detail="Uma partida só pode ser concluída com 5 acertos")
+        if payload.completed and payload.correct_answers not in (3, 5):
+            raise HTTPException(status_code=422, detail="Uma partida só pode ser concluída com 3 ou 5 acertos")
         correct_answers = payload.correct_answers
         attempts_calc = correct_answers + payload.incorrect_answers
         accuracy_rate = round(correct_answers / attempts_calc * 100) if attempts_calc else 0

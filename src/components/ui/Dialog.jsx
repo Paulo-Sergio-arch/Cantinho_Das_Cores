@@ -1,8 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { Button } from "./Button";
+
+const SELETOR_FOCAVEL =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export function Dialog({
   open,
@@ -15,17 +18,51 @@ export function Dialog({
   footerClassName,
   className,
 }) {
+  const containerRef = useRef(null);
+
   useEffect(() => {
     if (!open) return;
+    const elementoAnterior = document.activeElement;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const focarInicial = setTimeout(() => {
+      const raiz = containerRef.current;
+      if (!raiz) return;
+      if (raiz.contains(document.activeElement)) return;
+      const primeiro = raiz.querySelector(SELETOR_FOCAVEL);
+      primeiro?.focus?.();
+    }, 20);
+
     const onKeyDown = (ev) => {
-      if (ev.key === "Escape") onClose?.();
+      if (ev.key === "Escape") {
+        onClose?.();
+        return;
+      }
+      if (ev.key === "Tab" && containerRef.current) {
+        const focaveis = Array.from(
+          containerRef.current.querySelectorAll(SELETOR_FOCAVEL)
+        );
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (ev.shiftKey && document.activeElement === primeiro) {
+          ev.preventDefault();
+          ultimo.focus();
+        } else if (!ev.shiftKey && document.activeElement === ultimo) {
+          ev.preventDefault();
+          primeiro.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
+      clearTimeout(focarInicial);
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      if (elementoAnterior && typeof elementoAnterior.focus === "function") {
+        elementoAnterior.focus();
+      }
     };
   }, [open, onClose]);
 
@@ -45,6 +82,7 @@ export function Dialog({
       }}
     >
       <motion.div
+        ref={containerRef}
         initial={{ opacity: 0, y: 12, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 420, damping: 32 }}
