@@ -166,7 +166,7 @@ export default function Casca({
       <h1 className="sr-only">{titulo}</h1>
 
       {/* Barra superior simétrica em 3 colunas no desktop ([1fr_auto_1fr]) — estrelas perfeitamente centralizadas */}
-      <header className="grid w-full grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8] px-3.5 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.04)] sm:px-4 md:grid-cols-[1fr_auto_1fr]">
+      <header className="relative z-20 grid w-full grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-[#DDD6C7] bg-[#FCFBF8]/95 px-3.5 py-2.5 shadow-[0_2px_10px_rgba(31,45,77,0.06)] backdrop-blur-xs sm:px-4 md:grid-cols-[1fr_auto_1fr]">
         {/* Coluna 1 (Esquerda): Voltar */}
         <div className="justify-self-start">
           <button

@@ -1,11 +1,11 @@
 import {
-  Apple,
   Cloud,
-  Heart,
-  Palette,
+  CloudRain,
+  CloudSun,
+  Moon,
+  Rainbow,
   Sparkles,
   Star,
-  Sun,
 } from "lucide-react";
 
 const PREFIXO_AVATAR = "cc_avatar_perfil_v1_";
@@ -22,12 +22,12 @@ export const CORES_AVATAR_OPCOES = [
 export const ICONES_AVATAR_OPCOES = [
   { id: "letra", nome: "Inicial do nome", Icon: null },
   { id: "nuvi", nome: "Nuvem Nuvi", Icon: Cloud },
+  { id: "nuvem_sol", nome: "Nuvem e Sol", Icon: CloudSun },
+  { id: "nuvem_chuva", nome: "Nuvem Chuvinha", Icon: CloudRain },
+  { id: "arcoiris", nome: "Arco-Íris", Icon: Rainbow },
   { id: "estrela", nome: "Estrela", Icon: Star },
-  { id: "sol", nome: "Sol", Icon: Sun },
-  { id: "coracao", nome: "Coração", Icon: Heart },
-  { id: "frutinha", nome: "Frutinha", Icon: Apple },
-  { id: "cores", nome: "Aquarela", Icon: Palette },
-  { id: "brilho", nome: "Brilho", Icon: Sparkles },
+  { id: "lua", nome: "Lua", Icon: Moon },
+  { id: "brilho", nome: "Brilho do Céu", Icon: Sparkles },
 ];
 
 export function corAvatarPadrao(nome = "") {

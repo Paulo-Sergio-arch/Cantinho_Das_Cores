@@ -8,21 +8,57 @@ import Fundo from "./Fundo";
 import { NuviMascote } from "./Nuvi";
 import { Button } from "./ui";
 
-function NuvemDecorativa({ className = "", scale = 1 }) {
+function NuvemDecorativa({ className = "", scale = 1, comRostinho = false, corBorda = "#C8DDF2" }) {
   return (
     <svg
-      viewBox="0 0 140 76"
-      width={Math.round(140 * scale)}
-      height={Math.round(76 * scale)}
+      viewBox="0 0 144 82"
+      width={Math.round(144 * scale)}
+      height={Math.round(82 * scale)}
       aria-hidden="true"
       className={className}
     >
-      <g fill="#FFFFFF" stroke="#DCE8F5" strokeWidth="2.5">
-        <circle cx="40" cy="46" r="22" />
-        <circle cx="70" cy="33" r="27" />
-        <circle cx="100" cy="47" r="20" />
-        <rect x="34" y="45" width="70" height="23" rx="11.5" stroke="none" />
+      {/* Contorno externo contínuo sem linhas internas */}
+      <g fill={corBorda} stroke={corBorda} strokeWidth="5.5" strokeLinejoin="round">
+        <circle cx="42" cy="48" r="22" />
+        <circle cx="72" cy="34" r="27" />
+        <circle cx="102" cy="49" r="20" />
+        <rect x="36" y="47" width="68" height="23" rx="11.5" />
       </g>
+      <g fill="#FFFFFF">
+        <circle cx="42" cy="48" r="22" />
+        <circle cx="72" cy="34" r="27" />
+        <circle cx="102" cy="49" r="20" />
+        <rect x="36" y="47" width="68" height="23" rx="11.5" />
+      </g>
+      <path d="M32 66h80" stroke="#EAF2FA" strokeWidth="4" strokeLinecap="round" />
+
+      {comRostinho && (
+        <g>
+          <path
+            d="M57 47q4-4.5 8 0"
+            stroke="#273654"
+            strokeWidth="2.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d="M79 47q4-4.5 8 0"
+            stroke="#273654"
+            strokeWidth="2.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <path
+            d="M68 52q4 4.2 8 0"
+            stroke="#273654"
+            strokeWidth="2.4"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <ellipse cx="53" cy="53" rx="4.5" ry="2.6" fill="#F4B8B4" opacity="0.9" />
+          <ellipse cx="91" cy="53" rx="4.5" ry="2.6" fill="#F4B8B4" opacity="0.9" />
+        </g>
+      )}
     </svg>
   );
 }
@@ -135,13 +171,13 @@ export default function Fim({
       })
     : null;
 
-  const animFlutuar = (delay = 0, amp = 6) =>
+  const animFlutuar = (delay = 0, amp = 7) =>
     calmo
       ? {}
       : {
           animate: { y: [0, -amp, 0] },
           transition: {
-            duration: 3.8 + delay,
+            duration: 4 + delay,
             repeat: Infinity,
             ease: "easeInOut",
             delay,
@@ -153,112 +189,201 @@ export default function Fim({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative flex w-full max-w-5xl items-center justify-center py-2 sm:py-4"
+      className="relative flex w-full items-center justify-center py-3 sm:py-6"
     >
-      {/* ARCO-ÍRIS PASTEL E CENÁRIO LATERAL (OPÇÃO A) */}
+      {/* CENÁRIO DE TELA INTEIRA (FULL-BLEED) — Preenche 100% da largura e altura da tela, sem faixas vazias */}
       <div
-        className="pointer-events-none absolute inset-x-0 -inset-y-2 overflow-hidden rounded-[36px]"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-gradient-to-b from-[#D5ECFF] via-[#EDF7FF] to-[#E5F4E8]"
         aria-hidden="true"
       >
+        {/* Sol suave e arco-íris panorâmico aterrissando nas colinas */}
         <svg
-          viewBox="0 0 1100 540"
+          viewBox="0 0 1600 840"
           preserveAspectRatio="xMidYMax slice"
-          className="h-full w-full"
+          className="absolute inset-0 h-full w-full"
         >
-          {/* Arco-íris pastel acolhedor que abraça o card central e preenche as laterais */}
-          <g fill="none" strokeLinecap="round" opacity={calmo ? "0.68" : "0.88"}>
-            <path
-              d="M 50 540 A 500 470 0 0 1 1050 540"
-              stroke="#F7C7C5"
-              strokeWidth="26"
-            />
-            <path
-              d="M 76 540 A 474 444 0 0 1 1024 540"
-              stroke="#FBE0B4"
-              strokeWidth="26"
-            />
-            <path
-              d="M 102 540 A 448 418 0 0 1 998 540"
-              stroke="#FCF1B8"
-              strokeWidth="26"
-            />
-            <path
-              d="M 128 540 A 422 392 0 0 1 972 540"
-              stroke="#C8ECCE"
-              strokeWidth="26"
-            />
-            <path
-              d="M 154 540 A 396 366 0 0 1 946 540"
-              stroke="#C5E2FA"
-              strokeWidth="26"
-            />
-            <path
-              d="M 180 540 A 370 340 0 0 1 920 540"
-              stroke="#DCD1F6"
-              strokeWidth="26"
-            />
+          <defs>
+            <radialGradient id="vitoria-sol-halo" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FFF7D6" stopOpacity="0.95" />
+              <stop offset="55%" stopColor="#FCE39C" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {/* Sol acolhedor no canto superior direito */}
+          <circle cx="1410" cy="145" r="115" fill="url(#vitoria-sol-halo)" />
+          <circle cx="1410" cy="145" r="56" fill="#F9DC7E" />
+
+          {/* Arco-íris pastel amplo que atravessa toda a tela e pousa nas nuvens/colinas */}
+          <g fill="none" strokeLinecap="round" opacity={calmo ? "0.62" : "0.86"}>
+            <path d="M 60 770 A 740 650 0 0 1 1540 770" stroke="#F7C7C5" strokeWidth="30" />
+            <path d="M 90 770 A 710 620 0 0 1 1510 770" stroke="#FBE0B4" strokeWidth="30" />
+            <path d="M 120 770 A 680 590 0 0 1 1480 770" stroke="#FCF1B8" strokeWidth="30" />
+            <path d="M 150 770 A 650 560 0 0 1 1450 770" stroke="#C8ECCE" strokeWidth="30" />
+            <path d="M 180 770 A 620 530 0 0 1 1420 770" stroke="#C5E2FA" strokeWidth="30" />
+            <path d="M 210 770 A 590 500 0 0 1 1390 770" stroke="#DCD1F6" strokeWidth="30" />
           </g>
 
-          {/* Bolinhas pastéis suaves decorativas */}
-          <circle cx="84" cy="230" r="9" fill="#F2B8B5" opacity="0.8" />
-          <circle cx="998" cy="285" r="10" fill="#CFC2F2" opacity="0.85" />
-          <circle cx="195" cy="145" r="7" fill="#F7DC8B" opacity="0.8" />
-          <circle cx="910" cy="145" r="8" fill="#B5DFC6" opacity="0.85" />
+          {/* Pontinhos e estrelinhas sutis no céu aberto */}
+          <circle cx="120" cy="215" r="9" fill="#F2B8B5" opacity="0.8" />
+          <circle cx="290" cy="150" r="7" fill="#F7DC8B" opacity="0.85" />
+          <circle cx="1275" cy="220" r="8" fill="#B5DFC6" opacity="0.85" />
+          <circle cx="1490" cy="310" r="10" fill="#CFC2F2" opacity="0.85" />
+          <circle cx="205" cy="495" r="7" fill="#9BC8F2" opacity="0.8" />
+          <circle cx="1390" cy="485" r="8" fill="#F5C396" opacity="0.8" />
         </svg>
-      </div>
 
-      {/* BASTIDOR LATERAL ESQUERDO — Nuvens + Formas e Frutinhas Sorrindo */}
-      <div
-        className="pointer-events-none hidden md:flex md:w-52 lg:w-64 flex-col items-center justify-between self-stretch py-4 pr-2 relative z-10"
-        aria-hidden="true"
-      >
-        <motion.div {...animFlutuar(0.2, 5)} className="self-start pl-2">
-          <NuvemDecorativa scale={0.95} className="drop-shadow-xs" />
-        </motion.div>
+        {/* Colinas verdes e florzinhas cobrindo 100% da base da tela */}
+        <svg
+          viewBox="0 0 1600 220"
+          preserveAspectRatio="none"
+          className="absolute bottom-0 inset-x-0 h-[135px] sm:h-[170px] w-full"
+        >
+          <path d="M0 90 Q360 15 800 80 T1600 48 V220 H0Z" fill="#BDE6BB" />
+          <path d="M0 135 Q420 78 880 132 T1600 104 V220 H0Z" fill="#94D7A2" />
+          <g opacity="0.85">
+            {[
+              [95, 175, "#E899B8"],
+              [240, 152, "#F5D471"],
+              [410, 182, "#FFFFFF"],
+              [620, 165, "#E8948E"],
+              [980, 170, "#B4A2E8"],
+              [1190, 156, "#FFFFFF"],
+              [1355, 180, "#F0B47B"],
+              [1505, 155, "#E899B8"],
+            ].map(([x, y, c], i) => (
+              <g key={i}>
+                <circle cx={x} cy={y} r="7" fill={c} />
+                <circle cx={x} cy={y} r="2.6" fill="#FFF7CC" />
+              </g>
+            ))}
+          </g>
+        </svg>
 
-        <div className="relative flex w-full flex-col items-center gap-3 my-auto">
-          <div className="flex items-center justify-center gap-3">
-            <motion.div {...animFlutuar(0.4, 7)} className="-rotate-12">
-              <FormaComOlhinhos
-                tipo="triangulo"
-                cor="#E56B67"
-                sombra="#C24D49"
-                size={68}
-              />
-            </motion.div>
-            <motion.div {...animFlutuar(0.9, 6)} className="rotate-6 mt-4">
-              <FormaComOlhinhos
-                tipo="estrela"
-                cor="#F5CC54"
-                sombra="#D1A62C"
-                size={66}
-              />
-            </motion.div>
+        {/* LATERAL ESQUERDA FULL-VIEWPORT (Nuvens fofas + Personagens comemorando da borda ao centro) */}
+        <div className="hidden md:block">
+          {/* Nuvem superior esquerda */}
+          <motion.div
+            {...animFlutuar(0.2, 6)}
+            className="absolute top-[13%] left-[2%] lg:left-[5%]"
+          >
+            <NuvemDecorativa scale={1.15} className="drop-shadow-xs" />
+          </motion.div>
+
+          {/* Nuvinha fofa sorrindo no canto médio-esquerdo */}
+          <motion.div
+            {...animFlutuar(0.8, 7)}
+            className="hidden lg:block absolute top-[28%] left-[12%] xl:left-[15%]"
+          >
+            <NuvemDecorativa scale={0.82} comRostinho className="drop-shadow-xs" />
+          </motion.div>
+
+          {/* Triângulo e estrela flutuando */}
+          <motion.div
+            {...animFlutuar(0.4, 8)}
+            className="absolute top-[42%] left-[2.5%] lg:left-[5.5%] -rotate-12"
+          >
+            <FormaComOlhinhos tipo="triangulo" cor="#E56B67" sombra="#C24D49" size={72} />
+          </motion.div>
+
+          <motion.div
+            {...animFlutuar(1.1, 7)}
+            className="hidden lg:block absolute top-[49%] left-[13%] xl:left-[17%] rotate-12"
+          >
+            <FormaComOlhinhos tipo="estrela" cor="#F5CC54" sombra="#D1A62C" size={68} />
+          </motion.div>
+
+          {/* Morango e quadrado comemorando sobre o arco-íris */}
+          <motion.div
+            {...animFlutuar(0.15, 6)}
+            className="absolute bottom-[17%] left-[3%] lg:left-[6.5%] h-22 w-22 -rotate-6 drop-shadow-[0_6px_12px_rgba(31,45,77,0.12)]"
+          >
+            <BloquinhoFruta fruta={{ id: "morango" }} comOlhos />
+          </motion.div>
+
+          <motion.div
+            {...animFlutuar(0.7, 6)}
+            className="hidden lg:block absolute bottom-[19%] left-[14%] xl:left-[18%] rotate-6"
+          >
+            <FormaComOlhinhos tipo="quadrado" cor="#4D8FE8" sombra="#346FC2" size={68} />
+          </motion.div>
+
+          {/* Banco de nuvens fofinhas na base esquerda (pousando o arco-íris nas colinas) */}
+          <div className="absolute bottom-[5%] left-[1%] opacity-95">
+            <NuvemDecorativa scale={1.35} />
           </div>
+          <div className="hidden lg:block absolute bottom-[2%] left-[10%] opacity-90">
+            <NuvemDecorativa scale={1.05} />
+          </div>
+        </div>
 
-          <NuvemDecorativa scale={0.72} className="opacity-90 -my-2" />
+        {/* LATERAL DIREITA FULL-VIEWPORT (Nuvens fofas + Personagens comemorando da borda ao centro) */}
+        <div className="hidden md:block">
+          {/* Nuvem superior direita */}
+          <motion.div
+            {...animFlutuar(0.5, 6)}
+            className="hidden lg:block absolute top-[15%] right-[11%] xl:right-[14%]"
+          >
+            <NuvemDecorativa scale={1.05} className="drop-shadow-xs" />
+          </motion.div>
 
-          <div className="flex items-end justify-center gap-3 pt-1">
-            <motion.div
-              {...animFlutuar(0.1, 6)}
-              className="h-20 w-20 -rotate-6 drop-shadow-[0_6px_10px_rgba(31,45,77,0.1)]"
-            >
-              <BloquinhoFruta fruta={{ id: "morango" }} comOlhos />
-            </motion.div>
-            <motion.div {...animFlutuar(0.7, 5)} className="rotate-6">
-              <FormaComOlhinhos
-                tipo="quadrado"
-                cor="#4D8FE8"
-                sombra="#346FC2"
-                size={66}
-              />
-            </motion.div>
+          {/* Nuvinha fofa sorrindo na direita */}
+          <motion.div
+            {...animFlutuar(1.0, 7)}
+            className="absolute top-[28%] right-[2%] lg:right-[4.5%]"
+          >
+            <NuvemDecorativa scale={0.86} comRostinho className="drop-shadow-xs" />
+          </motion.div>
+
+          {/* Formas geométricas comemorando na direita */}
+          <motion.div
+            {...animFlutuar(0.3, 7)}
+            className="hidden lg:block absolute top-[43%] right-[13%] xl:right-[17%] rotate-12"
+          >
+            <FormaComOlhinhos tipo="triangulo" cor="#E56B67" sombra="#C24D49" size={66} />
+          </motion.div>
+
+          <motion.div
+            {...animFlutuar(0.9, 8)}
+            className="absolute top-[47%] right-[2.5%] lg:right-[5.5%] -rotate-6"
+          >
+            <FormaComOlhinhos tipo="quadrado" cor="#4D8FE8" sombra="#346FC2" size={68} />
+          </motion.div>
+
+          <motion.div
+            {...animFlutuar(0.6, 5)}
+            className="hidden lg:block absolute bottom-[29%] right-[11%] xl:right-[15%]"
+          >
+            <FormaComOlhinhos tipo="circulo" cor="#69B88B" sombra="#4B986D" size={58} />
+          </motion.div>
+
+          {/* Frutinhas fofas na direita */}
+          <motion.div
+            {...animFlutuar(0.25, 6)}
+            className="hidden lg:block absolute bottom-[17%] right-[15%] xl:right-[19%] h-18 w-18 -rotate-6 drop-shadow-[0_6px_10px_rgba(31,45,77,0.1)]"
+          >
+            <BloquinhoFruta fruta={{ id: "banana" }} comOlhos />
+          </motion.div>
+
+          <motion.div
+            {...animFlutuar(0.85, 6)}
+            className="absolute bottom-[17%] right-[3%] lg:right-[6.5%] h-22 w-22 rotate-6 drop-shadow-[0_6px_12px_rgba(31,45,77,0.12)]"
+          >
+            <BloquinhoFruta fruta={{ id: "maca" }} comOlhos />
+          </motion.div>
+
+          {/* Banco de nuvens fofinhas na base direita */}
+          <div className="absolute bottom-[5%] right-[1%] opacity-95">
+            <NuvemDecorativa scale={1.35} />
+          </div>
+          <div className="hidden lg:block absolute bottom-[2%] right-[10%] opacity-90">
+            <NuvemDecorativa scale={1.05} />
           </div>
         </div>
       </div>
 
       {/* CARTÃO CENTRAL DE VITÓRIA (FOCO DA CRIANÇA) */}
-      <div className="relative z-20 w-full max-w-xl overflow-hidden rounded-[34px] border-4 border-white bg-gradient-to-b from-[#CEEBFF] via-[#E5F6EE] to-[#BCEAD5] p-6 sm:p-8 shadow-[0_14px_36px_rgba(31,45,77,0.12)]">
+      <div className="relative z-20 w-full max-w-xl overflow-hidden rounded-[34px] border-4 border-white bg-gradient-to-b from-[#CEEBFF] via-[#E5F6EE] to-[#BCEAD5] p-6 sm:p-8 shadow-[0_16px_42px_rgba(31,45,77,0.14)]">
         <Fundo variant="vitoria" />
 
         <div className="relative z-10 flex flex-col items-center gap-5">
@@ -311,7 +436,7 @@ export default function Fim({
             ))}
           </div>
 
-          {/* 3 Cartõezinhos Brancos Ilustrados de Conquista (estilo Opção A) */}
+          {/* 3 Cartõezinhos Brancos Ilustrados de Conquista */}
           <div className="grid w-full grid-cols-3 gap-2.5 sm:gap-3">
             <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-white bg-white/95 px-2.5 py-3 text-center shadow-[0_4px_10px_rgba(31,45,77,0.05)]">
               <span
@@ -402,64 +527,6 @@ export default function Fim({
               <Home size={18} />
               Voltar ao menu
             </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* BASTIDOR LATERAL DIREITO — Nuvens + Formas e Frutinhas Comemorando */}
-      <div
-        className="pointer-events-none hidden md:flex md:w-52 lg:w-64 flex-col items-center justify-between self-stretch py-4 pl-2 relative z-10"
-        aria-hidden="true"
-      >
-        <motion.div {...animFlutuar(0.5, 5)} className="self-end pr-2">
-          <NuvemDecorativa scale={0.95} className="drop-shadow-xs" />
-        </motion.div>
-
-        <div className="relative flex w-full flex-col items-center gap-3 my-auto">
-          <div className="flex items-center justify-center gap-3">
-            <motion.div {...animFlutuar(0.3, 6)} className="rotate-12">
-              <FormaComOlhinhos
-                tipo="triangulo"
-                cor="#E56B67"
-                sombra="#C24D49"
-                size={62}
-              />
-            </motion.div>
-            <motion.div {...animFlutuar(0.8, 7)} className="-rotate-6 mt-3">
-              <FormaComOlhinhos
-                tipo="quadrado"
-                cor="#4D8FE8"
-                sombra="#346FC2"
-                size={64}
-              />
-            </motion.div>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 -my-1">
-            <NuvemDecorativa scale={0.76} className="opacity-95" />
-            <motion.div {...animFlutuar(0.6, 5)}>
-              <FormaComOlhinhos
-                tipo="circulo"
-                cor="#69B88B"
-                sombra="#4B986D"
-                size={54}
-              />
-            </motion.div>
-          </div>
-
-          <div className="flex items-end justify-center gap-3 pt-1">
-            <motion.div
-              {...animFlutuar(0.2, 5)}
-              className="h-16 w-16 -rotate-6 drop-shadow-[0_5px_8px_rgba(31,45,77,0.08)]"
-            >
-              <BloquinhoFruta fruta={{ id: "banana" }} comOlhos />
-            </motion.div>
-            <motion.div
-              {...animFlutuar(0.9, 6)}
-              className="h-20 w-20 rotate-6 drop-shadow-[0_6px_10px_rgba(31,45,77,0.1)]"
-            >
-              <BloquinhoFruta fruta={{ id: "maca" }} comOlhos />
-            </motion.div>
           </div>
         </div>
       </div>

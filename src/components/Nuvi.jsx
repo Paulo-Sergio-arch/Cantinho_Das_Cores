@@ -42,11 +42,17 @@ export function NuviMascote({ size = "md", comPes = false, calmo = false, classN
           />
         </>
       )}
-      <g fill="#F8FBFE" stroke="#84A3C4" strokeWidth="3">
+      <g fill="#84A3C4" stroke="#84A3C4" strokeWidth="6" strokeLinejoin="round">
         <circle cx="38" cy="48" r="23" />
         <circle cx="62" cy="34" r="27" />
         <circle cx="86" cy="49" r="21" />
-        <rect x="30" y="48" width="66" height="23" rx="11.5" stroke="none" />
+        <rect x="30" y="48" width="62" height="23" rx="11.5" />
+      </g>
+      <g fill="#F8FBFE">
+        <circle cx="38" cy="48" r="23" />
+        <circle cx="62" cy="34" r="27" />
+        <circle cx="86" cy="49" r="21" />
+        <rect x="30" y="48" width="62" height="23" rx="11.5" />
       </g>
       <path d="M26 67h72" stroke="#DCE9F6" strokeWidth="5" strokeLinecap="round" />
       <path
