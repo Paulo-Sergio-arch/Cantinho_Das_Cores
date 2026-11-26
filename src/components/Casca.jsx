@@ -59,6 +59,7 @@ export default function Casca({
   onNovo,
   onFim,
   onParcial,
+  palcoClassName = "",
   children,
 }) {
   const fim = estrelas >= total;
@@ -269,7 +270,12 @@ export default function Casca({
           </div>
         )
       ) : (
-        <div className="palco-jogo flex w-full max-w-3xl flex-col items-center gap-5 sm:gap-7 pt-1">
+        <div
+          className={cn(
+            "palco-jogo flex w-full max-w-3xl flex-col items-center gap-4 sm:gap-5 pt-1",
+            palcoClassName
+          )}
+        >
           <Nuvi variant="jogo" calmo={calmo} fala={fala} falaVisual={falaVisual} ouvivel />
           <div className="w-full">{children}</div>
         </div>
