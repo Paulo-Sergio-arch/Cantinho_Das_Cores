@@ -282,7 +282,6 @@ export default function PerfisCriancas({
             <ul className="m-0 list-none space-y-2.5 p-0">
               {criancas.map((c) => {
                 const ativo = String(ativaId) === String(c.id);
-                const confirmando = confirmarId === c.id;
                 const infoNivel = nivelDaIdade(c.age);
 
                 return (
@@ -340,28 +339,15 @@ export default function PerfisCriancas({
                       </Button>
 
                       <Button
-                        variant={confirmando ? "danger" : "dangerSoft"}
+                        variant="dangerSoft"
                         size="sm"
                         disabled={ocupado}
-                        aria-busy={ocupado && confirmando}
-                        onClick={() => excluir(c.id)}
+                        onClick={() => setConfirmarId(c.id)}
                         className="min-h-9 h-9 rounded-xl px-3 text-xs font-bold shadow-none"
                       >
                         <Trash2 size={13} />
-                        {confirmando ? "Confirmar?" : "Excluir"}
+                        Excluir
                       </Button>
-
-                      {confirmando && (
-                        <Button
-                          variant="outlineInst"
-                          size="sm"
-                          disabled={ocupado}
-                          onClick={() => setConfirmarId(null)}
-                          className="min-h-9 h-9 rounded-xl px-3 text-xs font-bold"
-                        >
-                          Cancelar
-                        </Button>
-                      )}
                     </div>
                   </li>
                 );

@@ -238,6 +238,9 @@ export function CloudToast({
   );
 }
 
+const SELETOR_FOCAVEL =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 /**
  * Modal de confirmação em formato de nuvem fofa (para exclusão de relatórios ou perfis).
  */
@@ -253,11 +256,47 @@ export function CloudConfirmDialog({
 }) {
   useEffect(() => {
     if (!open) return undefined;
+    const elementoAnterior = document.activeElement;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focarInicial = setTimeout(() => {
+      const modal = document.getElementById("cloud-confirm-card");
+      if (!modal || modal.contains(document.activeElement)) return;
+      const primeiro = modal.querySelector(SELETOR_FOCAVEL);
+      primeiro?.focus?.();
+    }, 20);
+
     const onKey = (ev) => {
-      if (ev.key === "Escape" && !busy) onClose?.();
+      if (ev.key === "Escape" && !busy) {
+        onClose?.();
+        return;
+      }
+      if (ev.key === "Tab") {
+        const modal = document.getElementById("cloud-confirm-card");
+        if (!modal) return;
+        const focaveis = Array.from(modal.querySelectorAll(SELETOR_FOCAVEL));
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (ev.shiftKey && document.activeElement === primeiro) {
+          ev.preventDefault();
+          ultimo.focus();
+        } else if (!ev.shiftKey && document.activeElement === ultimo) {
+          ev.preventDefault();
+          primeiro.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      clearTimeout(focarInicial);
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+      if (elementoAnterior && typeof elementoAnterior.focus === "function") {
+        elementoAnterior.focus();
+      }
+    };
   }, [open, busy, onClose]);
 
   return (
@@ -277,6 +316,7 @@ export function CloudConfirmDialog({
           }}
         >
           <motion.div
+            id="cloud-confirm-card"
             initial={{ opacity: 0, y: 16, scale: 0.93 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
