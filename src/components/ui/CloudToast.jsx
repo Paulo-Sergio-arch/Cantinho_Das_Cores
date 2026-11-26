@@ -22,11 +22,17 @@ export function NuviCloudIcon({ variant = "success", className = "" }) {
       aria-hidden="true"
       className={cn("shrink-0 drop-shadow-[0_3px_6px_rgba(31,45,77,0.08)]", className)}
     >
-      <g fill="#FFFFFF" stroke={stroke} strokeWidth="2.6">
+      <g fill={stroke} stroke={stroke} strokeWidth="5.2" strokeLinejoin="round">
         <circle cx="26" cy="36" r="16" />
         <circle cx="44" cy="25" r="20" />
         <circle cx="62" cy="37" r="15" />
-        <rect x="21" y="36" width="46" height="17" rx="8.5" stroke="none" />
+        <rect x="21" y="36" width="46" height="16" rx="8" />
+      </g>
+      <g fill="#FFFFFF">
+        <circle cx="26" cy="36" r="16" />
+        <circle cx="44" cy="25" r="20" />
+        <circle cx="62" cy="37" r="15" />
+        <rect x="21" y="36" width="46" height="16" rx="8" />
       </g>
       <path d="M19 50h50" stroke="#E4EEF8" strokeWidth="3.8" strokeLinecap="round" />
 
