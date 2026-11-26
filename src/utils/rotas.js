@@ -2,6 +2,7 @@
 
 const ABAS_PARA_CAMINHO = {
   jogos: "/jogos",
+  jardim: "/jardim",
   bloquinhos: "/bloquinhos",
   perfis: "/criancas",
   pais: "/painel",
@@ -11,6 +12,7 @@ const CAMINHO_PARA_ABA = {
   "": "jogos",
   "/": "jogos",
   "/jogos": "jogos",
+  "/jardim": "jardim",
   "/bloquinhos": "bloquinhos",
   "/criancas": "perfis",
   "/painel": "pais",
@@ -20,6 +22,7 @@ const JOGOS_VALIDOS = new Set(["cores", "encaixe", "ligar", "corforma", "falar",
 
 const TITULOS_ABAS = {
   jogos: "Jogos — Cantinho das Cores",
+  jardim: "Jardim da Nuvi — Cantinho das Cores",
   bloquinhos: "Bloquinhos Interativos — Cantinho das Cores",
   perfis: "Perfis das Crianças — Cantinho das Cores",
   pais: "Pais e Professores — Cantinho das Cores",

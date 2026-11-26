@@ -36,6 +36,7 @@ export default function JogoLigar(p) {
   const [lida, setLida] = useState(null);
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
+  const [errosItem, setErrosItem] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -63,19 +64,22 @@ export default function JogoLigar(p) {
     if (desenho === palavra) {
       setLida(null);
       setTente(null);
+      setErrosItem(0);
       setFeito((d) => [...d, palavra]);
       setAcertos((a) => a + 1);
+      setSel(null);
       tocarAcerto();
       falar(`Isso! ${palavra}`);
     } else {
       setLida(null);
       setTente(palavra);
       setErros((x) => x + 1);
+      setErrosItem((ei) => ei + 1);
+      setSel(desenho);
       tocarErro();
       falar("Tente de novo");
       agendar(() => setTente(null), 700);
     }
-    setSel(null);
   };
 
   return (
@@ -105,6 +109,7 @@ export default function JogoLigar(p) {
                 className={`${sel === x.id ? "sel" : ""} ${pareado ? "par" : ""}`}
                 style={pareado ? { background: x.bg } : undefined}
                 onToque={() => {
+                  if (sel !== x.id) setErrosItem(0);
                   setSel(x.id);
                   tocarSelecao();
                   falar(x.id);
@@ -125,6 +130,7 @@ export default function JogoLigar(p) {
           {it.dir.map((x) => {
             const indicePar = feito.indexOf(x.id);
             const pareado = indicePar !== -1;
+            const dicaAlvo = errosItem >= 2 && sel === x.id && !pareado;
             return (
               <button
                 type="button"
@@ -132,9 +138,11 @@ export default function JogoLigar(p) {
                 data-alvo={x.id}
                 disabled={pareado}
                 aria-label={pareado ? `${x.id}, par ${indicePar + 1} concluído` : `ouvir ou ligar ${x.id}`}
-                className={`ficha ${sobre === x.id ? "sobre" : ""} ${
+                className={`ficha ${sobre === x.id || dicaAlvo ? "sobre" : ""} ${
                   tente === x.id ? "tente" : ""
-                } ${lida === x.id ? "sel" : ""} ${pareado ? "par" : ""}`}
+                } ${lida === x.id ? "sel" : ""} ${pareado ? "par" : ""} ${
+                  errosItem >= 2 && sel && sel !== x.id && !pareado ? "opacity-75" : ""
+                }`}
                 style={pareado ? { background: x.bg } : undefined}
                 onClick={() => ligar(sel, x.id)}
               >
