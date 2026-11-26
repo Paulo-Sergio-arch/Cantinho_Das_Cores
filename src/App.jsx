@@ -16,8 +16,9 @@ import { definirAoExpirar, lerExpiracaoToken, lerToken, salvarToken } from "./se
 import * as authApi from "./services/auth";
 import * as criancasApi from "./services/criancas";
 import { listarJogos } from "./services/jogos";
+import { porJogo } from "./services/dashboard";
 import { montarPayload, registrarPartida } from "./services/partidas";
-import { Alert, Button } from "./components/ui";
+import { CloudToast } from "./components/ui";
 import Login from "./pages/Login";
 import Menu from "./pages/Menu";
 import JogoCores from "./games/JogoCores";
@@ -312,6 +313,41 @@ export default function App() {
 
   const feitosAtuais = chavePerfilFeitos ? feitosMapa[chavePerfilFeitos] || {} : feitosVisitante;
 
+  // Sincroniza o contador de partidas concluídas por jogo com o backend ao trocar de criança ativa
+  useEffect(() => {
+    if (!responsavel || !criancaAtiva?.id || !chavePerfilFeitos) return undefined;
+    let ativo = true;
+    porJogo(criancaAtiva.id)
+      .then((jogosApi) => {
+        if (!ativo || !Array.isArray(jogosApi)) return;
+        const doServidor = {};
+        for (const item of jogosApi) {
+          if (item?.game_id && Number(item.completed_matches) > 0) {
+            doServidor[item.game_id] = Number(item.completed_matches);
+          }
+        }
+        setFeitosMapa((mapa) => {
+          const localAtual = mapa[chavePerfilFeitos] || {};
+          const mesclado = { ...localAtual };
+          let mudou = false;
+          for (const [gid, qtd] of Object.entries(doServidor)) {
+            if ((mesclado[gid] || 0) < qtd) {
+              mesclado[gid] = qtd;
+              mudou = true;
+            }
+          }
+          if (!mudou) return mapa;
+          const atualizado = { ...mapa, [chavePerfilFeitos]: mesclado };
+          gravarStorage(CHAVE_FEITOS_MAPA, atualizado);
+          return atualizado;
+        });
+      })
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, [responsavel, criancaAtiva?.id, chavePerfilFeitos]);
+
   // Fila de partidas pendentes (falha de rede/servidor): fica no navegador e é reenviada depois.
   const enviarFila = useCallback(async () => {
     if (!responsavel || enviandoFilaRef.current) return;
@@ -527,16 +563,11 @@ export default function App() {
   return (
     <MotionConfig reducedMotion={calmo ? "always" : "user"}>
       <div className={classesRaiz}>
-        {avisoApi && (
-          <div className="no-print relative z-20 w-full max-w-6xl px-4 pt-3 sm:px-6">
-            <Alert variant={avisoApi.tipo === "ok" ? "success" : "error"}>
-              <span>{avisoApi.texto}</span>
-              <Button variant="outlineInst" size="sm" onClick={() => setAvisoApi(null)}>
-                Fechar
-              </Button>
-            </Alert>
-          </div>
-        )}
+        <CloudToast
+          message={avisoApi?.texto}
+          variant={avisoApi?.tipo === "ok" ? "success" : "error"}
+          onClose={() => setAvisoApi(null)}
+        />
 
         {tela === "carregando" && (
           <main

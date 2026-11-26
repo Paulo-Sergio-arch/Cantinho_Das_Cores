@@ -15,6 +15,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CloudConfirmDialog,
+  CloudToast,
   Input,
   Label,
 } from "../components/ui";
@@ -41,24 +43,33 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
   const [destinatario, setDestinatario] = useState("");
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [erroLista, setErroLista] = useState("");
   const [erro, setErro] = useState("");
   const [msg, setMsg] = useState("");
+  const [msgTipo, setMsgTipo] = useState("success");
   const [gerando, setGerando] = useState(false);
   const [enviandoId, setEnviandoId] = useState(null);
   const [excluindoId, setExcluindoId] = useState(null);
+  const [confirmarExclusao, setConfirmarExclusao] = useState(null);
   const [baixandoPdfId, setBaixandoPdfId] = useState(null);
   const [aberto, setAberto] = useState(null);
   const [mostrarTextoId, setMostrarTextoId] = useState(null);
   const [metricasMapa, setMetricasMapa] = useState({});
   const [carregandoMetricasId, setCarregandoMetricasId] = useState(null);
 
+  const notificarSucesso = (texto, tipo = "success") => {
+    setErro("");
+    setMsgTipo(tipo);
+    setMsg(texto);
+  };
+
   const carregar = useCallback(async () => {
     setCarregando(true);
-    setErro("");
+    setErroLista("");
     try {
       setLista(await listarRelatorios(criancaId));
     } catch (e) {
-      setErro(e.message);
+      setErroLista(e.message);
     } finally {
       setCarregando(false);
     }
@@ -70,6 +81,8 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
     setMostrarTextoId(null);
     setMetricasMapa({});
     setMsg("");
+    setErro("");
+    setConfirmarExclusao(null);
     carregar();
   }, [carregar]);
 
@@ -112,7 +125,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
       setLista((l) => [novo, ...l]);
       setAberto(novo.id);
       buscarMetricas(novo.id);
-      setMsg("Relatório gerado com sucesso.");
+      notificarSucesso("Relatório gerado com sucesso.", "success");
     } catch (e) {
       setErro(e.message);
     } finally {
@@ -135,10 +148,11 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
         resend: Boolean(relatorio.sent),
       });
       setLista((l) => l.map((r) => (r.id === relatorio.id ? atualizado : r)));
-      setMsg(
+      notificarSucesso(
         atualizado.delivery_recipient
           ? `Relatório enviado para ${atualizado.delivery_recipient}.`
-          : "Relatório enviado com sucesso."
+          : "Relatório enviado com sucesso.",
+        "success"
       );
     } catch (e) {
       setErro(e.message);
@@ -156,7 +170,8 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
       await excluirRelatorio(id);
       setLista((l) => l.filter((r) => r.id !== id));
       if (aberto === id) setAberto(null);
-      setMsg("Relatório excluído.");
+      setConfirmarExclusao(null);
+      notificarSucesso("Relatório excluído.", "delete");
     } catch (e) {
       setErro(e.message);
     } finally {
@@ -167,7 +182,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
   const copiar = async (texto) => {
     try {
       await navigator.clipboard.writeText(texto);
-      setMsg("Texto do relatório copiado.");
+      notificarSucesso("Texto do relatório copiado.", "info");
     } catch {
       setErro("Não foi possível copiar. Selecione o texto e copie manualmente.");
     }
@@ -196,7 +211,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
       await exportarRelatorioPdf(dadosVisuais, {
         nomeArquivo: `relatorio-${slug || "crianca"}-${relatorio.period_start}-a-${relatorio.period_end}.pdf`,
       });
-      setMsg("PDF do relatório baixado com sucesso.");
+      notificarSucesso("PDF do relatório baixado com sucesso.", "success");
     } catch {
       setErro("Não foi possível gerar o PDF agora. Tente novamente em instantes.");
     } finally {
@@ -210,6 +225,31 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
 
   return (
     <Card tone="institutional" aria-label="Relatórios pedagógicos">
+      {/* POP-UP EM NUVEM DA NUVI (SUCESSO / EXCLUSÃO / ERRO DE AÇÃO) */}
+      <CloudToast
+        message={erro || msg}
+        variant={erro ? "error" : msgTipo}
+        onClose={() => {
+          setErro("");
+          setMsg("");
+        }}
+      />
+
+      {/* MODAL EM NUVEM PARA CONFIRMAR EXCLUSÃO DE RELATÓRIO */}
+      <CloudConfirmDialog
+        open={Boolean(confirmarExclusao)}
+        onClose={() => setConfirmarExclusao(null)}
+        onConfirm={() => confirmarExclusao && excluir(confirmarExclusao.id)}
+        busy={Boolean(excluindoId)}
+        title="Excluir este relatório?"
+        description={
+          confirmarExclusao
+            ? `O relatório do período ${soData(confirmarExclusao.period_start)} a ${soData(confirmarExclusao.period_end)} de ${nomeCrianca} será removido.`
+            : ""
+        }
+        confirmLabel="Excluir relatório"
+      />
+
       <CardHeader className="no-print">
         <CardTitle>Relatórios pedagógicos de {nomeCrianca}</CardTitle>
         <Badge variant="muted">{lista.length} gerado(s)</Badge>
@@ -266,14 +306,12 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
           </div>
         </form>
 
-        {erro && (
+        {erroLista && (
           <Alert variant="error" className="no-print">
-            {erro}
-          </Alert>
-        )}
-        {msg && (
-          <Alert variant="success" className="no-print">
-            {msg}
+            <span>{erroLista}</span>
+            <Button variant="outlineInst" size="sm" onClick={carregar}>
+              Tentar de novo
+            </Button>
           </Alert>
         )}
         {carregando && (
@@ -281,7 +319,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
             Carregando relatórios…
           </p>
         )}
-        {!carregando && !erro && lista.length === 0 && (
+        {!carregando && !erroLista && lista.length === 0 && (
           <p className="no-print m-0 text-sm text-ink-muted">
             Nenhum relatório gerado ainda. Escolha o período e clique em “Gerar”.
           </p>
@@ -354,7 +392,7 @@ export default function Relatorios({ criancaId, nomeCrianca, idadeCrianca = null
                       size="sm"
                       disabled={excluindoId === r.id}
                       aria-busy={excluindoId === r.id}
-                      onClick={() => excluir(r.id)}
+                      onClick={() => setConfirmarExclusao(r)}
                     >
                       <Trash2 size={14} />
                       {excluindoId === r.id ? "Excluindo…" : "Excluir"}

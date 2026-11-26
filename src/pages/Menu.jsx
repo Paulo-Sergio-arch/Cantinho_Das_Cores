@@ -39,7 +39,7 @@ import RecadoDaSemana from "../components/RecadoDaSemana";
 import useRecadoDaSemana from "../hooks/useRecadoDaSemana";
 import PinPaisModal from "../components/PinPaisModal";
 import { ShapePhysics } from "../components/shape-physics";
-import { Alert, Button, Card, Dialog, Input, Select } from "../components/ui";
+import { Alert, Button, Card, CloudToast, Dialog, Input, Select } from "../components/ui";
 import { cn } from "../lib/cn";
 import PerfisCriancas from "./PerfisCriancas";
 
@@ -460,16 +460,11 @@ export default function Menu({
         </div>
       </header>
 
-      {avisoPin && (
-        <div className="no-print w-full">
-          <Alert variant="success">
-            <span>{avisoPin}</span>
-            <Button variant="outlineInst" size="sm" onClick={() => setAvisoPin("")}>
-              Fechar
-            </Button>
-          </Alert>
-        </div>
-      )}
+      <CloudToast
+        message={avisoPin}
+        variant="success"
+        onClose={() => setAvisoPin("")}
+      />
 
       {/* MODAL DE AJUSTES */}
       <Dialog

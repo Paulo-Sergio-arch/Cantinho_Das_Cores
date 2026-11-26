@@ -18,7 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import { evolucao, historico, porJogo, resumo } from "../services/dashboard";
-import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Select } from "../components/ui";
+import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, CloudToast, Select } from "../components/ui";
 import { cn } from "../lib/cn";
 import { construirDadosPainel } from "../utils/relatorioDados";
 import Relatorios from "./Relatorios";
@@ -192,6 +192,7 @@ export default function PainelPais({
   const [erro, setErro] = useState("");
   const [exportandoPdf, setExportandoPdf] = useState(false);
   const [erroPdf, setErroPdf] = useState("");
+  const [msgPdf, setMsgPdf] = useState("");
   const [mais, setMais] = useState({ carregando: false, erro: "" });
 
   const crianca = criancas.find((c) => String(c.id) === String(criancaId)) || null;
@@ -224,12 +225,14 @@ export default function PainelPais({
     // oxlint-disable-next-line react/set-state-in-effect -- busca de dados ao montar/trocar filtro; o loading faz parte do fluxo
     setDados(null);
     setErroPdf("");
+    setMsgPdf("");
     carregar();
   }, [carregar]);
 
   const exportarPdf = async () => {
     if (exportandoPdf || !dados?.res) return;
     setErroPdf("");
+    setMsgPdf("");
     setExportandoPdf(true);
     try {
       let evoCompleto = dados.evo;
@@ -263,6 +266,7 @@ export default function PainelPais({
       await exportarRelatorioPdf(dadosPdf, {
         nomeArquivo: `desempenho-${slug || "crianca"}-${sufixoPeriodo}.pdf`,
       });
+      setMsgPdf("PDF do painel de desempenho baixado com sucesso.");
     } catch {
       setErroPdf("Não foi possível gerar o PDF agora. Tente novamente em instantes.");
     } finally {
@@ -441,11 +445,14 @@ export default function PainelPais({
         </div>
       </div>
 
-      {erroPdf && (
-        <Alert variant="error" className="no-print">
-          <span>{erroPdf}</span>
-        </Alert>
-      )}
+      <CloudToast
+        message={erroPdf || msgPdf}
+        variant={erroPdf ? "error" : "success"}
+        onClose={() => {
+          setErroPdf("");
+          setMsgPdf("");
+        }}
+      />
 
       {carregando && !dados && (
         <p className="no-print py-8 text-center text-sm font-semibold text-ink-muted" role="status">
