@@ -185,14 +185,12 @@ export default function Fim({
         };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="relative flex w-full items-center justify-center py-3 sm:py-6"
-    >
-      {/* CENÁRIO DE TELA INTEIRA (FULL-BLEED) — Preenche 100% da largura e altura da tela, sem faixas vazias */}
-      <div
+    <div className="relative flex w-full items-center justify-center py-3 sm:py-6">
+      {/* CENÁRIO DE TELA INTEIRA (FULL-BLEED) — Sem transform em ancestrais para cobrir 100% da tela já no 1º frame */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.22 }}
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-gradient-to-b from-[#D5ECFF] via-[#EDF7FF] to-[#E5F4E8]"
         aria-hidden="true"
       >
@@ -380,10 +378,15 @@ export default function Fim({
             <NuvemDecorativa scale={1.05} />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* CARTÃO CENTRAL DE VITÓRIA (FOCO DA CRIANÇA) */}
-      <div className="relative z-20 w-full max-w-xl overflow-hidden rounded-[34px] border-4 border-white bg-gradient-to-b from-[#CEEBFF] via-[#E5F6EE] to-[#BCEAD5] p-6 sm:p-8 shadow-[0_16px_42px_rgba(31,45,77,0.14)]">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28 }}
+        className="relative z-20 w-full max-w-xl overflow-hidden rounded-[34px] border-4 border-white bg-gradient-to-b from-[#CEEBFF] via-[#E5F6EE] to-[#BCEAD5] p-6 sm:p-8 shadow-[0_16px_42px_rgba(31,45,77,0.14)]"
+      >
         <Fundo variant="vitoria" />
 
         <div className="relative z-10 flex flex-col items-center gap-5">
@@ -529,7 +532,7 @@ export default function Fim({
             </Button>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
