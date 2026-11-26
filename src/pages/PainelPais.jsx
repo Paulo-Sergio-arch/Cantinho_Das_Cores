@@ -20,18 +20,9 @@ import {
 import { evolucao, historico, porJogo, resumo } from "../services/dashboard";
 import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, CloudToast, Select } from "../components/ui";
 import { cn } from "../lib/cn";
+import { AvatarCrianca } from "../utils/avatarCrianca";
 import { construirDadosPainel } from "../utils/relatorioDados";
 import Relatorios from "./Relatorios";
-
-const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
-
-function corAvatar(nome = "") {
-  const limpo = nome.trim();
-  if (!limpo) return "#5B82BA";
-  let soma = 0;
-  for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
-  return CORES_AVATAR[soma % CORES_AVATAR.length];
-}
 
 function formatarDataCurta(iso) {
   try {
@@ -199,7 +190,6 @@ export default function PainelPais({
   const idCrianca = crianca ? criancaId : null;
   const nomeCrianca = crianca ? String(crianca.name || "") : "";
   const idadeCrianca = crianca ? crianca.age : "";
-  const inicialCrianca = nomeCrianca.trim().charAt(0).toUpperCase() || "?";
 
   const carregar = useCallback(async () => {
     if (!idCrianca) return;
@@ -351,6 +341,17 @@ export default function PainelPais({
       partidas: p.completed_matches,
     }));
 
+  const deltaEvolucao =
+    serie.length >= 2 ? serie[serie.length - 1].taxa - serie[0].taxa : null;
+  const rotuloDelta =
+    deltaEvolucao === null
+      ? undefined
+      : deltaEvolucao > 0
+        ? `+${deltaEvolucao}% no período`
+        : deltaEvolucao < 0
+          ? `${deltaEvolucao}% no período`
+          : "estável";
+
   return (
     <section className="flex w-full flex-col gap-5" aria-label="Painel de acompanhamento para pais e professores">
       {/* SUBCABEÇALHO EDITORIAL QUENTE */}
@@ -362,13 +363,12 @@ export default function PainelPais({
 
           {criancas.length > 1 ? (
             <div className="relative inline-flex items-center">
-              <span
-                className="pointer-events-none absolute left-2 flex h-6 w-6 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
-                style={{ backgroundColor: corAvatar(nomeCrianca) }}
-                aria-hidden="true"
-              >
-                {inicialCrianca}
-              </span>
+              <AvatarCrianca
+                criancaId={criancaId}
+                nome={nomeCrianca}
+                size="sm"
+                className="pointer-events-none absolute left-2"
+              />
               <select
                 aria-label="Selecionar criança"
                 value={criancaId}
@@ -389,13 +389,11 @@ export default function PainelPais({
             </div>
           ) : (
             <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-inst-border bg-inst-surface px-2.5 py-1 pr-3.5 text-sm font-semibold text-ink shadow-2xs">
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
-                style={{ backgroundColor: corAvatar(nomeCrianca) }}
-                aria-hidden="true"
-              >
-                {inicialCrianca}
-              </span>
+              <AvatarCrianca
+                criancaId={criancaId}
+                nome={nomeCrianca}
+                size="sm"
+              />
               <span>
                 {nomeCrianca} · {idadeCrianca} anos
               </span>
@@ -493,6 +491,7 @@ export default function PainelPais({
             <KpiCard
               label="Pontuação Média"
               value={res.average_score === null ? "—" : `${pontos(res.average_score)}%`}
+              accent={rotuloDelta}
               icon={Trophy}
               iconTone="bg-[#FDF3DA] text-[#B37E14]"
               topAccent="#E0AE4C"

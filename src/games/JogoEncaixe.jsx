@@ -42,6 +42,7 @@ export default function JogoEncaixe(p) {
   const [sobre, setSobre] = useState(null);
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
+  const [errosPeca, setErrosPeca] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -56,12 +57,15 @@ export default function JogoEncaixe(p) {
     if (peca === alvo) {
       setFeito((d) => [...d, alvo]);
       setAcertos((a) => a + 1);
+      setErrosPeca(0);
       setSel(null);
       tocarAcerto();
       falar(`Encaixou! ${alvo}`);
     } else {
       setTente(alvo);
       setErros((x) => x + 1);
+      setErrosPeca((ep) => ep + 1);
+      setSel(peca);
       tocarErro();
       falar("Tente de novo");
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -98,6 +102,7 @@ export default function JogoEncaixe(p) {
                   feito.includes(f.n) ? "feito" : ""
                 }`}
                 onToque={() => {
+                  if (sel !== f.n) setErrosPeca(0);
                   setSel(f.n);
                   tocarSelecao();
                   falar(f.n);
@@ -114,6 +119,7 @@ export default function JogoEncaixe(p) {
           <div className="linha-grid">
             {it.buracos.map((b) => {
               const encaixado = feito.includes(b.f.n);
+              const dicaAlvo = errosPeca >= 2 && sel === b.f.n && !encaixado;
               return (
                 <button
                   type="button"
@@ -123,12 +129,14 @@ export default function JogoEncaixe(p) {
                   aria-label={`buraco ${b.f.n}`}
                   className={`ficha buraco ${encaixado ? "certo" : ""} ${
                     tente === b.f.n ? "tente" : ""
-                  } ${sobre === b.f.n ? "sobre" : ""}`}
+                  } ${sobre === b.f.n || dicaAlvo ? "sobre" : ""} ${
+                    errosPeca >= 2 && sel && sel !== b.f.n && !encaixado ? "opacity-75" : ""
+                  }`}
                   onClick={() => encaixar(sel, b.f.n)}
                 >
                   <Forma
                     f={b.f}
-                    cor={encaixado ? b.corReal : b.cor}
+                    cor={encaixado || dicaAlvo ? b.corReal : b.cor}
                     oco={!encaixado}
                   />
                 </button>

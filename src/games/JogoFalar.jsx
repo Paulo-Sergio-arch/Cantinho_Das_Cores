@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Mic } from "lucide-react";
 import { FALA, FALA_9, FALA_10 } from "../data/jogosData";
 import { pick } from "../utils/aleatorio";
 import { falar } from "../utils/voz";
@@ -13,6 +14,11 @@ function gerarListaFala(total, idade) {
   return pick(fonte, Math.min(fonte.length, total));
 }
 
+function obterReconhecedor() {
+  if (typeof window === "undefined") return null;
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
 export default function JogoFalar(p) {
   const total = p.total ?? 5;
   const idade = p.idade ?? "8";
@@ -22,21 +28,38 @@ export default function JogoFalar(p) {
   const [tocando, setTocando] = useState(false);
   const [ouviu, setOuviu] = useState(false);
   const [bloq, setBloq] = useState(false);
+  const [escutandoMic, setEscutandoMic] = useState(false);
   const [acertos, setAcertos] = useState(0);
   const [erros, setErros] = useState(0);
   const timersRef = useRef([]);
+  const recRef = useRef(null);
   const w = lista[Math.min(e, lista.length - 1)];
+  const temMic = Boolean(obterReconhecedor());
 
   const limparTimers = () => {
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
   };
 
+  const pararMic = () => {
+    try {
+      recRef.current?.abort?.();
+    } catch {
+      // Ignora erro ao encerrar reconhecimento
+    }
+    recRef.current = null;
+    setEscutandoMic(false);
+  };
+
   useEffect(() => {
-    return () => limparTimers();
+    return () => {
+      limparTimers();
+      pararMic();
+    };
   }, []);
 
   const ouvir = () => {
+    pararMic();
     limparTimers();
     setTocando(true);
     w.s.forEach((s, i) => {
@@ -65,6 +88,7 @@ export default function JogoFalar(p) {
 
   const falei = () => {
     if (bloq) return;
+    pararMic();
     limparTimers();
     setAtiva(-1);
     setTocando(false);
@@ -80,6 +104,37 @@ export default function JogoFalar(p) {
     timersRef.current.push(id);
   };
 
+  const falarNoMicrofone = () => {
+    if (bloq || tocando) return;
+    if (escutandoMic) {
+      pararMic();
+      return;
+    }
+    const Rec = obterReconhecedor();
+    if (!Rec) return;
+    try {
+      const rec = new Rec();
+      rec.lang = "pt-BR";
+      rec.interimResults = false;
+      rec.maxAlternatives = 3;
+      recRef.current = rec;
+      setEscutandoMic(true);
+      rec.onresult = () => {
+        setEscutandoMic(false);
+        falei();
+      };
+      rec.onerror = () => {
+        setEscutandoMic(false);
+      };
+      rec.onend = () => {
+        setEscutandoMic(false);
+      };
+      rec.start();
+    } catch {
+      setEscutandoMic(false);
+    }
+  };
+
   const praticarMais = () => {
     if (bloq) return;
     setErros((x) => x + 1);
@@ -93,9 +148,11 @@ export default function JogoFalar(p) {
       estrelas={e}
       estatisticas={{ acertos, erros }}
       fala={
-        ouviu
-          ? `Agora é você! Fale: ${w.w}`
-          : "Toque em ouvir ou clique em cada sílaba."
+        escutandoMic
+          ? `Estou ouvindo você falar: ${w.w}!`
+          : ouviu
+            ? `Agora é você! Fale: ${w.w}`
+            : "Toque em ouvir ou clique em cada sílaba."
       }
     >
       <div className="fala-card">
@@ -138,6 +195,17 @@ export default function JogoFalar(p) {
             <IconFala size={20} />
             Eu falei!
           </button>
+          {ouviu && !bloq && temMic && (
+            <button
+              type="button"
+              className="btn neutro"
+              onClick={falarNoMicrofone}
+              aria-pressed={escutandoMic}
+            >
+              <Mic size={19} className={escutandoMic ? "text-danger" : "text-pais"} />
+              {escutandoMic ? "Ouvindo sua voz..." : "Usar microfone"}
+            </button>
+          )}
           {ouviu && !bloq && (
             <button
               type="button"

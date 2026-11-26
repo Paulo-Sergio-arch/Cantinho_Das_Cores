@@ -15,6 +15,14 @@ import {
   Label,
 } from "../components/ui";
 import { cn } from "../lib/cn";
+import { AvatarCrianca } from "../utils/avatarCrianca";
+import {
+  CORES_AVATAR_OPCOES,
+  ICONES_AVATAR_OPCOES,
+  corAvatarPadrao,
+  lerEstiloAvatar,
+  salvarEstiloAvatar,
+} from "../utils/avatarCriancaDados";
 
 const IDADES = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"];
 
@@ -41,16 +49,14 @@ function nivelDaIdade(idade) {
   };
 }
 
-const VAZIO = { id: null, nome: "", idade: "8", vozAtiva: true };
-const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
-
-function corAvatar(nome = "") {
-  const limpo = nome.trim();
-  if (!limpo) return "#5B82BA";
-  let soma = 0;
-  for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
-  return CORES_AVATAR[soma % CORES_AVATAR.length];
-}
+const VAZIO = {
+  id: null,
+  nome: "",
+  idade: "8",
+  vozAtiva: true,
+  avatarCor: "#5B82BA",
+  avatarIcone: "letra",
+};
 
 export default function PerfisCriancas({
   visitante,
@@ -100,7 +106,6 @@ export default function PerfisCriancas({
 
   const editando = form.id !== null;
   const infoNivelPreview = nivelDaIdade(form.idade);
-  const inicialPreview = (form.nome || "").trim().charAt(0).toUpperCase() || "?";
   const criancaParaExcluir = criancas.find((c) => c.id === confirmarId) || null;
 
   const abrirNovo = () => {
@@ -112,11 +117,14 @@ export default function PerfisCriancas({
   };
 
   const abrirEditar = (c) => {
+    const estiloAvatar = lerEstiloAvatar(c.id, c.name);
     setForm({
       id: c.id,
       nome: c.name,
       idade: String(c.age),
       vozAtiva: c.voice_enabled !== false,
+      avatarCor: estiloAvatar.cor,
+      avatarIcone: estiloAvatar.icone,
     });
     setErroForm("");
     setErroAcao("");
@@ -141,7 +149,14 @@ export default function PerfisCriancas({
     setErroForm("");
     setOcupado(true);
     try {
-      await onSalvar(form);
+      const salva = await onSalvar(form);
+      const idSalvo = salva?.id ?? form.id;
+      if (idSalvo) {
+        salvarEstiloAvatar(idSalvo, {
+          cor: form.avatarCor || corAvatarPadrao(form.nome),
+          icone: form.avatarIcone || "letra",
+        });
+      }
       setMsgTipo("success");
       setMsg(editando ? "Perfil atualizado com sucesso." : "Perfil criado com sucesso.");
       setForm(VAZIO);
@@ -268,7 +283,6 @@ export default function PerfisCriancas({
               {criancas.map((c) => {
                 const ativo = String(ativaId) === String(c.id);
                 const confirmando = confirmarId === c.id;
-                const inicial = (c.name || "?").trim().charAt(0).toUpperCase();
                 const infoNivel = nivelDaIdade(c.age);
 
                 return (
@@ -282,13 +296,11 @@ export default function PerfisCriancas({
                     )}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-lg font-semibold text-white"
-                        style={{ background: corAvatar(c.name) }}
-                        aria-hidden="true"
-                      >
-                        {inicial}
-                      </span>
+                      <AvatarCrianca
+                        criancaId={c.id}
+                        nome={c.name}
+                        size="md"
+                      />
                       <div className="min-w-0">
                         <strong className="block text-base font-bold text-ink truncate">
                           {c.name}
@@ -366,7 +378,7 @@ export default function PerfisCriancas({
         title={editando ? "Editar perfil da criança" : "Nova criança"}
         subtitle={
           editando
-            ? "Atualize nome, idade ou preferência de voz deste perfil."
+            ? "Atualize nome, idade, avatar ou preferência de voz deste perfil."
             : "Crie um perfil personalizado para ajustar a dificuldade e acompanhar o progresso."
         }
         titleId="modal-perfil-titulo"
@@ -392,13 +404,14 @@ export default function PerfisCriancas({
       >
         <form id="form-perfil-crianca" className="space-y-5" onSubmit={salvar} noValidate>
           <div className="flex items-center gap-4 rounded-2xl border border-[#E5DFD2] bg-[#F6F4EE] p-4">
-            <span
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-display text-2xl font-semibold text-white shadow-sm transition-colors"
-              style={{ background: corAvatar(form.nome) }}
-              aria-hidden="true"
-            >
-              {inicialPreview}
-            </span>
+            <AvatarCrianca
+              criancaId={form.id}
+              nome={form.nome}
+              corForcada={form.avatarCor}
+              iconeForcado={form.avatarIcone}
+              size="lg"
+              className="shadow-sm"
+            />
             <div className="min-w-0 flex-1">
               <strong className="block font-display text-lg font-semibold text-ink truncate">
                 {form.nome.trim() || "Nome da criança"}
@@ -430,6 +443,63 @@ export default function PerfisCriancas({
                 if (erroForm) setErroForm("");
               }}
             />
+          </div>
+
+          {/* PERSONALIZAÇÃO DO AVATAR (COR + SÍMBOLO FAVORITO) */}
+          <div className="space-y-2.5 rounded-2xl border border-inst-border bg-inst-subtle/30 p-3.5">
+            <Label className="mb-0">Personalizar avatar da criança</Label>
+            <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Cor do avatar">
+              {CORES_AVATAR_OPCOES.map((op) => {
+                const ativa = form.avatarCor === op.id;
+                return (
+                  <button
+                    key={op.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={ativa}
+                    aria-label={`Cor ${op.nome}`}
+                    title={op.nome}
+                    onClick={() => setForm({ ...form, avatarCor: op.id })}
+                    style={{ backgroundColor: op.id }}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-full border-2 text-white transition-transform",
+                      ativa
+                        ? "scale-110 border-ink ring-2 ring-pais/30"
+                        : "border-white hover:scale-105"
+                    )}
+                  >
+                    {ativa && <Check size={14} strokeWidth={3} />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8" role="radiogroup" aria-label="Símbolo do avatar">
+              {ICONES_AVATAR_OPCOES.map((op) => {
+                const ativo = form.avatarIcone === op.id;
+                const IconeOp = op.Icon;
+                const letraPreview = (form.nome || "").trim().charAt(0).toUpperCase() || "A";
+                return (
+                  <button
+                    key={op.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={ativo}
+                    aria-label={op.nome}
+                    title={op.nome}
+                    onClick={() => setForm({ ...form, avatarIcone: op.id })}
+                    className={cn(
+                      "flex h-9 items-center justify-center rounded-xl border text-xs font-bold transition-all",
+                      ativo
+                        ? "border-pais bg-pais text-white shadow-2xs"
+                        : "border-inst-border bg-white text-ink hover:border-pais/50"
+                    )}
+                  >
+                    {IconeOp ? <IconeOp size={16} /> : letraPreview}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div>

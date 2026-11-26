@@ -518,6 +518,7 @@ export default function App() {
         gravarStorage("cc_crianca", salva.id);
         if (salva.voice_enabled !== undefined) setSom(Boolean(salva.voice_enabled));
       }
+      return salva;
     },
     onExcluir: async (id) => {
       await criancasApi.excluirCrianca(id);

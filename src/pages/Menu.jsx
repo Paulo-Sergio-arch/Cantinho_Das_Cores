@@ -34,6 +34,8 @@ import {
   obterFaixaEtaria,
 } from "../data/jogosData";
 import { temPinPais } from "../utils/pinPais";
+import { AvatarCrianca } from "../utils/avatarCrianca";
+import JardimNuvi from "../components/JardimNuvi";
 import Nuvi from "../components/Nuvi";
 import RecadoDaSemana from "../components/RecadoDaSemana";
 import useRecadoDaSemana from "../hooks/useRecadoDaSemana";
@@ -44,16 +46,6 @@ import { cn } from "../lib/cn";
 import PerfisCriancas from "./PerfisCriancas";
 
 const PainelPais = lazy(() => import("./PainelPais"));
-
-const CORES_AVATAR = ["#5B82BA", "#D67456", "#7E64C4", "#2D8A56", "#C88E26", "#B86077"];
-
-function corAvatar(nome = "") {
-  const limpo = nome.trim();
-  if (!limpo) return "#5B82BA";
-  let soma = 0;
-  for (let i = 0; i < limpo.length; i++) soma += limpo.charCodeAt(i);
-  return CORES_AVATAR[soma % CORES_AVATAR.length];
-}
 
 function MarcaCompacta() {
   return (
@@ -73,6 +65,7 @@ function MarcaCompacta() {
 
 const ABAS_INFANTIS = [
   { id: "jogos", rotulo: "Jogos" },
+  { id: "jardim", rotulo: "Conquistas" },
   { id: "bloquinhos", rotulo: "Bloquinhos" },
 ];
 
@@ -229,7 +222,6 @@ export default function Menu({
   const bloqueadoPorPin = ehAreaPais && !visitante && !areaPaisLiberada;
   const abasAtuais = ehAreaPais ? ABAS_PAIS : ABAS_INFANTIS;
   const temModoAtivo = calmo || fonteMaior || !som;
-  const inicialCrianca = (criancaAtiva?.name || "?").trim().charAt(0).toUpperCase();
   const recadoSemana = useRecadoDaSemana(criancaAtiva?.id, visitante);
   const jogoDesafio = recadoSemana?.desafio?.jogo;
 
@@ -354,8 +346,8 @@ export default function Menu({
           {/* Centro cravado */}
           <nav
             className={cn(
-              "col-span-2 order-3 grid w-full grid-cols-2 gap-1 rounded-full p-1 md:col-span-1 md:order-2 md:flex md:w-auto md:justify-self-center",
-              ehAreaPais ? "bg-inst-subtle" : "bg-[#EFECE3]"
+              "col-span-2 order-3 grid w-full gap-1 rounded-full p-1 md:col-span-1 md:order-2 md:flex md:w-auto md:justify-self-center",
+              ehAreaPais ? "grid-cols-2 bg-inst-subtle" : "grid-cols-3 bg-[#EFECE3]"
             )}
             aria-label={ehAreaPais ? "Navegação da Área dos Pais" : "Navegação infantil"}
             role="tablist"
@@ -371,7 +363,7 @@ export default function Menu({
                   aria-selected={ativa}
                   aria-controls={`painel-${item.id}`}
                   className={cn(
-                    "min-h-9 rounded-full px-5 py-1.5 text-center text-sm font-semibold whitespace-nowrap transition-all",
+                    "min-h-9 rounded-full px-3.5 sm:px-5 py-1.5 text-center text-xs sm:text-sm font-semibold whitespace-nowrap transition-all",
                     ativa
                       ? ehAreaPais
                         ? "bg-pais text-white shadow-2xs"
@@ -408,13 +400,11 @@ export default function Menu({
                     title={`Perfil ativo: ${criancaAtiva.name} (${criancaAtiva.age} anos) · Toque para trocar na Área dos Pais`}
                     className="inline-flex min-h-9 max-w-[165px] sm:max-w-none items-center gap-2 rounded-full border border-[#DDD6C7] bg-[#F3EFE6] py-1 pl-1.5 pr-3 text-xs sm:text-sm font-semibold text-ink transition-colors hover:bg-[#EAE3D5]"
                   >
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-display text-xs font-semibold text-white"
-                      style={{ backgroundColor: corAvatar(criancaAtiva.name) }}
-                      aria-hidden="true"
-                    >
-                      {inicialCrianca}
-                    </span>
+                    <AvatarCrianca
+                      criancaId={criancaAtiva.id}
+                      nome={criancaAtiva.name}
+                      size="sm"
+                    />
                     <span className="truncate">
                       <strong>{criancaAtiva.name}</strong>
                       <span className="text-ink-muted"> · {criancaAtiva.age} anos</span>
@@ -978,7 +968,17 @@ export default function Menu({
         </div>
       )}
 
-      {/* ABA 2: BLOQUINHOS INTERATIVOS */}
+      {/* ABA 2: JARDIM DE CONQUISTAS DA NUVI (FIGURINHAS) */}
+      {aba === "jardim" && (
+        <JardimNuvi
+          feitos={feitos}
+          nomeCrianca={criancaAtiva?.name || ""}
+          calmo={calmo}
+          onJogar={onSelecionarJogo}
+        />
+      )}
+
+      {/* ABA 3: BLOQUINHOS INTERATIVOS */}
       {aba === "bloquinhos" && (
         <section
           id="painel-bloquinhos"
