@@ -114,35 +114,111 @@
   animation: pulso-alvo 1.8s ease-in-out infinite;
 }
 
-/* Jogo 3: Ligue ao nome */
-.ligar {
+/* Jogo 3: Ligue ao nome — Palco solto sem container externo e sem scroll */
+.ligar-palco-solto {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(84px, 0.74fr) minmax(0, 1.4fr);
-  gap: 10px;
-  background: #FCFBF8;
-  border: 2px solid #E5DFD2;
-  border-radius: 26px;
-  padding: 12px;
-  box-shadow: 0 6px 20px rgba(31, 45, 77, 0.05), 0 3px 0 #E5DFD2;
+  grid-template-columns: minmax(90px, 0.82fr) minmax(0, 1.25fr);
+  column-gap: 28px;
+  align-items: center;
   width: 100%;
+  padding: 2px 0;
 }
 
-.col {
+.ligar-fios-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+}
+
+.ligar-coluna {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   min-width: 0;
 }
 
-.col .ficha {
-  min-height: 68px;
+.ligar-item-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.ligar-bloco {
+  flex-direction: row;
+  min-height: 54px;
   width: 100%;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
-.col .ficha.par {
-  padding-top: 22px;
+.ligar-bloco-dir {
+  justify-content: center;
+  padding-right: 34px;
+}
+
+.ligar-bloco.par {
+  opacity: 0.96;
+}
+
+.ligar-pino {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #E5DFD2;
+  border: 2.5px solid #FCFBF8;
+  box-shadow: 0 1px 3px rgba(31, 45, 77, 0.16);
+  z-index: 6;
+  pointer-events: none;
+  transition: transform 0.16s ease, background-color 0.16s ease;
+}
+
+.ligar-pino-dir {
+  right: -7px;
+}
+
+.ligar-pino-esq {
+  left: -7px;
+}
+
+.ligar-pino.ativo {
+  background: var(--azul);
+  transform: translateY(-50%) scale(1.22);
+}
+
+.ligar-pino.conectado {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.ligar-audio-chip {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #F3EFE6;
+  color: #4E6894;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.ligar-audio-chip:hover {
+  background: #E2ECF9;
+  color: var(--azul);
 }
 
 .pictograma-svg {
@@ -153,12 +229,13 @@
 
 .par-selo {
   position: absolute;
-  top: 5px;
-  right: 6px;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--verde);
   color: #FFFFFF;
@@ -169,9 +246,9 @@
 
 .pal {
   font-family: var(--fonte-titulo);
-  font-size: clamp(0.95rem, 3.6vw, 1.42rem);
+  font-size: clamp(0.95rem, 3.2vw, 1.28rem);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.15;
   text-align: center;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -518,20 +595,22 @@
     gap: 12px;
   }
 
-  .ligar {
+  .ligar-palco-solto {
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 16px;
+    column-gap: 56px;
   }
 
-  .col .ficha {
-    min-height: 76px;
-    padding: 10px 14px;
+  .ligar-coluna {
+    gap: 10px;
   }
 
-  .col .ficha.par {
-    padding-top: 10px;
-    padding-right: 44px;
+  .ligar-bloco {
+    min-height: 58px;
+    padding: 8px 16px;
+  }
+
+  .ligar-bloco-dir {
+    padding-right: 42px;
   }
 
   .grade2 {

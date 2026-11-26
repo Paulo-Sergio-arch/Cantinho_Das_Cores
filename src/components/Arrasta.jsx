@@ -4,11 +4,14 @@ export default function Arrasta({
   onSolta,
   onToque,
   onSobre,
+  onMovimento,
   disabled,
   className = "",
   label,
   cru,
   style,
+  dataEsq,
+  buttonRef,
   children,
 }) {
   const [pos, setPos] = useState(null);
@@ -42,6 +45,7 @@ export default function Arrasta({
     if (!r.mov && Math.abs(dx) + Math.abs(dy) > 10) r.mov = true;
     if (r.mov) {
       setPos({ x: dx, y: dy });
+      onMovimento?.({ clientX: e.clientX, clientY: e.clientY });
       const s = alvoEm(e.clientX, e.clientY);
       if (s !== r.s) {
         r.s = s;
@@ -56,6 +60,7 @@ export default function Arrasta({
     ref.current = null;
     setPos(null);
     onSobre?.(null);
+    onMovimento?.(null);
     ignorarClickRef.current = true;
     setTimeout(() => {
       ignorarClickRef.current = false;
@@ -71,6 +76,7 @@ export default function Arrasta({
     ref.current = null;
     setPos(null);
     onSobre?.(null);
+    onMovimento?.(null);
   };
 
   const clicar = () => {
@@ -84,7 +90,9 @@ export default function Arrasta({
 
   return (
     <button
+      ref={buttonRef}
       type="button"
+      data-esq={dataEsq}
       className={`${cru ? "cru" : "ficha"} ${className} ${pos ? "arrastando" : ""}`}
       aria-label={label}
       disabled={disabled}
@@ -96,7 +104,7 @@ export default function Arrasta({
       style={{
         ...style,
         touchAction: "none",
-        transform: pos ? `translate(${pos.x}px,${pos.y}px) scale(1.1)` : undefined,
+        transform: pos ? `translate(${pos.x}px,${pos.y}px) scale(1.08)` : undefined,
         zIndex: pos ? 50 : undefined,
       }}
     >
